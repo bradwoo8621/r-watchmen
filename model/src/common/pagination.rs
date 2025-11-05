@@ -1,4 +1,4 @@
-use super::BaseDataModel;
+use crate::BaseDataModel;
 use serde_json::Value;
 use std::collections::HashMap;
 

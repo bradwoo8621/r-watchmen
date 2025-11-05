@@ -1,5 +1,4 @@
-use crate::serde_for_enum;
-use crate::BaseDataModel;
+use crate::{bdm, serde_for_enum};
 use std::fmt;
 
 pub enum VariablePredefineFunctions {
@@ -71,4 +70,4 @@ pub struct ConstantParameter {
     pub value: Option<String>,
 }
 
-impl BaseDataModel for ConstantParameter {}
+bdm!(ConstantParameter);

@@ -1,8 +1,4 @@
-use super::ComputedParameter;
-use super::ConstantParameter;
-use super::ParameterKind;
-use super::TopicFactorParameter;
-use crate::BaseDataModel;
+use crate::{bdm, ComputedParameter, ConstantParameter, ParameterKind, TopicFactorParameter};
 
 pub enum Parameter {
     Topic(TopicFactorParameter),
@@ -20,4 +16,4 @@ impl Parameter {
     }
 }
 
-impl BaseDataModel for Parameter {}
+bdm!(Parameter);

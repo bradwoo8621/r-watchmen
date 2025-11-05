@@ -1,6 +1,4 @@
-use crate::serde_for_enum;
-use crate::BaseDataModel;
-use crate::Parameter;
+use crate::{bdm, serde_for_enum, Parameter};
 use std::fmt;
 
 pub enum ParameterExpressionOperator {
@@ -82,4 +80,4 @@ impl ParameterExpression {
     }
 }
 
-impl BaseDataModel for ParameterExpression {}
+bdm!(ParameterExpression);

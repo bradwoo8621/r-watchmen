@@ -1,4 +1,4 @@
-use super::BaseDataModel;
+use crate::{bdm, BaseDataModel};
 
 pub trait GraphicPosition: BaseDataModel {
     fn x(&self) -> Option<f32>;
@@ -17,7 +17,7 @@ pub struct GraphicRect {
     pub height: Option<f32>,
 }
 
-impl BaseDataModel for GraphicRect {}
+bdm!(GraphicRect);
 
 impl GraphicPosition for GraphicRect {
     fn x(&self) -> Option<f32> {

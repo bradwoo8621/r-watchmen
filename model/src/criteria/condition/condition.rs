@@ -1,10 +1,8 @@
-use super::ParameterExpression;
-use super::ParameterJoint;
-use crate::BaseDataModel;
+use crate::{bdm, ParameterExpression, ParameterJoint};
 
 pub enum ParameterCondition {
     Exp(ParameterExpression),
     Joint(ParameterJoint),
 }
 
-impl BaseDataModel for ParameterCondition {}
+bdm!(ParameterCondition);

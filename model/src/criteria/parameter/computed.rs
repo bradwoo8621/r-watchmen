@@ -1,7 +1,4 @@
-use super::Parameter;
-use crate::serde_for_enum;
-use crate::BaseDataModel;
-use crate::ParameterJoint;
+use crate::{bdm, serde_for_enum, Parameter, ParameterJoint};
 use std::fmt;
 
 pub enum ParameterComputeType {
@@ -106,4 +103,4 @@ impl ComputedParameter {
     }
 }
 
-impl BaseDataModel for ComputedParameter {}
+bdm!(ComputedParameter);
