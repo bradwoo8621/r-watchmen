@@ -288,40 +288,26 @@ impl AdaptTo {
 }
 
 /// Adapt the model struct or enum to various traits and fields based on the provided attributes.
-/// For struct, supported trait are:
-/// - bdm: BaseDataModel
-/// - storable: Storable
-/// - audit: Auditable
-/// - opt_lock: OptimisticLock
-/// - last_visit: LastVisit
-/// - tuple: Tuple
-/// - tenant_based: TenantBasedTuple
-/// - user_based: UserBasedTuple
+/// For struct:
 ///
-/// Supported attributes are:
-/// - bdm
-/// - storable
-/// - audit
-///     - created_at
-///     - created_by
-///     - last_modified_at
-///     - last_modified_by
-/// - opt_lock
-///     - version
-/// - last_visit
-///     - last_visit_time
-/// - tuple
-/// - tenant_based
-///     - tenant_id
-/// - user_based
-///    - user_id
+/// | keyword       | trait                  | fields added                                      |
+/// |---------------|------------------------|---------------------------------------------------|
+/// | bdm           | BaseDataModel         | None                                              |
+/// | storable      | Storable              | None                                              |
+/// | audit         | Auditable             | created_at, created_by, last_modified_at, last_modified_by |
+/// | opt_lock      | OptimisticLock        | version                                           |
+/// | last_visit    | LastVisit             | last_visit_time                                   |
+/// | tuple         | Tuple                 | None                                              |
+/// | tenant_based  | TenantBasedTuple      | tenant_id                                         |
+/// | user_based    | UserBasedTuple        | user_id                                           |
 ///
 /// # Examples
+/// ```
 /// #[adapt_model(opt_lock, tenant_based)]
 /// pub struct User {
 ///    pub user_id: Option<UserId>,
 /// }
-/// expands to
+/// // expands to
 /// pub struct User {
 ///    pub user_id: Option<UserId>,
 ///    // adapted fields
@@ -332,8 +318,9 @@ impl AdaptTo {
 ///    pub last_modified_at: Option<chrono::NaiveDateTime>,
 ///    pub last_modified_by: Option<UserId>,
 /// }
+/// ```
 ///
-/// for enum, only bdm is supported.
+/// > for enum, only `bdm` is supported.
 #[proc_macro_attribute]
 pub fn adapt_model(attr: TokenStream, item: TokenStream) -> TokenStream {
     if attr.is_empty() {
