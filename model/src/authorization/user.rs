@@ -9,14 +9,15 @@ use watchmen_model_marco::{adapt_model, Display};
 pub enum UserRole {
     Console,
     Admin,
-    Superadmin,
+    #[display = "superadmin"]
+    SuperAdmin,
 }
 
 serde_for_enum! {
     UserRole {
         Console => "console",
         Admin => "admin",
-        Superadmin => "superadmin"
+        SuperAdmin => "superadmin"
     }
 }
 

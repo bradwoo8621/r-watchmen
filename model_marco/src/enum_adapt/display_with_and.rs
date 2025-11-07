@@ -1,6 +1,7 @@
+use crate::enum_adapt::utils::get_display_value;
 use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, Attribute, DeriveInput, Meta};
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
 
 fn first_lowercase_with_ampersand(s: &str) -> String {
     let mut chars = s.chars();
@@ -12,23 +13,6 @@ fn first_lowercase_with_ampersand(s: &str) -> String {
         ),
         None => String::from("&"),
     }
-}
-
-fn get_display_value(attrs: &[Attribute]) -> Option<String> {
-    for attr in attrs {
-        if let Meta::NameValue(meta) = &attr.meta {
-            if meta.path.is_ident("display") {
-                return Some(
-                    meta.value
-                        .to_token_stream()
-                        .to_string()
-                        .trim_matches('"')
-                        .to_string(),
-                );
-            }
-        }
-    }
-    None
 }
 
 pub fn impl_display_with_and(item: TokenStream) -> TokenStream {
