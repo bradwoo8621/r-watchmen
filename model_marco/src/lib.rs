@@ -38,13 +38,24 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 ///
+/// If `Storable` implemented, struct will automatically add follow:
+/// ```rust
+/// #[derive(serde::Serialize, serde::Deserialize)]
+/// #[serde(deny_unknown_fields, rename_all = "camelCase")]
+/// ```
+/// and add following to fields which type has `Option<>`:
+/// ```rust
+/// #[serde(skip_serializing_if = "Option::is_none")]
+/// ```
+/// if `#[serde]` already defined on field, `skip_serializing_if = "Option::is_none"` will be added.
+///
 /// > for enum, only `bdm` is supported.
 ///
 /// All traits and return types are from [watchmen_model] module:
 /// So import them by yourself, such as:
 /// ```
 /// use watchmen_model::{
-///     BaseDataModel, Storage,
+///     BaseDataModel, Storable,
 ///     Auditable, OptimisticLock, LastVisit,
 ///     Tuple, TenantBasedTuple, UserBasedTuple,
 ///     TenantId, UserId
