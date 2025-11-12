@@ -15,6 +15,8 @@ pub fn get_pattern(attrs: &Vec<Attribute>) -> VariantStrPattern {
                     return VariantStrPattern::CamelCaseToKebab;
                 } else if value == "ampersand-prefix" {
                     return VariantStrPattern::AmpersandPrefix;
+                } else if value == "keep-same" {
+                    return VariantStrPattern::KeepSame;
                 } else {
                     panic!("Unsupported pattern value [{}].", value)
                 }
