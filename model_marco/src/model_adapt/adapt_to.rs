@@ -42,16 +42,13 @@ impl AdaptTo {
             _ => panic!("Unknown flag {}.", flag),
         }
 
-        if self.user_based {
-            self.tenant_based = true;
-        }
         if self.tenant_based {
             self.tuple = true;
         }
         if self.tuple {
             self.audit = true;
         }
-        if self.audit || self.opt_lock || self.last_visit {
+        if self.audit || self.opt_lock || self.last_visit || self.user_based {
             self.storable = true;
         }
         if self.storable {
@@ -136,6 +133,8 @@ impl AdaptTo {
 
     fn user_based_fields() -> proc_macro2::TokenStream {
         quote! {
+            #[serde(skip_serializing_if = "Option::is_none")]
+            pub tenant_id: Option<TenantId>,
             #[serde(skip_serializing_if = "Option::is_none")]
             pub user_id: Option<UserId>,
         }
@@ -247,6 +246,10 @@ impl AdaptTo {
     fn user_based_trait(struct_name: &Ident) -> proc_macro2::TokenStream {
         quote! {
             impl UserBasedTuple for #struct_name {
+                fn tenant_id(&self) -> Option<TenantId> {
+                    self.tenant_id.clone()
+                }
+
                 fn user_id(&self) -> Option<UserId> {
                     self.user_id.clone()
                 }

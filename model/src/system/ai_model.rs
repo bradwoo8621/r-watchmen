@@ -1,7 +1,6 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    AIModelId, Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId,
-    Tuple, UserId,
+    Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
@@ -17,6 +16,8 @@ pub enum AiModelProvider {
     Google,
     Ollama,
 }
+
+pub type AIModelId = String;
 
 #[adapt_model(opt_lock, tenant_based)]
 pub struct AIModel {

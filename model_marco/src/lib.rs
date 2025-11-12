@@ -17,7 +17,7 @@ use proc_macro::TokenStream;
 /// | last_visit    | LastVisit             | last_visit_time                                   |
 /// | tuple         | Tuple                 | None                                              |
 /// | tenant_based  | TenantBasedTuple      | tenant_id                                         |
-/// | user_based    | UserBasedTuple        | user_id                                           |
+/// | user_based    | UserBasedTuple        | tenant_id, user_id                                |
 ///
 /// # Examples
 /// ```
@@ -69,7 +69,7 @@ pub fn adapt_model(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// implement [std::fmt::Display] for enum.
 /// enum variant name camel case to display with hyphen separated lowercase
 /// - use [#[pattern = "type"]] on enum to custom the display string transformation rule,
-///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same].
+///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same], [lower-case].
 /// - use [#[display = "name"]] on fields to custom the display string.
 #[proc_macro_derive(Display, attributes(pattern, display))]
 pub fn impl_display_for_enum(item: TokenStream) -> TokenStream {
@@ -79,7 +79,7 @@ pub fn impl_display_for_enum(item: TokenStream) -> TokenStream {
 /// implement [serde::Serialize] and [serde::Deserialize] for enum.
 /// enum variant name camel case to display with hyphen separated lowercase
 /// - use [#[pattern = "type"]] on enum to custom the display string transformation rule,
-///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same].
+///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same], [lower-case].
 /// - use [#[display = "name"]] on fields to custom the display string.
 #[proc_macro_derive(Serde, attributes(pattern, display))]
 pub fn impl_serde_for_enum(item: TokenStream) -> TokenStream {

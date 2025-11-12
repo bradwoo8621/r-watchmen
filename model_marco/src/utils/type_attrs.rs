@@ -17,6 +17,8 @@ pub fn get_pattern(attrs: &Vec<Attribute>) -> VariantStrPattern {
                     return VariantStrPattern::AmpersandPrefix;
                 } else if value == "keep-same" {
                     return VariantStrPattern::KeepSame;
+                } else if value == "lower-case" {
+                    return VariantStrPattern::LowerCase;
                 } else {
                     panic!("Unsupported pattern value [{}].", value)
                 }

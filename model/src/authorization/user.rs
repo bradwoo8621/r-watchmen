@@ -1,7 +1,7 @@
 use crate::serde::option_naive_datetime;
 use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple,
-    UserGroupId, UserId,
+    UserGroupId,
 };
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
@@ -12,6 +12,8 @@ pub enum UserRole {
     #[display = "superadmin"]
     SuperAdmin,
 }
+
+pub type UserId = String;
 
 #[adapt_model(opt_lock, tenant_based)]
 pub struct User {

@@ -25,10 +25,15 @@ fn keep_same(s: &str) -> String {
     String::from(s)
 }
 
+fn lower_case(s: &str) -> String {
+    s.to_lowercase()
+}
+
 pub enum VariantStrPattern {
     CamelCaseToKebab,
     AmpersandPrefix,
     KeepSame,
+    LowerCase,
 }
 
 pub fn get_pattern_fn(pattern: VariantStrPattern) -> Box<dyn Fn(&str) -> String> {
@@ -36,5 +41,6 @@ pub fn get_pattern_fn(pattern: VariantStrPattern) -> Box<dyn Fn(&str) -> String>
         VariantStrPattern::CamelCaseToKebab => Box::new(camel_to_kebab),
         VariantStrPattern::AmpersandPrefix => Box::new(first_lowercase_with_ampersand_prefix),
         VariantStrPattern::KeepSame => Box::new(keep_same),
+        VariantStrPattern::LowerCase => Box::new(lower_case),
     }
 }
