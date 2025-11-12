@@ -1,9 +1,11 @@
 pub enum TopicKind {
     System,
 }
+
 pub enum TopicType {
     Raw,
 }
+
 pub struct Topic {
     pub name: &'static str,
     pub kind: TopicKind,
@@ -16,10 +18,12 @@ pub enum FactorType {
     Text,
     Number,
 }
+
 pub enum FactorIndexGroup {
     Index1,
     Index2,
 }
+
 pub struct Factor {
     pub factor_id: &'static str,
     pub name: &'static str,
