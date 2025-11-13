@@ -11,19 +11,17 @@ pub fn get_pattern(attrs: &Vec<Attribute>) -> VariantStrPattern {
                     .to_string()
                     .trim_matches('"')
                     .to_string();
-                if value == "kebab" {
-                    return VariantStrPattern::CamelCaseToKebab;
-                } else if value == "ampersand-prefix" {
-                    return VariantStrPattern::AmpersandPrefix;
-                } else if value == "keep-same" {
-                    return VariantStrPattern::KeepSame;
-                } else if value == "lower-case" {
-                    return VariantStrPattern::LowerCase;
-                } else {
-                    panic!("Unsupported pattern value [{}].", value)
-                }
+                return match value.as_str() {
+                    "kebab-lower" => VariantStrPattern::CamelCaseToKebabAndLower,
+                    "kebab-upper" => VariantStrPattern::CamelCaseToKebabAndUpper,
+                    "ampersand-prefix" => VariantStrPattern::AmpersandPrefix,
+                    "keep-same" => VariantStrPattern::KeepSame,
+                    "upper-case" => VariantStrPattern::UpperCase,
+                    "lower-case" => VariantStrPattern::LowerCase,
+                    _ => panic!("Unsupported pattern value [{}].", value),
+                };
             }
         }
     }
-    VariantStrPattern::CamelCaseToKebab
+    VariantStrPattern::CamelCaseToKebabAndLower
 }

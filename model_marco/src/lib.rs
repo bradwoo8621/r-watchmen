@@ -69,7 +69,20 @@ pub fn adapt_model(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// implement [std::fmt::Display] for enum.
 /// enum variant name camel case to display with hyphen separated lowercase
 /// - use [#[pattern = "type"]] on enum to custom the display string transformation rule,
-///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same], [lower-case].
+///   Available pattern are:
+///   - [kebab-lower]: Converts variant name from camel case (e.g., “CamelCase”) to kebab case (e.g., “camel-case”)
+///     by inserting hyphens before each uppercase letter except the first one
+///     and converting all letters to lowercase.
+///     It is the default when not appointed.
+///   - [kebab-upper]: Converts variant name from camel case (e.g., “CamelCase”) to kebab case (e.g., “camel-case”)
+///     by inserting hyphens before each uppercase letter except the first one
+///     and converting all letters to uppercase.
+///   - [ampersand-prefix]: Prepends an ampersand to the input string
+///     and converts the first character of the string to its ASCII lowercase form;
+///     if the input string is empty, it simply returns a string consisting of only an ampersand.
+///   - [keep-same]: Same as variant name.
+///   - [upper-case]: Converts variant name to uppercase.
+///   - [lower-case]: Converts variant name to lowercase.
 /// - use [#[display = "name"]] on fields to custom the display string.
 #[proc_macro_derive(Display, attributes(pattern, display))]
 pub fn impl_display_for_enum(item: TokenStream) -> TokenStream {
@@ -79,7 +92,20 @@ pub fn impl_display_for_enum(item: TokenStream) -> TokenStream {
 /// implement [serde::Serialize] and [serde::Deserialize] for enum.
 /// enum variant name camel case to display with hyphen separated lowercase
 /// - use [#[pattern = "type"]] on enum to custom the display string transformation rule,
-///   Available pattern is [kebab] (default value if not appointed), [ampersand-prefix], [keep-same], [lower-case].
+///   Available pattern  are:
+///   - [kebab-lower]: Converts variant name from camel case (e.g., “CamelCase”) to kebab case (e.g., “camel-case”)
+///     by inserting hyphens before each uppercase letter except the first one
+///     and converting all letters to lowercase.
+///     It is the default when not appointed.
+///   - [kebab-upper]: Converts variant name from camel case (e.g., “CamelCase”) to kebab case (e.g., “camel-case”)
+///     by inserting hyphens before each uppercase letter except the first one
+///     and converting all letters to uppercase.
+///   - [ampersand-prefix]: Prepends an ampersand to the input string
+///     and converts the first character of the string to its ASCII lowercase form;
+///     if the input string is empty, it simply returns a string consisting of only an ampersand.
+///   - [keep-same]: Same as variant name.
+///   - [upper-case]: Converts variant name to uppercase.
+///   - [lower-case]: Converts variant name to lowercase.
 /// - use [#[display = "name"]] on fields to custom the display string.
 #[proc_macro_derive(Serde, attributes(pattern, display))]
 pub fn impl_serde_for_enum(item: TokenStream) -> TokenStream {

@@ -1,114 +1,89 @@
-pub enum TopicKind {
-    System,
-}
-
-pub enum TopicType {
-    Raw,
-}
-
-pub struct Topic {
-    pub name: &'static str,
-    pub kind: TopicKind,
-    pub r#type: TopicType,
-    pub factors: Vec<Factor>,
-    pub description: &'static str,
-}
-
-pub enum FactorType {
-    Text,
-    Number,
-}
-
-pub enum FactorIndexGroup {
-    Index1,
-    Index2,
-}
-
-pub struct Factor {
-    pub factor_id: &'static str,
-    pub name: &'static str,
-    pub r#type: FactorType,
-    pub flatten: bool,
-    pub index_group: Option<FactorIndexGroup>,
-    pub precision: Option<&'static str>,
-}
+use crate::{
+    FactorBuilder, FactorIndexGroup, FactorType, Topic, TopicBuilder, TopicKind, TopicType,
+};
 
 pub struct Pipeline {}
 
 pub fn create_qpt_topic() -> Topic {
     let mut factors = Vec::new();
-    factors.push(Factor {
-        factor_id: "rmpl-f-1",
-        name: "uid",
-        r#type: FactorType::Text,
-        flatten: false,
-        index_group: None,
-        precision: None,
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-2",
-        name: "topic_dimensions",
-        r#type: FactorType::Text,
-        flatten: true,
-        index_group: Some(FactorIndexGroup::Index1),
-        precision: Some("200"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-3",
-        name: "column_dimensions",
-        r#type: FactorType::Text,
-        flatten: true,
-        index_group: Some(FactorIndexGroup::Index2),
-        precision: Some("200"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-4",
-        name: "execution_time",
-        r#type: FactorType::Number,
-        flatten: false,
-        index_group: None,
-        precision: Some("50"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-5",
-        name: "data_volume",
-        r#type: FactorType::Number,
-        flatten: false,
-        index_group: None,
-        precision: Some("50"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-6",
-        name: "join_dimensions",
-        r#type: FactorType::Text,
-        flatten: true,
-        index_group: None,
-        precision: Some("200"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-7",
-        name: "where_dimensions",
-        r#type: FactorType::Text,
-        flatten: true,
-        index_group: None,
-        precision: Some("200"),
-    });
-    factors.push(Factor {
-        factor_id: "rmpl-f-8",
-        name: "group_by_dimensions",
-        r#type: FactorType::Text,
-        flatten: true,
-        index_group: None,
-        precision: Some("200"),
-    });
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-1"))
+            .name(String::from("uid"))
+            .r#type(FactorType::Text)
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-2"))
+            .name(String::from("topic_dimensions"))
+            .r#type(FactorType::Text)
+            .flatten(true)
+            .index_group(FactorIndexGroup::Index1)
+            .precision(String::from("200"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-3"))
+            .name(String::from("column_dimensions"))
+            .r#type(FactorType::Text)
+            .flatten(true)
+            .index_group(FactorIndexGroup::Index2)
+            .precision(String::from("200"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-4"))
+            .name(String::from("execution_time"))
+            .r#type(FactorType::Number)
+            .precision(String::from("50"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-5"))
+            .name(String::from("data_volume"))
+            .r#type(FactorType::Number)
+            .precision(String::from("50"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-6"))
+            .name(String::from("join_dimensions"))
+            .r#type(FactorType::Text)
+            .flatten(true)
+            .precision(String::from("200"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-7"))
+            .name(String::from("where_dimensions"))
+            .r#type(FactorType::Text)
+            .flatten(true)
+            .precision(String::from("200"))
+            .build(),
+    );
+    factors.push(
+        FactorBuilder::new()
+            .factor_id(String::from("rmpl-f-8"))
+            .name(String::from("group_by_dimensions"))
+            .r#type(FactorType::Text)
+            .flatten(true)
+            .precision(String::from("200"))
+            .build(),
+    );
 
-    Topic {
-        name: "query_performance_log",
-        kind: TopicKind::System,
-        r#type: TopicType::Raw,
-        factors,
-        description: "query performance	log	raw	topic",
-    }
+    TopicBuilder::new()
+        .name(String::from("query_performance_log"))
+        .kind(TopicKind::System)
+        .r#type(TopicType::Raw)
+        .factors(factors)
+        .description(String::from("query performance	log	raw	topic"))
+        .build()
 }
 
 pub fn ask_query_performance_topics() -> Vec<Topic> {
