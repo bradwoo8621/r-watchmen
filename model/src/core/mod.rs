@@ -1,13 +1,27 @@
+mod connected_space;
+mod connected_space_ext;
+mod dashboard;
 mod enumeration;
 mod factor;
 mod pipeline;
+mod report;
 mod space;
+mod subject;
+mod subject_ext;
+mod subject_with_column_type;
 mod topic;
 mod topic_snapshot;
 
+pub use connected_space::*;
+pub use connected_space_ext::*;
+pub use dashboard::*;
 pub use enumeration::*;
 pub use factor::*;
 pub use pipeline::*;
+pub use report::*;
 pub use space::*;
+pub use subject::*;
+pub use subject_ext::*;
+pub use subject_with_column_type::*;
 pub use topic::*;
 pub use topic_snapshot::*;
