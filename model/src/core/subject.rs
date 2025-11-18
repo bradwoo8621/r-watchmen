@@ -1,7 +1,7 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    Auditable, BaseDataModel, ConnectedSpaceId, FactorId, LastVisit, Parameter, ParameterCondition,
-    ParameterJoint, Storable, TenantId, TopicId, UserBasedTuple, UserId,
+    Auditable, BaseDataModel, ConnectedSpaceId, FactorId, LastVisit, Parameter, ParameterJoint,
+    Storable, TenantId, TopicId, UserBasedTuple, UserId,
 };
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
@@ -98,34 +98,4 @@ pub struct Subject {
     pub connect_id: Option<ConnectedSpaceId>,
     pub auto_refresh_interval: Option<i32>,
     pub dataset: Option<SubjectDataset>,
-}
-
-#[derive(Display, Serde)]
-pub enum SubjectDatasetCriteriaIndicatorArithmetic {
-    None,
-    #[display = "distinct_count"]
-    DistinctCount,
-    Count,
-    Sum,
-    Avg,
-    Max,
-    Min,
-}
-
-#[adapt_model(storable)]
-pub struct SubjectDatasetCriteriaIndicator {
-    pub name: Option<String>,
-    pub column_id: Option<SubjectDatasetColumnId>,
-    pub arithmetic: Option<SubjectDatasetCriteriaIndicatorArithmetic>,
-    pub alias: Option<String>,
-}
-
-#[adapt_model(storable)]
-pub struct SubjectDatasetCriteria {
-    ///(Pageable):
-    /// use one of subject id or name
-    pub subject_id: Option<SubjectId>,
-    pub subject_name: Option<String>,
-    pub indicators: Option<Vec<SubjectDatasetCriteriaIndicator>>,
-    pub conditions: Option<Vec<ParameterCondition>>,
 }
