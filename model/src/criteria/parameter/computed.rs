@@ -28,11 +28,41 @@ pub struct AddParameter {
     pub parameters: Option<Vec<Parameter>>,
 }
 
+impl AddParameter {
+    pub fn init() -> Self {
+        AddParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::Add)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::Add(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct SubtractParameter {
     pub kind: Option<ParameterKind>,
     pub r#type: Option<ParameterComputeType>,
     pub parameters: Option<Vec<Parameter>>,
+}
+
+impl SubtractParameter {
+    pub fn init() -> Self {
+        SubtractParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::Subtract)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::Subtract(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[adapt_model(storable)]
@@ -42,6 +72,21 @@ pub struct MultiplyParameter {
     pub parameters: Option<Vec<Parameter>>,
 }
 
+impl MultiplyParameter {
+    pub fn init() -> Self {
+        MultiplyParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::Multiply)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::Multiply(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct DivideParameter {
     pub kind: Option<ParameterKind>,
@@ -49,11 +94,41 @@ pub struct DivideParameter {
     pub parameters: Option<Vec<Parameter>>,
 }
 
+impl DivideParameter {
+    pub fn init() -> Self {
+        DivideParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::Divide)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::Divide(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct ModulusParameter {
     pub kind: Option<ParameterKind>,
     pub r#type: Option<ParameterComputeType>,
     pub parameters: Option<Vec<Parameter>>,
+}
+
+impl ModulusParameter {
+    pub fn init() -> Self {
+        ModulusParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::Modulus)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::Modulus(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[adapt_model(storable)]
@@ -65,6 +140,21 @@ pub struct YearOfParameter {
     pub parameter: Option<Box<Parameter>>,
 }
 
+impl YearOfParameter {
+    pub fn init() -> Self {
+        YearOfParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::YearOf)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::YearOf(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct HalfYearOfParameter {
     pub kind: Option<ParameterKind>,
@@ -72,6 +162,21 @@ pub struct HalfYearOfParameter {
     /// use [Box<Parameter>] to avoid recursive type size issue.
     /// TODO serde from an array which name is "parameters"
     pub parameter: Option<Box<Parameter>>,
+}
+
+impl HalfYearOfParameter {
+    pub fn init() -> Self {
+        HalfYearOfParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::HalfYearOf)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::HalfYearOf(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[adapt_model(storable)]
@@ -83,6 +188,21 @@ pub struct QuarterOfParameter {
     pub parameter: Option<Box<Parameter>>,
 }
 
+impl QuarterOfParameter {
+    pub fn init() -> Self {
+        QuarterOfParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::QuarterOf)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::QuarterOf(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct MonthOfParameter {
     pub kind: Option<ParameterKind>,
@@ -90,6 +210,21 @@ pub struct MonthOfParameter {
     /// use [Box<Parameter>] to avoid recursive type size issue.
     /// TODO serde from an array which name is "parameters"
     pub parameter: Option<Box<Parameter>>,
+}
+
+impl MonthOfParameter {
+    pub fn init() -> Self {
+        MonthOfParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::MonthOf)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::MonthOf(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[adapt_model(storable)]
@@ -101,6 +236,21 @@ pub struct WeekOfYearParameter {
     pub parameter: Option<Box<Parameter>>,
 }
 
+impl WeekOfYearParameter {
+    pub fn init() -> Self {
+        WeekOfYearParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::WeekOfYear)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::WeekOfYear(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct WeekOfMonthParameter {
     pub kind: Option<ParameterKind>,
@@ -108,6 +258,21 @@ pub struct WeekOfMonthParameter {
     /// use [Box<Parameter>] to avoid recursive type size issue.
     /// TODO serde from an array which name is "parameters"
     pub parameter: Option<Box<Parameter>>,
+}
+
+impl WeekOfMonthParameter {
+    pub fn init() -> Self {
+        WeekOfMonthParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::WeekOfMonth)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::WeekOfMonth(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[adapt_model(storable)]
@@ -119,6 +284,21 @@ pub struct DayOfMonthParameter {
     pub parameter: Option<Box<Parameter>>,
 }
 
+impl DayOfMonthParameter {
+    pub fn init() -> Self {
+        DayOfMonthParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::DayOfMonth)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::DayOfMonth(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
 #[adapt_model(storable)]
 pub struct DayOfWeekParameter {
     pub kind: Option<ParameterKind>,
@@ -128,11 +308,59 @@ pub struct DayOfWeekParameter {
     pub parameter: Option<Box<Parameter>>,
 }
 
+impl DayOfWeekParameter {
+    pub fn init() -> Self {
+        DayOfWeekParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::DayOfWeek)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::DayOfWeek(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
+#[adapt_model(storable)]
+pub struct CaseThenParameterRoute {
+    pub conditional: Option<bool>,
+    pub on: Option<ParameterJoint>,
+    /// TODO serde untagged, no "parameter" field. all fields level up.
+    pub parameter: Option<Parameter>,
+}
+
+impl CaseThenParameterRoute {
+    pub fn finally() -> Self {
+        CaseThenParameterRoute::new().conditional(false)
+    }
+
+    pub fn with(joint: ParameterJoint) -> Self {
+        CaseThenParameterRoute::new().conditional(true).on(joint)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct CaseThenParameter {
     pub kind: Option<ParameterKind>,
     pub r#type: Option<ParameterComputeType>,
-    pub parameters: Option<Vec<(Parameter, Option<ParameterJoint>)>>,
+    pub parameters: Option<Vec<CaseThenParameterRoute>>,
+}
+
+impl CaseThenParameter {
+    pub fn init() -> Self {
+        CaseThenParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::CaseThen)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::CaseThen(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -169,4 +397,10 @@ pub enum ComputedParameter {
     // conditional operation
     #[serde(rename = "case-then")]
     CaseThen(CaseThenParameter),
+}
+
+impl ComputedParameter {
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self)
+    }
 }

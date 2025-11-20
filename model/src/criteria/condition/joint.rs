@@ -12,3 +12,23 @@ pub struct ParameterJoint {
     pub joint_type: Option<ParameterJointType>,
     pub filters: Option<Vec<ParameterCondition>>,
 }
+
+impl ParameterJoint {
+    pub fn and(filters: Vec<ParameterCondition>) -> Self {
+        ParameterJoint {
+            joint_type: Some(ParameterJointType::And),
+            filters: Some(filters),
+        }
+    }
+
+    pub fn or(filters: Vec<ParameterCondition>) -> Self {
+        ParameterJoint {
+            joint_type: Some(ParameterJointType::Or),
+            filters: Some(filters),
+        }
+    }
+
+    pub fn to_condition(self) -> ParameterCondition {
+        ParameterCondition::Joint(self)
+    }
+}

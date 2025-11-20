@@ -77,6 +77,16 @@ pub struct AlarmAction {
     pub on: Option<ParameterJoint>,
 }
 
+impl AlarmAction {
+    pub fn init() -> Self {
+        AlarmAction::new().r#type(PipelineActionType::Alarm)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::Alarm(self)
+    }
+}
+
 /// copy something to memory variable
 #[adapt_model(storable)]
 pub struct CopyToMemoryAction {
@@ -86,12 +96,32 @@ pub struct CopyToMemoryAction {
     pub variable_name: Option<String>,
 }
 
+impl CopyToMemoryAction {
+    pub fn init() -> Self {
+        CopyToMemoryAction::new().r#type(PipelineActionType::CopyToMemory)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::CopyToMemory(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct WriteToExternalAction {
     pub action_id: Option<PipelineActionId>,
     pub r#type: Option<PipelineActionType>,
     pub external_writer_id: Option<ExternalWriterId>,
     pub event_code: Option<String>,
+}
+
+impl WriteToExternalAction {
+    pub fn init() -> Self {
+        WriteToExternalAction::new().r#type(PipelineActionType::WriteToExternal)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::WriteToExternal(self)
+    }
 }
 
 #[adapt_model(storable)]
@@ -106,6 +136,16 @@ pub struct ReadRowAction {
     pub variable_name: Option<String>,
 }
 
+impl ReadRowAction {
+    pub fn init() -> Self {
+        ReadRowAction::new().r#type(PipelineActionType::ReadRow)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::ReadRow(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct ReadRowsAction {
     pub action_id: Option<PipelineActionId>,
@@ -116,6 +156,16 @@ pub struct ReadRowsAction {
     pub by: Option<ParameterJoint>,
     /// copy to memory variable
     pub variable_name: Option<String>,
+}
+
+impl ReadRowsAction {
+    pub fn init() -> Self {
+        ReadRowsAction::new().r#type(PipelineActionType::ReadRows)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::ReadRows(self)
+    }
 }
 
 #[derive(Display, Serde)]
@@ -141,6 +191,16 @@ pub struct ReadFactorAction {
     pub arithmetic: Option<AggregateArithmetic>,
 }
 
+impl ReadFactorAction {
+    pub fn init() -> Self {
+        ReadFactorAction::new().r#type(PipelineActionType::ReadFactor)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::ReadFactor(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct ReadFactorsAction {
     pub action_id: Option<PipelineActionId>,
@@ -155,6 +215,16 @@ pub struct ReadFactorsAction {
     pub variable_name: Option<String>,
 }
 
+impl ReadFactorsAction {
+    pub fn init() -> Self {
+        ReadFactorsAction::new().r#type(PipelineActionType::ReadFactors)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::ReadFactors(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct ExistsAction {
     pub action_id: Option<PipelineActionId>,
@@ -165,6 +235,16 @@ pub struct ExistsAction {
     pub by: Option<ParameterJoint>,
     /// copy to memory variable
     pub variable_name: Option<String>,
+}
+
+impl ExistsAction {
+    pub fn init() -> Self {
+        ExistsAction::new().r#type(PipelineActionType::Exists)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::Exists(self)
+    }
 }
 
 #[adapt_model(storable)]
@@ -199,6 +279,16 @@ pub struct InsertRowAction {
     pub topic_id: Option<TopicId>,
 }
 
+impl InsertRowAction {
+    pub fn init() -> Self {
+        InsertRowAction::new().r#type(PipelineActionType::InsertRow)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::InsertRow(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct InsertOrMergeRowAction {
     pub action_id: Option<PipelineActionId>,
@@ -211,6 +301,16 @@ pub struct InsertOrMergeRowAction {
     pub by: Option<ParameterJoint>,
 }
 
+impl InsertOrMergeRowAction {
+    pub fn init() -> Self {
+        InsertOrMergeRowAction::new().r#type(PipelineActionType::InsertOrMergeRow)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::InsertOrMergeRow(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct MergeRowAction {
     pub action_id: Option<PipelineActionId>,
@@ -221,6 +321,16 @@ pub struct MergeRowAction {
     pub topic_id: Option<TopicId>,
     /// write criteria
     pub by: Option<ParameterJoint>,
+}
+
+impl MergeRowAction {
+    pub fn init() -> Self {
+        MergeRowAction::new().r#type(PipelineActionType::MergeRow)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::MergeRow(self)
+    }
 }
 
 #[adapt_model(storable)]
@@ -238,6 +348,16 @@ pub struct WriteFactorAction {
     pub arithmetic: Option<AggregateArithmetic>,
 }
 
+impl WriteFactorAction {
+    pub fn init() -> Self {
+        WriteFactorAction::new().r#type(PipelineActionType::WriteFactor)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::WriteFactor(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct DeleteRowAction {
     pub action_id: Option<PipelineActionId>,
@@ -248,6 +368,16 @@ pub struct DeleteRowAction {
     pub by: Option<ParameterJoint>,
 }
 
+impl DeleteRowAction {
+    pub fn init() -> Self {
+        DeleteRowAction::new().r#type(PipelineActionType::DeleteRow)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::DeleteRow(self)
+    }
+}
+
 #[adapt_model(storable)]
 pub struct DeleteRowsAction {
     pub action_id: Option<PipelineActionId>,
@@ -256,6 +386,16 @@ pub struct DeleteRowsAction {
     pub topic_id: Option<TopicId>,
     /// delete criteria
     pub by: Option<ParameterJoint>,
+}
+
+impl DeleteRowsAction {
+    pub fn init() -> Self {
+        DeleteRowsAction::new().r#type(PipelineActionType::DeleteRows)
+    }
+
+    pub fn to_action(self) -> PipelineAction {
+        PipelineAction::DeleteRows(self)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
