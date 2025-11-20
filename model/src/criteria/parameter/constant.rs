@@ -41,6 +41,10 @@ impl ConstantParameter {
         ConstantParameter::new().kind(ParameterKind::Constant)
     }
 
+    pub fn of(value: String) -> Self {
+        ConstantParameter::new().kind(ParameterKind::Constant).value(value)
+    }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Constant(self)
     }

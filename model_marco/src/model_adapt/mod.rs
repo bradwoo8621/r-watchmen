@@ -22,6 +22,7 @@ pub fn model_adapt(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
     let vis = &input.vis.to_token_stream();
     let input_name = &input.ident;
+    let input_generic = &input.generics;
     match input.data {
         syn::Data::Struct(s) => match s.fields {
             Fields::Named(named_fields) => {
@@ -33,7 +34,7 @@ pub fn model_adapt(attr: TokenStream, item: TokenStream) -> TokenStream {
                 let builder = adapt_to.builder(input_name, &named_fields.named);
                 let expanded = quote! {
                     #attributes
-                    #vis struct #input_name {
+                    #vis struct #input_name #input_generic {
                         #existing_fields
                         #new_fields
                     }

@@ -254,6 +254,24 @@ pub struct MappingFactor {
     pub arithmetic: Option<AggregateArithmetic>,
 }
 
+impl MappingFactor {
+    pub fn direct() -> Self {
+        MappingFactor::new().arithmetic(AggregateArithmetic::None)
+    }
+
+    pub fn sum() -> Self {
+        MappingFactor::new().arithmetic(AggregateArithmetic::Sum)
+    }
+
+    pub fn avg() -> Self {
+        MappingFactor::new().arithmetic(AggregateArithmetic::Avg)
+    }
+
+    pub fn count() -> Self {
+        MappingFactor::new().arithmetic(AggregateArithmetic::Count)
+    }
+}
+
 #[derive(Display, Serde)]
 pub enum AccumulateMode {
     /// add value in current data for insert
@@ -289,6 +307,7 @@ impl InsertRowAction {
     }
 }
 
+// noinspection DuplicatedCode
 #[adapt_model(storable)]
 pub struct InsertOrMergeRowAction {
     pub action_id: Option<PipelineActionId>,
@@ -311,6 +330,7 @@ impl InsertOrMergeRowAction {
     }
 }
 
+// noinspection DuplicatedCode
 #[adapt_model(storable)]
 pub struct MergeRowAction {
     pub action_id: Option<PipelineActionId>,
