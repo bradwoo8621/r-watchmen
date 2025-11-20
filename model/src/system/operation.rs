@@ -2,6 +2,7 @@ use crate::serde::option_naive_datetime;
 use crate::{Auditable, BaseDataModel, Storable, TenantBasedTuple, TenantId, Tuple, UserId};
 use bigdecimal::BigDecimal;
 use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
 #[derive(Display, Serde)]
@@ -11,7 +12,7 @@ pub enum OperationType {
     Delete,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum OperationContent {
     Str(String),
     Num(BigDecimal),

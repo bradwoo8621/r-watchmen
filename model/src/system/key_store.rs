@@ -2,10 +2,11 @@ use crate::serde::option_naive_datetime;
 use crate::{BaseDataModel, Storable, TenantId, UserId};
 use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use watchmen_model_marco::adapt_model;
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum KeyStoreValue {
     Str(String),
     Num(BigDecimal),

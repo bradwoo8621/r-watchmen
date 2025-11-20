@@ -2,15 +2,16 @@ use crate::serde::option_naive_datetime;
 use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
+use serde::{Deserialize, Serialize};
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum DataSourceParamValue {
     Str(String),
     Bool(bool),
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[adapt_model(storable)]
 pub struct DataSourceParam {
     pub name: Option<String>,
     pub value: Option<DataSourceParamValue>,

@@ -30,6 +30,7 @@ pub fn model_adapt(attr: TokenStream, item: TokenStream) -> TokenStream {
                 let attributes = adapt_to.attributes();
                 let new_fields = adapt_to.fields();
                 let traits = adapt_to.traits(input_name);
+                let builder = adapt_to.builder(input_name, &named_fields.named);
                 let expanded = quote! {
                     #attributes
                     #vis struct #input_name {
@@ -38,6 +39,7 @@ pub fn model_adapt(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
 
                     #traits
+                    #builder
                 };
                 TokenStream::from(expanded)
             }
@@ -48,24 +50,24 @@ pub fn model_adapt(attr: TokenStream, item: TokenStream) -> TokenStream {
                 panic!("This macro only works on structs with name field.")
             }
         },
-        syn::Data::Enum(e) => {
-            if !adapt_to.suitable_for_enum() {
-                panic!("Enums can only adapt to [bdm] or [storable].");
-            }
-            let variants = e.variants.to_token_stream();
-            // modifications
-            let attributes = adapt_to.attributes();
-            let traits = adapt_to.traits(input_name);
-            let expanded = quote! {
-                #attributes
-                #vis enum #input_name {
-                    #variants
-                }
-
-                #traits
-            };
-            TokenStream::from(expanded)
-        }
+        // syn::Data::Enum(e) => {
+        //     if !adapt_to.suitable_for_enum() {
+        //         panic!("Enums can only adapt to [bdm] or [storable].");
+        //     }
+        //     let variants = e.variants.to_token_stream();
+        //     // modifications
+        //     let attributes = adapt_to.attributes();
+        //     let traits = adapt_to.traits(input_name);
+        //     let expanded = quote! {
+        //         #attributes
+        //         #vis enum #input_name {
+        //             #variants
+        //         }
+        //
+        //         #traits
+        //     };
+        //     TokenStream::from(expanded)
+        // }
         _ => panic!("This macro only works on structs."),
     }
 }

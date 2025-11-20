@@ -70,7 +70,7 @@ pub enum AlarmActionSeverity {
 #[adapt_model(storable)]
 pub struct AlarmAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub severity: Option<AlarmActionSeverity>,
     pub message: Option<String>,
     pub conditional: Option<bool>,
@@ -81,7 +81,7 @@ pub struct AlarmAction {
 #[adapt_model(storable)]
 pub struct CopyToMemoryAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub source: Option<Parameter>,
     pub variable_name: Option<String>,
 }
@@ -89,7 +89,7 @@ pub struct CopyToMemoryAction {
 #[adapt_model(storable)]
 pub struct WriteToExternalAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub external_writer_id: Option<ExternalWriterId>,
     pub event_code: Option<String>,
 }
@@ -97,7 +97,7 @@ pub struct WriteToExternalAction {
 #[adapt_model(storable)]
 pub struct ReadRowAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// read from topic
     pub topic_id: Option<TopicId>,
     /// read criteria
@@ -109,7 +109,7 @@ pub struct ReadRowAction {
 #[adapt_model(storable)]
 pub struct ReadRowsAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// read from topic
     pub topic_id: Option<TopicId>,
     /// read criteria
@@ -129,7 +129,7 @@ pub enum AggregateArithmetic {
 #[adapt_model(storable)]
 pub struct ReadFactorAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// read from topic
     pub topic_id: Option<TopicId>,
     /// read from factor
@@ -144,7 +144,7 @@ pub struct ReadFactorAction {
 #[adapt_model(storable)]
 pub struct ReadFactorsAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// read from topic
     pub topic_id: Option<TopicId>,
     /// read from factor
@@ -158,7 +158,7 @@ pub struct ReadFactorsAction {
 #[adapt_model(storable)]
 pub struct ExistsAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// read from topic
     pub topic_id: Option<TopicId>,
     /// read criteria
@@ -192,7 +192,7 @@ pub enum AccumulateMode {
 pub struct InsertRowAction {
     /// WriteTopicAction, MappingRow
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub accumulate_mode: Option<AccumulateMode>,
     pub mapping: Option<Vec<MappingFactor>>,
     /// write to topic
@@ -202,7 +202,7 @@ pub struct InsertRowAction {
 #[adapt_model(storable)]
 pub struct InsertOrMergeRowAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub accumulate_mode: Option<AccumulateMode>,
     pub mapping: Option<Vec<MappingFactor>>,
     /// write to topic
@@ -214,7 +214,7 @@ pub struct InsertOrMergeRowAction {
 #[adapt_model(storable)]
 pub struct MergeRowAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub accumulate_mode: Option<AccumulateMode>,
     pub mapping: Option<Vec<MappingFactor>>,
     /// write to topic
@@ -226,7 +226,7 @@ pub struct MergeRowAction {
 #[adapt_model(storable)]
 pub struct WriteFactorAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     pub accumulate_mode: Option<AccumulateMode>,
     pub source: Option<Parameter>,
     /// write to topic
@@ -241,7 +241,7 @@ pub struct WriteFactorAction {
 #[adapt_model(storable)]
 pub struct DeleteRowAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// delete from topic
     pub topic_id: Option<TopicId>,
     /// delete criteria
@@ -251,7 +251,7 @@ pub struct DeleteRowAction {
 #[adapt_model(storable)]
 pub struct DeleteRowsAction {
     pub action_id: Option<PipelineActionId>,
-    pub r#type: PipelineActionType,
+    pub r#type: Option<PipelineActionType>,
     /// delete from topic
     pub topic_id: Option<TopicId>,
     /// delete criteria

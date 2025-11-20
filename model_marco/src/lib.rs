@@ -49,8 +49,6 @@ use proc_macro::TokenStream;
 /// ```
 /// if `#[serde]` already defined on field, `skip_serializing_if = "Option::is_none"` will be added.
 ///
-/// > for enum, only `bdm` is supported.
-///
 /// All traits and return types are from [watchmen_model] module:
 /// So import them by yourself, such as:
 /// ```

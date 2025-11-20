@@ -1,3 +1,4 @@
+mod catalog;
 mod connected_space;
 mod connected_space_ext;
 mod dashboard;
@@ -13,6 +14,7 @@ mod subject_with_column_type;
 mod topic;
 mod topic_snapshot;
 
+pub use catalog::*;
 pub use connected_space::*;
 pub use connected_space_ext::*;
 pub use dashboard::*;

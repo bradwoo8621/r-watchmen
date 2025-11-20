@@ -1,5 +1,5 @@
 use crate::{BaseDataModel, Storable, TenantId, UserRole};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
 #[derive(Display, Serde)]
@@ -35,7 +35,7 @@ pub struct OidcToken {
     pub tenant_id: Option<TenantId>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 #[serde(untagged)]
 pub enum TokenRecitation {
     Std(Token),
