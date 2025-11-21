@@ -30,6 +30,7 @@ pub struct SubjectDatasetCriteria {
     pub subject_name: Option<String>,
     pub indicators: Option<Vec<SubjectDatasetCriteriaIndicator>>,
     pub conditions: Option<Vec<ParameterCondition>>,
+    /// [Pageable]
     pub page_number: Option<i32>,
     pub page_size: Option<i32>,
 }

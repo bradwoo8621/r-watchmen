@@ -22,6 +22,7 @@ pub use error::*;
 pub use graphic::*;
 pub use lineage::*;
 pub use monitor::*;
+pub use pipelines::*;
 pub use profile::*;
 pub use system::*;
 pub use webhook::*;
