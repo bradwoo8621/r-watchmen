@@ -1,5 +1,5 @@
 mod analysis;
-mod authorization;
+mod profile;
 mod common;
 mod core;
 mod criteria;
@@ -13,7 +13,7 @@ pub mod serde;
 pub mod topics;
 
 pub use analysis::*;
-pub use authorization::*;
+pub use profile::*;
 pub use common::*;
 pub use core::*;
 pub use criteria::*;

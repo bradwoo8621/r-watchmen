@@ -125,14 +125,14 @@ fn create_dqc_pipeline(topics: &Vec<Topic>) -> Result<Pipeline, StdErr> {
             .source(
                 CaseThenParameter::init()
                     .parameters(vec![
-                        CaseThenParameterRoute::with(ParameterJoint::and(vec![
+                        CaseThenParameterRoute::case(ParameterJoint::and(vec![
                             EqualsExpression::init()
                                 .left(topic_factor(src_tid, src_fid_detected))
                                 .right(ConstantParameter::of(String::from("true")).to_parameter())
                                 .to_condition(),
                         ]))
                         .parameter(ConstantParameter::of(String::from("1")).to_parameter()),
-                        CaseThenParameterRoute::finally()
+                        CaseThenParameterRoute::default()
                             .parameter(ConstantParameter::of(String::from("0")).to_parameter()),
                     ])
                     .to_parameter(),

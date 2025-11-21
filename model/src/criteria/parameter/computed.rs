@@ -22,6 +22,28 @@ pub enum ParameterComputeType {
 }
 
 #[adapt_model(storable)]
+pub struct NoneParameter {
+    pub kind: Option<ParameterKind>,
+    pub r#type: Option<ParameterComputeType>,
+    pub parameters: Option<Vec<Parameter>>,
+}
+
+impl NoneParameter {
+    pub fn init() -> Self {
+        NoneParameter::new()
+            .kind(ParameterKind::Computed)
+            .r#type(ParameterComputeType::None)
+    }
+
+    pub fn to_computed(self) -> ComputedParameter {
+        ComputedParameter::None(self)
+    }
+    pub fn to_parameter(self) -> Parameter {
+        Parameter::Computed(self.to_computed())
+    }
+}
+
+#[adapt_model(storable)]
 pub struct AddParameter {
     pub kind: Option<ParameterKind>,
     pub r#type: Option<ParameterComputeType>,
@@ -327,16 +349,18 @@ impl DayOfWeekParameter {
 pub struct CaseThenParameterRoute {
     pub conditional: Option<bool>,
     pub on: Option<ParameterJoint>,
-    /// TODO serde untagged, no "parameter" field. all fields level up.
+    #[serde(flatten)]
     pub parameter: Option<Parameter>,
 }
 
 impl CaseThenParameterRoute {
-    pub fn finally() -> Self {
+    /// it is to create the default route (without condition), not the [Default::default]
+    pub fn default() -> Self {
         CaseThenParameterRoute::new().conditional(false)
     }
 
-    pub fn with(joint: ParameterJoint) -> Self {
+    /// it is to create the conditional route
+    pub fn case(joint: ParameterJoint) -> Self {
         CaseThenParameterRoute::new().conditional(true).on(joint)
     }
 }
@@ -366,6 +390,8 @@ impl CaseThenParameter {
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ComputedParameter {
+    #[serde(rename = "none")]
+    None(NoneParameter),
     // math operations
     #[serde(rename = "add")]
     Add(AddParameter),
