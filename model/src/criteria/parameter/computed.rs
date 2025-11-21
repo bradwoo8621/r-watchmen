@@ -38,6 +38,7 @@ impl NoneParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::None(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -60,6 +61,7 @@ impl AddParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::Add(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -82,6 +84,7 @@ impl SubtractParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::Subtract(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -104,6 +107,7 @@ impl MultiplyParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::Multiply(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -126,6 +130,7 @@ impl DivideParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::Divide(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -148,6 +153,7 @@ impl ModulusParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::Modulus(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -172,6 +178,7 @@ impl YearOfParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::YearOf(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -196,6 +203,7 @@ impl HalfYearOfParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::HalfYearOf(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -220,6 +228,7 @@ impl QuarterOfParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::QuarterOf(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -244,6 +253,7 @@ impl MonthOfParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::MonthOf(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -268,6 +278,7 @@ impl WeekOfYearParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::WeekOfYear(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -292,6 +303,7 @@ impl WeekOfMonthParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::WeekOfMonth(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -316,6 +328,7 @@ impl DayOfMonthParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::DayOfMonth(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -340,6 +353,7 @@ impl DayOfWeekParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::DayOfWeek(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
@@ -382,6 +396,7 @@ impl CaseThenParameter {
     pub fn to_computed(self) -> ComputedParameter {
         ComputedParameter::CaseThen(self)
     }
+
     pub fn to_parameter(self) -> Parameter {
         Parameter::Computed(self.to_computed())
     }
