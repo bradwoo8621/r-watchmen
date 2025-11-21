@@ -28,36 +28,38 @@ pub enum PipelineActionType {
     DeleteRows,
 }
 
+impl PipelineActionType {
+    pub fn for_read(self) -> bool {
+        match self {
+            PipelineActionType::ReadRow => true,
+            PipelineActionType::ReadFactor => true,
+            PipelineActionType::Exists => true,
+            PipelineActionType::ReadRows => true,
+            PipelineActionType::ReadFactors => true,
+            _ => false,
+        }
+    }
+
+    pub fn for_write(self) -> bool {
+        match self {
+            PipelineActionType::InsertRow => true,
+            PipelineActionType::MergeRow => true,
+            PipelineActionType::InsertOrMergeRow => true,
+            PipelineActionType::WriteFactor => true,
+            _ => false,
+        }
+    }
+
+    pub fn for_delete(self) -> bool {
+        match self {
+            PipelineActionType::DeleteRow => true,
+            PipelineActionType::DeleteRows => true,
+            _ => false,
+        }
+    }
+}
+
 pub type PipelineActionId = String;
-
-pub trait IPipelineAction {
-    fn action_id() -> Option<PipelineActionId>;
-    fn r#type() -> Option<PipelineActionType>;
-}
-
-pub trait MemoryWriter: IPipelineAction {
-    fn variable_name() -> Option<String>;
-}
-
-pub trait FromTopic: IPipelineAction {
-    fn topic_id() -> Option<TopicId>;
-}
-
-pub trait FromFactor: FromTopic {
-    fn factor_id() -> Option<FactorId>;
-}
-
-pub trait ToTopic: IPipelineAction {
-    fn topic_id() -> Option<TopicId>;
-}
-
-pub trait ToFactor: ToTopic {
-    fn factor_id() -> Option<FactorId>;
-}
-
-pub trait FindBy: IPipelineAction {
-    fn by() -> Option<ParameterJoint>;
-}
 
 #[derive(Display, Serde)]
 pub enum AlarmActionSeverity {
