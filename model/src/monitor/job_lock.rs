@@ -1,12 +1,13 @@
 use crate::serde::{option_naive_date, option_naive_datetime};
 use crate::{BaseDataModel, MonitorRuleStatisticalInterval, Storable, TenantId, TopicId, UserId};
 use chrono::{NaiveDate, NaiveDateTime};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorJobLockStatus {
     Ready,
-    Fail,
+    #[display = "fail"]
+    Failed,
     Success,
 }
 

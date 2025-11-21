@@ -3,9 +3,10 @@ use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousValueTypes};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+/// various value types
+#[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum DataSourceParamValue {
     Str(String),
@@ -18,7 +19,7 @@ pub struct DataSourceParam {
     pub value: Option<DataSourceParamValue>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 #[pattern = "lower-case"]
 pub enum DataSourceType {
     MYSQL,

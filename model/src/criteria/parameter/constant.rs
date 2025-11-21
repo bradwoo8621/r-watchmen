@@ -1,7 +1,7 @@
 use crate::{BaseDataModel, Parameter, ParameterKind, Storable};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 #[pattern = "ampersand-prefix"]
 pub enum VariablePredefineFunctions {
     // Sequence functions

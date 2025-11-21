@@ -1,7 +1,8 @@
 use crate::{ComputedParameter, ConstantParameter, TopicFactorParameter};
 use serde::{Deserialize, Serialize};
+use watchmen_model_marco::VariousStructTypes;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "kind")]
 pub enum Parameter {
     #[serde(rename = "topic")]

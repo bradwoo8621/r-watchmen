@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple,
     UserGroupId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum UserRole {
     Console,
     Admin,

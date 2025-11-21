@@ -2,11 +2,11 @@ use crate::{BaseDataModel, KeyStoreValue, PipelineTriggerType, Storable, TenantI
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use watchmen_model_marco::adapt_model;
+use watchmen_model_marco::{adapt_model, VariousValueTypes};
 
 pub type PipelineTriggerTraceId = String;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum PipelineTriggerDataValue {
     Str(String),

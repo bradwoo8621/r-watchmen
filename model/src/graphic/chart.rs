@@ -6,16 +6,16 @@ use crate::{
 };
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PredefinedChartColorSeries {
     Regular,
     Dark,
     Light,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartBorderStyle {
     None,
     Solid,
@@ -23,13 +23,13 @@ pub enum ChartBorderStyle {
     Dashed,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartFontStyle {
     Normal,
     Italic,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartFontWeight {
     #[display = "100"]
     W100,
@@ -70,7 +70,7 @@ pub struct ChartBorder {
     pub radius: Option<BigDecimal>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartTruncationType {
     None,
     Top,
@@ -97,7 +97,7 @@ pub struct ChartSettings {
     pub truncation: Option<ChartTruncation>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum ChartSettingsRecitation {
     Chart(ChartSettings),
@@ -110,7 +110,7 @@ pub struct Chart {
     pub settings: Option<ChartSettingsRecitation>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartType {
     Count,
     Bar,
@@ -126,7 +126,7 @@ pub enum ChartType {
     Customized,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "type")]
 pub enum ChartRecitation {
     #[serde(rename = "count")]

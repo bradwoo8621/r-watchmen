@@ -4,9 +4,9 @@ use crate::{
     ParameterJoint, Storable, TenantBasedTuple, TenantId, TopicId, Tuple, UserId,
 };
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PipelineActionType {
     // system actions
     Alarm,
@@ -61,7 +61,7 @@ impl PipelineActionType {
 
 pub type PipelineActionId = String;
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum AlarmActionSeverity {
     Low,
     Medium,
@@ -170,7 +170,7 @@ impl ReadRowsAction {
     }
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum AggregateArithmetic {
     None,
     Count,
@@ -274,7 +274,7 @@ impl MappingFactor {
     }
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum AccumulateMode {
     /// add value in current data for insert
     /// subtract value in previous data, add value in current data for merge
@@ -420,7 +420,7 @@ impl DeleteRowsAction {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "type")]
 pub enum PipelineAction {
     #[serde(rename = "alarm")]
@@ -476,7 +476,7 @@ pub struct PipelineStage {
     pub on: Option<ParameterJoint>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PipelineTriggerType {
     Insert,
     Merge,

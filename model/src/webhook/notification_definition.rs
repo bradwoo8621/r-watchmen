@@ -2,7 +2,7 @@ use crate::serde::option_naive_datetime;
 use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[adapt_model(storable)]
 pub struct NotificationParam {
@@ -10,7 +10,7 @@ pub struct NotificationParam {
     pub value: Option<String>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum NotificationType {
     Email,
     #[display = "url"]

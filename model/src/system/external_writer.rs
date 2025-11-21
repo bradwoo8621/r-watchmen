@@ -2,9 +2,9 @@ use crate::serde::option_naive_datetime;
 use crate::{
     Auditable, BaseDataModel, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ExternalWriterType {
     StandardWriter,
     ElasticSearchWriter,

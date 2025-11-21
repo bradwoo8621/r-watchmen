@@ -1,9 +1,9 @@
 use crate::serde::{option_naive_date, option_naive_datetime};
 use crate::{BaseDataModel, Storable, SubscriptionEventId, TenantId, UserId};
 use chrono::{NaiveDate, NaiveDateTime};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubscriptionEventJobLockStatus {
     Ready,
     #[display = "fail"]

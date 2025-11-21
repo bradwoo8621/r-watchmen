@@ -2,9 +2,9 @@ use crate::{
     BaseDataModel, ChartBorder, ChartColor, ChartTruncation, ChartType, EChartsGridPositionOnly,
     EChartsTitle, PredefinedChartColorSeries, Storable,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MapChartRegion {
     ChinaL1,
     CyprusL1,

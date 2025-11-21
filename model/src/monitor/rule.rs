@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, FactorId, Storable, TenantBasedTuple, TenantId, TopicId, Tuple,
     UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorRuleCode {
     // structure
     RawMismatchStructure,
@@ -43,28 +43,28 @@ pub enum MonitorRuleCode {
     FactorAndAnother,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorRuleGrade {
     Global,
     Topic,
     Factor,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorRuleSeverity {
     Fatal,
     Warn,
     Trace,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorRuleStatisticalInterval {
     Daily,
     Weekly,
     Monthly,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum MonitorRuleCompareOperator {
     #[display = "eq"]
     Equal,

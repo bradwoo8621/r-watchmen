@@ -1,8 +1,8 @@
 use crate::{BaseDataModel, Parameter, ParameterCondition, Storable};
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ParameterExpressionOperator {
     Empty,
     NotEmpty,
@@ -224,7 +224,7 @@ impl NotInExpression {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "operator")]
 pub enum ParameterExpression {
     #[serde(rename = "empty")]

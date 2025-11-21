@@ -4,9 +4,9 @@ use crate::{
     TenantId, Tuple, UserId,
 };
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum BucketType {
     Value,
     ValueMeasure,
@@ -14,7 +14,7 @@ pub enum BucketType {
     EnumMeasure,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum RangeBucketValueIncluding {
     IncludeMin,
     IncludeMax,
@@ -211,7 +211,7 @@ impl EnumMeasureBucket {
 
 pub type BucketId = String;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum Bucket {
     NumericValue(NumericValueBucket),

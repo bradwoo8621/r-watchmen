@@ -1,6 +1,6 @@
-use watchmen_model_marco::{Display, Serde};
+use watchmen_model_marco::{Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ParameterKind {
     Topic,
     Constant,

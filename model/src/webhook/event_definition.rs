@@ -1,14 +1,14 @@
 use crate::serde::option_naive_datetime;
 use crate::{Auditable, BaseDataModel, OptimisticLock, Storable, Tuple, UserId, UserRole};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EventType {
     System,
     Business,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EventSource {
     Subject,
     #[display = "objective_analysis"]

@@ -1,7 +1,7 @@
 use crate::{BaseDataModel, Storable};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveTimeframeKind {
     None,
     Year,
@@ -17,7 +17,7 @@ pub enum ObjectiveTimeframeKind {
     LastNDays,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveTimeframeTill {
     Now,
     LastCompleteCycle,

@@ -4,7 +4,7 @@ use crate::{
 };
 use bigdecimal::BigDecimal;
 use std::collections::HashMap;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[adapt_model(storable)]
 pub struct EChartsBorderHolder {
@@ -41,7 +41,7 @@ pub struct EChartsPositionHolder {
     pub position: Option<EChartsPosition>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsHorizontalAlignment {
     Auto,
     Left,
@@ -49,7 +49,7 @@ pub enum EChartsHorizontalAlignment {
     Center,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsVerticalAlignment {
     Auto,
     Top,
@@ -91,7 +91,7 @@ pub struct EChartsTitleHolder {
     pub title: Option<EChartsTitle>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsLegendOrient {
     Horizontal,
     Vertical,
@@ -138,7 +138,7 @@ pub struct EChartsGridHolder {
     pub grid: Option<EChartsGrid>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsAxisSplitLineStyle {
     Solid,
     Dashed,
@@ -163,20 +163,20 @@ pub struct EChartsAxisMinorSplitLineHolder {
     pub minor_split_line: Option<EChartsAxisSplitLine>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsXAxisPosition {
     Top,
     Bottom,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsXAxisType {
     Value,
     Category,
     Time,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsXAxisNameLocation {
     Start,
     Center,
@@ -241,20 +241,20 @@ pub struct EChartsXAxisHolder {
     pub xaxis: Option<EChartsXAxis>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsYAxisPosition {
     Left,
     Right,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsYAxisType {
     Value,
     Category,
     Time,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsYAxisNameLocation {
     Start,
     Middle,
@@ -318,7 +318,7 @@ pub struct EChartsYAxisHolder {
     pub yaxis: Option<EChartsYAxis>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum EChartsToolboxOrient {
     Horizontal,
     Vertical,

@@ -3,16 +3,16 @@ use crate::{Auditable, BaseDataModel, Storable, TenantBasedTuple, TenantId, Tupl
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousValueTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum OperationType {
     Create,
     Update,
     Delete,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum OperationContent {
     Str(String),

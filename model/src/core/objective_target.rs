@@ -1,14 +1,14 @@
 use crate::{BaseDataModel, ComputedObjectiveParameter, ObjectiveFactorId, Storable};
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveTargetBetterSide {
     Less,
     More,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum ObjectiveTargetAsIs {
     Parameter(ComputedObjectiveParameter),

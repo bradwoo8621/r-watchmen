@@ -1,8 +1,8 @@
 use crate::{BaseDataModel, Parameter, ParameterJoint, ParameterKind, Storable};
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ParameterComputeType {
     None,
     Add,
@@ -402,7 +402,7 @@ impl CaseThenParameter {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "type")]
 pub enum ComputedParameter {
     #[serde(rename = "none")]

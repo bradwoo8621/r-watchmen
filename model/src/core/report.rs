@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, Chart, ConnectedSpaceId, DataResultSet, GraphicRect, LastVisit,
     ParameterJoint, Storable, SubjectDatasetColumnId, SubjectId, TenantId, UserBasedTuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ReportIndicatorArithmetic {
     None,
     Count,
@@ -30,7 +30,7 @@ pub struct ReportDimension {
     pub name: Option<String>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ReportFunnelType {
     Numeric,
     Date,

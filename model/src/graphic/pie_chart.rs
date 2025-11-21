@@ -4,23 +4,23 @@ use crate::{
     EChartsVerticalAlignment, PredefinedChartColorSeries, Storable,
 };
 use bigdecimal::BigDecimal;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PieRoseType {
     None,
     Radius,
     Area,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PieLabelPosition {
     Inside,
     Outside,
     Center,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PieLabelAlignTo {
     None,
     #[display = "labelLine"]

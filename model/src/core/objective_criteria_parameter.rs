@@ -3,9 +3,9 @@ use crate::{
     ObjectiveParameterJoint, Storable,
 };
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveParameterType {
     Refer,
     Constant,
@@ -60,7 +60,7 @@ impl ConstantObjectiveParameter {
     }
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveFormulaOperator {
     None,
     Add,
@@ -639,7 +639,7 @@ impl ObjectiveCaseThenParameter {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "operator")]
 pub enum ComputedObjectiveParameter {
     None(ObjectiveNoneParameter),
@@ -709,7 +709,7 @@ impl TimeframeObjectiveParameter {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum ObjectiveParameter {
     Refer(ReferObjectiveParameter),

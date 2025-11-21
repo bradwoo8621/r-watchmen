@@ -2,7 +2,7 @@ mod enum_adapt;
 mod model_adapt;
 mod utils;
 
-use crate::enum_adapt::{impl_display, impl_serde};
+use crate::enum_adapt::{impl_display, impl_enum_type, impl_serde};
 use proc_macro::TokenStream;
 
 /// Adapt the model struct or enum to various traits and fields based on the provided attributes.
@@ -108,4 +108,22 @@ pub fn impl_display_for_enum(item: TokenStream) -> TokenStream {
 #[proc_macro_derive(Serde, attributes(pattern, display))]
 pub fn impl_serde_for_enum(item: TokenStream) -> TokenStream {
     impl_serde(item)
+}
+
+/// Prove that this enumeration defines a set of value types.
+#[proc_macro_derive(VariousValueTypes)]
+pub fn impl_various_value_types_form_enum(item: TokenStream) -> TokenStream {
+    impl_enum_type(item)
+}
+
+/// Prove that this enumeration defines a set of struct types.
+#[proc_macro_derive(VariousStructTypes)]
+pub fn impl_various_struct_types_form_enum(item: TokenStream) -> TokenStream {
+    impl_enum_type(item)
+}
+
+/// Prove that this enumeration defines a set of string constants.
+#[proc_macro_derive(StrEnum)]
+pub fn impl_str_enum_form_enum(item: TokenStream) -> TokenStream {
+    impl_enum_type(item)
 }

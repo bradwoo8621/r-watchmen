@@ -4,9 +4,9 @@ use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use watchmen_model_marco::adapt_model;
+use watchmen_model_marco::{adapt_model, VariousValueTypes};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum SQLQueryPerformanceParsedQuerySegment {
     Str(String),

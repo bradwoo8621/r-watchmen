@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{Display, Serde};
+use watchmen_model_marco::{Display, Serde, StrEnum};
 
-#[derive(Display, Serde, Debug, Clone)]
+#[derive(Display, Serde, StrEnum)]
 pub enum StdErrCode {
     #[display = "99999"]
     Unknown,
 }
 
 /// Convert other types of exceptions to this exception to enable the use of the `?` syntactic sugar.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct StdErr {
     code: StdErrCode,
     msg: String,

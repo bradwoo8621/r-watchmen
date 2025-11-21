@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, ConnectedSpaceId, FactorId, LastVisit, Parameter, ParameterJoint,
     Storable, TenantId, TopicId, UserBasedTuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubjectJoinType {
     Left,
     Right,
@@ -21,7 +21,7 @@ pub struct SubjectDatasetJoin {
     pub r#type: Option<SubjectJoinType>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubjectColumnArithmetic {
     None,
     #[display = "distinct_count"]
@@ -33,14 +33,14 @@ pub enum SubjectColumnArithmetic {
     Min,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubjectColumnAlignment {
     Left,
     Center,
     Right,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubjectColumnFormat {
     None,
     #[display = "#,##0"]

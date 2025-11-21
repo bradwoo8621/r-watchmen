@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, EventSource, NotificationDefinitionId, OptimisticLock, Storable,
     TenantBasedTuple, TenantId, Tuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubscriptionEventFrequency {
     Daily,
     Weekly,

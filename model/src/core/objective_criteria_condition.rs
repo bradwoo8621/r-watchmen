@@ -1,8 +1,8 @@
 use crate::{BaseDataModel, ObjectiveParameter, Storable};
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveParameterExpressionOperator {
     Empty,
     NotEmpty,
@@ -227,7 +227,7 @@ impl ObjectiveNotInExpression {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "operator")]
 pub enum ObjectiveParameterExpression {
     #[serde(rename = "empty")]
@@ -258,7 +258,7 @@ impl ObjectiveParameterExpression {
     }
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ObjectiveParameterJointType {
     And,
     Or,
@@ -290,7 +290,7 @@ impl ObjectiveParameterJoint {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum ObjectiveParameterCondition {
     Expression(ObjectiveParameterExpression),

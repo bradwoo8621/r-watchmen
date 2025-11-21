@@ -4,22 +4,22 @@ use crate::{
     TenantBasedTuple, TenantId, Tuple, UserGroupId, UserId,
 };
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ConvergenceVariableType {
     Timeframe,
     Bucket,
     FreeWalk,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ConvergenceVariableAxis {
     X,
     Y,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ConvergenceTimeframeVariableKind {
     Year,
     HalfYear,
@@ -98,7 +98,7 @@ impl ConvergenceFreeWalkVariable {
 
 pub type ConvergenceVariableId = String;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "type")]
 pub enum ConvergenceVariable {
     #[serde(rename = "timeframe")]

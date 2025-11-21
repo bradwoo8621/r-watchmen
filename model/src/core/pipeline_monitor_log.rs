@@ -4,9 +4,9 @@ use crate::{
     PipelineTriggerTraceId, PipelineUnitId, Storable, TenantId, TopicDataId, TopicId,
 };
 use chrono::NaiveDateTime;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 #[pattern = "upper-case"]
 pub enum MonitorLogStatus {
     /// even step is ignored by prerequisite is false, it is treated as DONE
@@ -151,12 +151,12 @@ pub struct PipelineMonitorLogCriteria {
     pub trace_id: Option<PipelineTriggerTraceId>,
     pub tenant_id: Option<TenantId>,
     /// [Pageable]
-    pub page_number: Option<i32>,
-    pub page_size: Option<i32>,
+    pub page_number: Option<u32>,
+    pub page_size: Option<u32>,
 }
 
 impl Pageable for PipelineMonitorLogCriteria {
-    fn page_number(&self) -> i32 {
+    fn page_number(&self) -> u32 {
         if let Some(page_number) = self.page_number {
             page_number
         } else {
@@ -164,7 +164,7 @@ impl Pageable for PipelineMonitorLogCriteria {
         }
     }
 
-    fn page_size(&self) -> i32 {
+    fn page_size(&self) -> u32 {
         if let Some(page_size) = self.page_size {
             page_size
         } else {

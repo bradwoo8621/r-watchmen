@@ -4,9 +4,9 @@ use crate::{
     Storable, TenantId, TopicId,
 };
 use chrono::NaiveDateTime;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum PipelineIndexRefType {
     Direct,
     Computed,

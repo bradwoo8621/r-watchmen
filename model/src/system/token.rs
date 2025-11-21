@@ -1,10 +1,18 @@
 use crate::{BaseDataModel, Storable, TenantId, UserRole};
 use serde::Deserialize;
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum TokenType {
     Bearer,
+}
+
+impl TokenType {
+    pub fn value(self) -> &'static str {
+        match self {
+            TokenType::Bearer => "bearer",
+        }
+    }
 }
 
 #[adapt_model(storable)]
@@ -35,7 +43,7 @@ pub struct OidcToken {
     pub tenant_id: Option<TenantId>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, VariousStructTypes)]
 #[serde(untagged)]
 pub enum TokenRecitation {
     Std(Token),

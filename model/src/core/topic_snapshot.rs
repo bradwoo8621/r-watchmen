@@ -4,9 +4,9 @@ use crate::{
     TenantBasedTuple, TenantId, TopicId, Tuple, UserId,
 };
 use chrono::{NaiveDate, NaiveDateTime};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum TopicSnapshotFrequency {
     Daily,
     Weekly,
@@ -33,7 +33,7 @@ pub struct TopicSnapshotScheduler {
     pub enabled: Option<bool>,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum TopicSnapshotJobLockStatus {
     Ready,
     #[display = "fail"]

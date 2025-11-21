@@ -3,9 +3,9 @@ use crate::{
     Auditable, BaseDataModel, BucketId, FactorOrSubjectDatasetColumnId, LastVisit, MeasureMethod,
     Objective, ObjectiveId, ObjectiveTargetId, Storable, TenantId, UserBasedTuple, UserId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum BreakdownDimensionType {
     Value,
     Bucket,

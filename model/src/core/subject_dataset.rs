@@ -1,9 +1,9 @@
 use crate::{
     BaseDataModel, Pageable, ParameterCondition, Storable, SubjectDatasetColumnId, SubjectId,
 };
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum SubjectDatasetCriteriaIndicatorArithmetic {
     None,
     #[display = "distinct_count"]
@@ -31,12 +31,12 @@ pub struct SubjectDatasetCriteria {
     pub indicators: Option<Vec<SubjectDatasetCriteriaIndicator>>,
     pub conditions: Option<Vec<ParameterCondition>>,
     /// [Pageable]
-    pub page_number: Option<i32>,
-    pub page_size: Option<i32>,
+    pub page_number: Option<u32>,
+    pub page_size: Option<u32>,
 }
 
 impl Pageable for SubjectDatasetCriteria {
-    fn page_number(&self) -> i32 {
+    fn page_number(&self) -> u32 {
         if let Some(page_number) = self.page_number {
             page_number
         } else {
@@ -44,7 +44,7 @@ impl Pageable for SubjectDatasetCriteria {
         }
     }
 
-    fn page_size(&self) -> i32 {
+    fn page_size(&self) -> u32 {
         if let Some(page_size) = self.page_size {
             page_size
         } else {

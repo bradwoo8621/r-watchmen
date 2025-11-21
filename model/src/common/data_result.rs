@@ -3,9 +3,9 @@ use crate::{BaseDataModel, Storable};
 use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::adapt_model;
+use watchmen_model_marco::{adapt_model, VariousValueTypes};
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum DataResultSetCell {
     Str(String),

@@ -1,7 +1,7 @@
 use crate::{BaseDataModel, EnumId, Storable};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum FactorType {
     Sequence,
     Number,
@@ -89,7 +89,7 @@ pub enum FactorType {
     Array,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum FactorIndexGroup {
     #[display = ""]
     EMPTY,
@@ -135,7 +135,7 @@ pub enum FactorIndexGroup {
     UniqueIndex10,
 }
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 #[pattern = "kebab-upper"]
 pub enum FactorEncryptMethod {
     #[display = "none"]

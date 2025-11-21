@@ -1,9 +1,11 @@
 use crate::{BaseDataModel, ChartColor, Storable};
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
-use watchmen_model_marco::{adapt_model, Display, Serde};
+use watchmen_model_marco::{
+    adapt_model, Display, Serde, StrEnum, VariousStructTypes, VariousValueTypes,
+};
 
-#[derive(Display, Serde)]
+#[derive(Display, Serde, StrEnum)]
 pub enum ChartDefItemType {
     Section,
     Number,
@@ -15,7 +17,7 @@ pub enum ChartDefItemType {
 }
 
 // TODO can't find out where this is used, seems to define the chart properties
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, VariousStructTypes)]
 #[serde(tag = "type")]
 pub enum ChartDefItem {
     #[serde(rename = "section")]
@@ -84,7 +86,7 @@ pub struct ChartColorItem {
     pub default_value: Option<ChartColor>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, VariousValueTypes)]
 #[serde(untagged)]
 pub enum ChartDropdownItemOptionValue {
     Str(String),
