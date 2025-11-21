@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use watchmen_model_marco::{adapt_model, Display, Serde};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(untagged)]
 pub enum DataSourceParamValue {
     Str(String),
     Bool(bool),

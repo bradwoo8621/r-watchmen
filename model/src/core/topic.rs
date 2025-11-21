@@ -34,3 +34,6 @@ pub struct Topic {
     pub factors: Option<Vec<Factor>>,
     pub description: Option<String>,
 }
+
+/// the instance data id of topic
+pub type TopicDataId = String;

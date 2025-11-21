@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use watchmen_model_marco::adapt_model;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(untagged)]
 pub enum DataResultSetCell {
     Str(String),
     Num(BigDecimal),

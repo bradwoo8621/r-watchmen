@@ -6,8 +6,7 @@ pub fn ask_query_performance_log_topic() -> Topic {
         Factor::new()
             .factor_id(String::from("rmpl-f-1"))
             .name(String::from("uid"))
-            .r#type(FactorType::Text)
-            .build(),
+            .r#type(FactorType::Text),
     );
     factors.push(
         Factor::new()
@@ -16,8 +15,7 @@ pub fn ask_query_performance_log_topic() -> Topic {
             .r#type(FactorType::Text)
             .flatten(true)
             .index_group(FactorIndexGroup::Index1)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
     factors.push(
         Factor::new()
@@ -26,24 +24,21 @@ pub fn ask_query_performance_log_topic() -> Topic {
             .r#type(FactorType::Text)
             .flatten(true)
             .index_group(FactorIndexGroup::Index2)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("rmpl-f-4"))
             .name(String::from("execution_time"))
             .r#type(FactorType::Number)
-            .precision(String::from("50"))
-            .build(),
+            .precision(String::from("50")),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("rmpl-f-5"))
             .name(String::from("data_volume"))
             .r#type(FactorType::Number)
-            .precision(String::from("50"))
-            .build(),
+            .precision(String::from("50")),
     );
     factors.push(
         Factor::new()
@@ -51,8 +46,7 @@ pub fn ask_query_performance_log_topic() -> Topic {
             .name(String::from("join_dimensions"))
             .r#type(FactorType::Text)
             .flatten(true)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
     factors.push(
         Factor::new()
@@ -60,8 +54,7 @@ pub fn ask_query_performance_log_topic() -> Topic {
             .name(String::from("where_dimensions"))
             .r#type(FactorType::Text)
             .flatten(true)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
     factors.push(
         Factor::new()
@@ -69,8 +62,7 @@ pub fn ask_query_performance_log_topic() -> Topic {
             .name(String::from("group_by_dimensions"))
             .r#type(FactorType::Text)
             .flatten(true)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
 
     Topic::new()

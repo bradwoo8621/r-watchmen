@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use watchmen_model_marco::adapt_model;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
 pub enum MonitorResultValue {
     Str(String),
     Num(BigDecimal),

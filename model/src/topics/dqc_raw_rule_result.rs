@@ -9,8 +9,7 @@ pub fn ask_dqc_raw_rule_result_topic() -> Topic {
             .r#type(FactorType::Text)
             .flatten(true)
             .index_group(FactorIndexGroup::Index1)
-            .precision(String::from("50"))
-            .build(),
+            .precision(String::from("50")),
     );
     factors.push(
         Factor::new()
@@ -19,15 +18,13 @@ pub fn ask_dqc_raw_rule_result_topic() -> Topic {
             .r#type(FactorType::Text)
             .flatten(true)
             .index_group(FactorIndexGroup::Index2)
-            .precision(String::from("200"))
-            .build(),
+            .precision(String::from("200")),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("dra-f-3"))
             .name(String::from("topicName"))
-            .r#type(FactorType::Text)
-            .build(),
+            .r#type(FactorType::Text),
     );
     factors.push(
         Factor::new()
@@ -36,30 +33,26 @@ pub fn ask_dqc_raw_rule_result_topic() -> Topic {
             .r#type(FactorType::Text)
             .flatten(true)
             .index_group(FactorIndexGroup::Index3)
-            .precision(String::from("50"))
-            .build(),
+            .precision(String::from("50")),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("dra-f-5"))
             .name(String::from("factorName"))
-            .r#type(FactorType::Text)
-            .build(),
+            .r#type(FactorType::Text),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("dra-f-6"))
             .name(String::from("detected"))
             .r#type(FactorType::Boolean)
-            .flatten(true)
-            .build(),
+            .flatten(true),
     );
     factors.push(
         Factor::new()
             .factor_id(String::from("dra-f-7"))
             .name(String::from("severity"))
-            .r#type(FactorType::Text)
-            .build(),
+            .r#type(FactorType::Text),
     );
     // the start day of date range
     // sunday of weekly; 1st of monthly.
@@ -69,8 +62,7 @@ pub fn ask_dqc_raw_rule_result_topic() -> Topic {
             .name(String::from("processDate"))
             .r#type(FactorType::Date)
             .flatten(true)
-            .index_group(FactorIndexGroup::Index4)
-            .build(),
+            .index_group(FactorIndexGroup::Index4),
     );
 
     Topic::new()

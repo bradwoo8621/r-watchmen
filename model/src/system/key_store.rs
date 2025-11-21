@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use watchmen_model_marco::adapt_model;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(untagged)]
 pub enum KeyStoreValue {
     Str(String),
     Num(BigDecimal),

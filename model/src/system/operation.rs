@@ -13,6 +13,7 @@ pub enum OperationType {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(untagged)]
 pub enum OperationContent {
     Str(String),
     Num(BigDecimal),

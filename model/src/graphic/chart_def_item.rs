@@ -85,6 +85,7 @@ pub struct ChartColorItem {
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(untagged)]
 pub enum ChartDropdownItemOptionValue {
     Str(String),
     Num(BigDecimal),
