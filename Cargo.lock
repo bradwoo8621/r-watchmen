@@ -352,7 +352,6 @@ version = "0.1.0"
 dependencies = [
  "watchmen_auth",
  "watchmen_model",
- "watchmen_model_marco",
 ]
 
 [[package]]

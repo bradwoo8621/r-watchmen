@@ -2,10 +2,20 @@ use crate::{AuthErrorCode, AuthenticationDetails, AuthenticationProvider, Authen
 use watchmen_model::{StdErr, StdErrorCode, User};
 
 pub struct AuthenticationManager {
-    pub providers: Vec<Box<dyn AuthenticationProvider>>,
+    providers: Vec<Box<dyn AuthenticationProvider>>,
 }
 
 impl AuthenticationManager {
+    pub fn new() -> AuthenticationManager {
+        AuthenticationManager {
+            providers: Vec::new(),
+        }
+    }
+
+    pub fn of(providers: Vec<Box<dyn AuthenticationProvider>>) -> AuthenticationManager {
+        AuthenticationManager { providers }
+    }
+
     pub fn register_provider(
         mut self,
         provider: Box<dyn AuthenticationProvider>,

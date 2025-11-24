@@ -1,4 +1,5 @@
-use watchmen_model::{TenantId, UserId, UserRole};
+use crate::{AuthErrorCode, AuthenticationScheme, Authorization};
+use watchmen_model::{StdErr, StdErrorCode, TenantId, User, UserId, UserRole};
 
 pub struct Principal {
     pub tenant_id: TenantId,
@@ -27,6 +28,39 @@ impl Principal {
             UserRole::SuperAdmin => true,
             _ => false,
         }
+    }
+    fn from_user(user: &User) -> Result<Principal, StdErr> {
+        if user.tenant_id.is_none() {
+            return StdErr::of(
+                AuthErrorCode::TenantIdMissedInUser.code(),
+                "Tenant id is missing in user.",
+            );
+        }
+        if user.user_id.is_none() {
+            return StdErr::of(
+                AuthErrorCode::UserIdMissedInUser.code(),
+                "User id is missing in user.",
+            );
+        }
+        if user.name.is_none() {
+            return StdErr::of(
+                AuthErrorCode::NameMissedInUser.code(),
+                "Name is missing in user.",
+            );
+        }
+        if user.role.is_none() {
+            return StdErr::of(
+                AuthErrorCode::RoleMissedInUser.code(),
+                "Role is missing in user.",
+            );
+        }
+
+        Ok(Principal {
+            tenant_id: user.tenant_id.clone().unwrap(),
+            user_id: user.user_id.clone().unwrap(),
+            name: user.name.clone().unwrap(),
+            role: user.role.clone().unwrap(),
+        })
     }
 
     /// - [tenant_id]: -1,
@@ -58,5 +92,14 @@ impl Principal {
             name: user_name.unwrap_or(String::from("imma-super")),
             role: UserRole::Admin,
         }
+    }
+
+    pub fn authorize_token(
+        authorization: &Authorization,
+        scheme: AuthenticationScheme,
+        token: String,
+    ) -> Result<Self, StdErr> {
+        let user = authorization.authorize_token(scheme, token)?;
+        Principal::from_user(&user)
     }
 }

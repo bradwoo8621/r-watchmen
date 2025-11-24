@@ -5,7 +5,7 @@ use crate::{
 };
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, StrEnum, Clone)]
 pub enum UserRole {
     Console,
     Admin,

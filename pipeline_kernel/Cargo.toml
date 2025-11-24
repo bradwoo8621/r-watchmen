@@ -4,6 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-watchmen_model_marco = { path = "../model_marco" }
 watchmen_model = { path = "../model" }
 watchmen_auth = { path = "../auth" }
