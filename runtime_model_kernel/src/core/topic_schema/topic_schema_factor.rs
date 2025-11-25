@@ -18,6 +18,14 @@ impl TopicSchemaFactorInner {
             names,
         }
     }
+
+    pub fn replace_names(&self, names: Arc<Vec<String>>) -> Self {
+        TopicSchemaFactorInner {
+            factor: self.factor.clone(),
+            factor_name: self.factor_name.clone(),
+            names,
+        }
+    }
 }
 
 pub trait TopicSchemaFactor {
@@ -33,5 +41,16 @@ pub trait TopicSchemaFactor {
 
     fn names(&self) -> &Arc<Vec<String>> {
         &self.get_inner().names
+    }
+}
+
+pub trait TopicSchemaGroupFactor<F>: TopicSchemaFactor {
+    fn replace_names(&self, names: Arc<Vec<String>>) -> F;
+
+    fn remove_first_name(&self) -> F {
+        let inner = self.get_inner();
+        let mut names = inner.names.as_ref().clone();
+        names.remove(0);
+        self.replace_names(Arc::new(names))
     }
 }

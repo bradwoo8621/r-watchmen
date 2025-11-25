@@ -26,4 +26,8 @@ impl TopicSchema {
             default_value_factor_groups: TopicSchemaDefaultValueFactorGroups::create(&arc_topic),
         }
     }
+
+    pub fn topic(&self) -> &Arc<ArcTopic> {
+        &self.topic
+    }
 }

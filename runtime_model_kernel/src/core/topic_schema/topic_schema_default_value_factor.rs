@@ -1,24 +1,24 @@
 use crate::{
     ArcFactor, TopicSchemaFactor, TopicSchemaFactorGroup, TopicSchemaFactorGroupInner,
-    TopicSchemaFactorGroups, TopicSchemaFactorInner,
+    TopicSchemaFactorGroups, TopicSchemaFactorInner, TopicSchemaGroupFactor,
 };
 use std::sync::Arc;
 use watchmen_model::TopicDataValue;
 
 pub struct TopicSchemaDefaultValueFactor {
     inner: TopicSchemaFactorInner,
-    default_value: Option<TopicDataValue>,
+    default_value: Option<Arc<TopicDataValue>>,
 }
 
 impl TopicSchemaDefaultValueFactor {
-    pub fn new(inner: TopicSchemaFactorInner, default_value: Option<TopicDataValue>) -> Self {
+    pub fn new(inner: TopicSchemaFactorInner, default_value: Option<Arc<TopicDataValue>>) -> Self {
         TopicSchemaDefaultValueFactor {
             inner,
             default_value,
         }
     }
 
-    pub fn default_value(&self) -> &Option<TopicDataValue> {
+    pub fn default_value(&self) -> &Option<Arc<TopicDataValue>> {
         &self.default_value
     }
 }
@@ -26,6 +26,15 @@ impl TopicSchemaDefaultValueFactor {
 impl TopicSchemaFactor for TopicSchemaDefaultValueFactor {
     fn get_inner(&self) -> &TopicSchemaFactorInner {
         &self.inner
+    }
+}
+
+impl TopicSchemaGroupFactor<TopicSchemaDefaultValueFactor> for TopicSchemaDefaultValueFactor {
+    fn replace_names(&self, names: Arc<Vec<String>>) -> TopicSchemaDefaultValueFactor {
+        TopicSchemaDefaultValueFactor {
+            inner: self.get_inner().replace_names(names),
+            default_value: self.default_value.clone(),
+        }
     }
 }
 
@@ -46,6 +55,10 @@ impl TopicSchemaFactorGroup<'_, TopicSchemaDefaultValueFactor, TopicSchemaDefaul
     for TopicSchemaDefaultValueFactorGroup
 {
     type Inner = TopicSchemaDefaultValueFactorGroupInner;
+
+    fn new(name: Arc<String>, factors: Arc<Vec<Arc<TopicSchemaDefaultValueFactor>>>) -> Self {
+        TopicSchemaDefaultValueFactorGroup::new(TopicSchemaFactorGroupInner::new(name, factors))
+    }
 
     fn get_inner(&self) -> &TopicSchemaDefaultValueFactorGroupInner {
         &self.inner
