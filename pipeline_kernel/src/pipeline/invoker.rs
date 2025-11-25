@@ -71,12 +71,12 @@ impl PipelineInvoker {
 
     pub async fn invoke_async(
         trigger_data: PipelineTriggerData,
-        trace_id: PipelineTriggerTraceId,
+        _trace_id: PipelineTriggerTraceId,
         principal: Principal,
-        asynchronized: bool,
+        _asynchronized: bool,
     ) -> Result<TopicDataId, StdErr> {
         Self::check_trigger_data(&trigger_data)?;
-        let execute_principal = Self::ask_execute_principal(&trigger_data, principal)?;
+        let _execute_principal = Self::ask_execute_principal(&trigger_data, principal)?;
 
         // let schema = TenantService::with(&execute_principal).find_topic_schema(&trigger_data.code, &execute_principal);
         // PipelineTrigger::new(
@@ -92,9 +92,9 @@ impl PipelineInvoker {
     }
 
     pub async fn invoke_sync(
-        trigger_data: PipelineTriggerData,
-        trace_id: PipelineTriggerTraceId,
-        principal: Principal,
+        _trigger_data: PipelineTriggerData,
+        _trace_id: PipelineTriggerTraceId,
+        _principal: Principal,
     ) -> Result<TopicDataId, StdErr> {
         todo!("Not implemented yet")
     }

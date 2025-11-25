@@ -4,16 +4,16 @@ use watchmen_model::{
 };
 use watchmen_runtime_model_kernel::TopicSchema;
 
-type TopicDataService = String;
+type _TopicDataService = String;
 type TopicTrigger = String;
 
 pub struct PipelineTrigger {
     // storages: RuntimeTopicStorages,
-    trigger_topic_schema: TopicSchema,
-    trigger_type: PipelineTriggerType,
-    trigger_data: PipelineTriggerData,
-    trace_id: PipelineTriggerTraceId,
-    principal: Principal,
+    _trigger_topic_schema: TopicSchema,
+    _trigger_type: PipelineTriggerType,
+    _trigger_data: PipelineTriggerData,
+    _trace_id: PipelineTriggerTraceId,
+    _principal: Principal,
     asynchronized: bool,
     // handle_monitor_log: handle_monitor_log,
 }
@@ -27,7 +27,7 @@ impl PipelineTrigger {
         // self.trigger_topic_schema.prepare_data(self.trigger_data, self.principal)
     }
 
-    fn ask_topic_data_service(&self, schema: TopicSchema) -> TopicDataService {
+    fn _ask_topic_data_service(&self, _schema: TopicSchema) -> _TopicDataService {
         // self.storages
         // 	.ask_topic_storage(schema)
         // 	.ask_topic_data_service(schema, self.principal)
@@ -79,7 +79,7 @@ impl PipelineTrigger {
     /// 3. start pipeline execution
     pub async fn invoke(&self) -> Result<TopicDataId, StdErr> {
         self.prepare_trigger_data();
-        let result = self.save_trigger_data()?;
+        let _result = self.save_trigger_data()?;
         if self.asynchronized {
             // TODO ensure_future(self.start(result))
         } else {
