@@ -3,7 +3,7 @@ use crate::{
     TopicSchemaFactorGroups, TopicSchemaFactorInner, TopicSchemaGroupFactor,
 };
 use std::sync::Arc;
-use watchmen_model::TopicDataValue;
+use watchmen_model::{TopicData, TopicDataValue};
 
 pub struct TopicSchemaDefaultValueFactor {
     inner: TopicSchemaFactorInner,
@@ -48,6 +48,10 @@ pub struct TopicSchemaDefaultValueFactorGroup {
 impl TopicSchemaDefaultValueFactorGroup {
     pub fn new(inner: TopicSchemaDefaultValueFactorGroupInner) -> Self {
         TopicSchemaDefaultValueFactorGroup { inner }
+    }
+
+    pub fn init_default_value(&self, _data: &mut TopicData) {
+        todo!("implement init_default_value for TopicSchemaDefaultValueFactorGroup")
     }
 }
 

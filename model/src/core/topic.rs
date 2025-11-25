@@ -58,3 +58,6 @@ pub enum TopicDataValue {
     Vec(Vec<TopicDataValue>),
     None,
 }
+
+pub type TopicData = HashMap<String, TopicDataValue>;
+
