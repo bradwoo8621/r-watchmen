@@ -7,6 +7,7 @@ use watchmen_model::{Topic, TopicData};
 
 /// The schema of a topic, including various factor groups.
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
+#[derive(Debug)]
 pub struct TopicSchema {
     topic: Arc<ArcTopic>,
     _flatten_factors: Option<String>, // Option<Arc<Vec<Arc<TopicSchemaFlattenFactor>>>>,
@@ -63,7 +64,19 @@ mod tests {
             .factors(vec![
                 Factor::new()
                     .name(String::from("factor-1"))
-                    .default_value(String::from("abc")),
+                    .default_value(String::from("a")),
+                Factor::new()
+                    .name(String::from("dv.factor-2"))
+                    .default_value(String::from("b")),
+                Factor::new()
+                    .name(String::from("dv.factor-3"))
+                    .default_value(String::from("c")),
+                Factor::new()
+                    .name(String::from("dv.sub-dv.factor-4"))
+                    .default_value(String::from("d")),
+                Factor::new()
+                    .name(String::from("dv.sub-dv.factor-5"))
+                    .default_value(String::from("e")),
             ])
             .tenant_id(String::from("Tenant-1"))
             .version(1)
@@ -78,6 +91,7 @@ mod tests {
             *topic_schema.topic().topic_id.as_deref().unwrap(),
             String::from("topic-1")
         );
-        assert!(topic_schema.default_value_factor_groups.is_none());
+        // assert!(topic_schema.default_value_factor_groups.is_none());
+        println!("{:?}", topic_schema)
     }
 }

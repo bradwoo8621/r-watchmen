@@ -7,6 +7,7 @@ use watchmen_model::{DataSourceId, TenantId, Topic, TopicId, TopicKind, TopicTyp
 /// of data across multiple threads without unnecessary cloning.
 ///
 /// fields are same as [Topic], and audit columns are omitted.
+#[derive(Debug)]
 pub struct ArcTopic {
     pub topic_id: Option<Arc<TopicId>>,
     pub name: Option<Arc<String>>,

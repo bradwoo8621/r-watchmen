@@ -1,6 +1,7 @@
 use crate::ArcFactor;
 use std::sync::Arc;
 
+#[derive(Debug)]
 pub struct TopicSchemaFactorInner {
     factor: Arc<ArcFactor>,
     factor_name: Arc<String>,

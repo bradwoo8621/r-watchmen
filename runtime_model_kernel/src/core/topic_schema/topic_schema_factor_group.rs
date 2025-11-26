@@ -2,6 +2,7 @@ use crate::{TopicSchemaFactor, TopicSchemaGroupFactor};
 use std::collections::HashMap;
 use std::sync::Arc;
 
+#[derive(Debug)]
 pub struct TopicSchemaFactorGroupInner<F, G> {
     name: Arc<String>,
     factors: Option<Arc<Vec<Arc<F>>>>,

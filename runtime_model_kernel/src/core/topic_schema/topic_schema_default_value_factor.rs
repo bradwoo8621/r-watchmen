@@ -8,6 +8,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use watchmen_model::{FactorType, FactorTypeCategory, TopicData, TopicDataValue};
 
+#[derive(Debug)]
 pub struct TopicSchemaDefaultValueFactor {
     inner: TopicSchemaFactorInner,
     default_value: Option<Arc<TopicDataValue>>,
@@ -94,6 +95,7 @@ impl TopicSchemaGroupFactor<TopicSchemaDefaultValueFactor> for TopicSchemaDefaul
 pub type TopicSchemaDefaultValueFactorGroupInner =
     TopicSchemaFactorGroupInner<TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>;
 
+#[derive(Debug)]
 pub struct TopicSchemaDefaultValueFactorGroup {
     inner: TopicSchemaDefaultValueFactorGroupInner,
 }

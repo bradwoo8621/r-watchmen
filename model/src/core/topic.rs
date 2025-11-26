@@ -9,14 +9,14 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousValueTypes};
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum TopicKind {
     System,
     Business,
     Synonym,
 }
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum TopicType {
     Raw,
     Meta,

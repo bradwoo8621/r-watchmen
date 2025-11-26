@@ -2,7 +2,7 @@ use crate::{BaseDataModel, EnumId, Storable};
 use std::cmp::PartialEq;
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde, PartialEq, StrEnum)]
+#[derive(Display, Serde, PartialEq, Debug, StrEnum)]
 pub enum FactorType {
     Sequence,
     Number,
@@ -165,7 +165,7 @@ impl FactorType {
     }
 }
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum FactorIndexGroup {
     #[display = ""]
     EMPTY,
@@ -211,7 +211,7 @@ pub enum FactorIndexGroup {
     UniqueIndex10,
 }
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 #[pattern = "kebab-upper"]
 pub enum FactorEncryptMethod {
     #[display = "none"]

@@ -4,6 +4,7 @@ use watchmen_model::{EnumId, Factor, FactorEncryptMethod, FactorId, FactorIndexG
 /// An Arc-wrapped Factor structure with optional fields.
 /// This struct uses Arc pointers for each field to allow efficient sharing
 /// of data across multiple threads without unnecessary cloning.
+#[derive(Debug)]
 pub struct ArcFactor {
     pub factor_id: Option<Arc<FactorId>>,
     pub r#type: Option<Arc<FactorType>>,
