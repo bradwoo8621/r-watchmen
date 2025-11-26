@@ -1,9 +1,9 @@
-use crate::core::topic_schema::aid_hierarchy::{HierarchyAid, HierarchyAidIdGenerator};
 use crate::{
-    ArcTopic, TopicSchemaDateOrTimeFactorGroup, TopicSchemaDateOrTimeFactorGroups,
-    TopicSchemaDefaultValueFactorGroup, TopicSchemaDefaultValueFactorGroups,
-    TopicSchemaEncryptFactorGroup, TopicSchemaEncryptFactorGroups, TopicSchemaFactorGroups,
-    TopicSchemaFlattenFactorGroup, TopicSchemaFlattenFactorGroups,
+    ArcTopic, HierarchyAid, HierarchyAidIdGenerator, TopicSchemaDateOrTimeFactorGroup,
+    TopicSchemaDateOrTimeFactorGroups, TopicSchemaDefaultValueFactorGroup,
+    TopicSchemaDefaultValueFactorGroups, TopicSchemaEncryptFactorGroup,
+    TopicSchemaEncryptFactorGroups, TopicSchemaFactorGroups, TopicSchemaFlattenFactorGroup,
+    TopicSchemaFlattenFactorGroups,
 };
 use std::sync::Arc;
 use watchmen_model::{Topic, TopicData, TopicKind};

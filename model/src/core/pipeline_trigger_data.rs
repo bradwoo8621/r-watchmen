@@ -1,30 +1,16 @@
-use crate::{BaseDataModel, KeyStoreValue, PipelineTriggerType, Storable, TenantId, TopicDataId};
-use bigdecimal::BigDecimal;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use watchmen_model_marco::{adapt_model, VariousValueTypes};
+use crate::{
+    BaseDataModel, PipelineTriggerType, Storable, TenantId, TopicData, TopicDataId,
+};
+use watchmen_model_marco::adapt_model;
 
 pub type PipelineTriggerTraceId = String;
-
-#[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]
-#[serde(untagged)]
-pub enum PipelineTriggerDataValue {
-    Str(String),
-    Num(BigDecimal),
-    Bool(bool),
-    Map(HashMap<String, KeyStoreValue>),
-    Vec(Vec<KeyStoreValue>),
-    None,
-}
-
-pub type PipelineTriggerDataMap = HashMap<String, PipelineTriggerDataValue>;
 
 #[adapt_model(storable)]
 pub struct PipelineTriggerData {
     /// topic name
     pub code: Option<String>,
     /// current data
-    pub data: Option<PipelineTriggerDataMap>,
+    pub data: Option<TopicData>,
     pub trigger_type: Option<PipelineTriggerType>,
     /// pass tenant id when use super admin
     pub tenant_id: Option<TenantId>,
@@ -39,7 +25,7 @@ pub struct PipelineTriggerDataWithPAT {
     /// topic name
     pub code: Option<String>,
     /// current data
-    pub data: Option<PipelineTriggerDataMap>,
+    pub data: Option<TopicData>,
     pub trigger_type: Option<PipelineTriggerType>,
     /// pass tenant id when use super admin
     pub tenant_id: Option<TenantId>,

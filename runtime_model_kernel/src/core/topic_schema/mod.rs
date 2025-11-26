@@ -10,6 +10,7 @@ mod topic_schema_factor_group;
 mod topic_schema_factor_groups;
 mod topic_schema_flatten_factor;
 
+pub use aid_hierarchy::*;
 pub use arc_factor::*;
 pub use arc_topic::*;
 pub use topic_schema::*;
