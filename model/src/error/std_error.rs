@@ -5,13 +5,15 @@ pub trait StdErrorCode {
 }
 
 pub enum StdErrCode {
+    DecimalParse,
     Unknown,
 }
 
 impl StdErrorCode for StdErrCode {
     fn code(&self) -> &'static str {
         match self {
-            StdErrCode::Unknown => "99999",
+            StdErrCode::DecimalParse => "STDE-00001",
+            StdErrCode::Unknown => "STDE-99999",
         }
     }
 }
@@ -19,6 +21,7 @@ impl StdErrorCode for StdErrCode {
 /// Convert other types of exceptions to this exception to enable the use of the `?` syntactic sugar.
 #[derive(Serialize, Deserialize)]
 pub struct StdErr {
+    /// code must be [XXXX-99999], each module has its own code prefix [XXXX]
     code: &'static str,
     msg: Option<String>,
 }

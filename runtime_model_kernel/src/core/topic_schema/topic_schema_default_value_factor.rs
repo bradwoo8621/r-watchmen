@@ -2,11 +2,11 @@ use crate::{
     ArcFactor, TopicSchemaFactor, TopicSchemaFactorGroup, TopicSchemaFactorGroupInner,
     TopicSchemaFactorGroups, TopicSchemaFactorInner, TopicSchemaGroupFactor,
 };
-use bigdecimal::{BigDecimal, Zero};
 use std::ops::Deref;
-use std::str::FromStr;
 use std::sync::Arc;
-use watchmen_model::{FactorType, FactorTypeCategory, TopicData, TopicDataValue};
+use watchmen_model::{
+    BooleanUtils, FactorType, FactorTypeCategory, NumericUtils, TopicData, TopicDataValue,
+};
 
 #[derive(Debug)]
 pub struct TopicSchemaDefaultValueFactor {
@@ -49,23 +49,15 @@ impl TopicSchemaDefaultValueFactor {
             FactorTypeCategory::Time => todo!("handle Time default value"),
             // date time related types, no check, take as number
             FactorTypeCategory::DatetimeNumeric | FactorTypeCategory::Numeric => {
-                todo!("handle Numeric default value")
+                if let Ok(v) = defined_default_value.deref().to_decimal() {
+                    TopicDataValue::Num(v)
+                } else {
+                    // TODO output some warning info: string cannot be casted to decimal
+                    TopicDataValue::None
+                }
             }
             FactorTypeCategory::Boolean => {
-                let val = defined_default_value.deref().to_lowercase();
-                let val = val.as_str();
-                let bool_value = match val {
-                    "true" | "t" | "yes" | "y" => true,
-                    "false" | "f" | "no" | "n" => false,
-                    _ => {
-                        if let Ok(v) = BigDecimal::from_str(val) {
-                            v != BigDecimal::zero()
-                        } else {
-                            false
-                        }
-                    }
-                };
-                TopicDataValue::Bool(bool_value)
+                TopicDataValue::Bool(defined_default_value.deref().to_bool())
             }
             FactorTypeCategory::Complex => TopicDataValue::None,
         };
