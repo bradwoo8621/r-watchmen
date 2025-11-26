@@ -163,6 +163,17 @@ impl FactorType {
             FactorType::Object | FactorType::Array => FactorTypeCategory::Complex,
         }
     }
+
+    pub fn is_date_or_time(&self) -> bool {
+        match self {
+            FactorType::Date
+            | FactorType::Time
+            | FactorType::Datetime
+            | FactorType::FullDatetime
+            | FactorType::DateOfBirth => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Display, Serde, Debug, StrEnum)]
@@ -256,14 +267,10 @@ impl Factor {
     }
 
     pub fn is_date_or_time(&self) -> bool {
-        match self.r#type {
-            Some(FactorType::Date)
-            | Some(FactorType::Time)
-            | Some(FactorType::Datetime)
-            | Some(FactorType::FullDatetime)
-            | Some(FactorType::DateOfBirth) => true,
-            _ => false,
-        }
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_date_or_time())
+            .unwrap_or(false)
     }
 
     pub fn has_default_value(&self) -> bool {

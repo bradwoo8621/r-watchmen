@@ -6,6 +6,7 @@ use crate::{
 use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
+use std::cmp::PartialEq;
 use std::collections::HashMap;
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousValueTypes};
 
@@ -16,7 +17,7 @@ pub enum TopicKind {
     Synonym,
 }
 
-#[derive(Display, Serde, Debug, StrEnum)]
+#[derive(Display, Serde, PartialEq, Debug, StrEnum)]
 pub enum TopicType {
     Raw,
     Meta,
@@ -24,6 +25,16 @@ pub enum TopicType {
     Aggregate,
     Time,
     Ratio,
+}
+
+impl TopicType {
+    pub fn is_raw_topic(&self) -> bool {
+        *self == TopicType::Raw
+    }
+
+    pub fn is_aggregation_topic(&self) -> bool {
+        *self == TopicType::Aggregate
+    }
 }
 
 pub type TopicId = String;
@@ -37,6 +48,22 @@ pub struct Topic {
     pub data_source_id: Option<DataSourceId>,
     pub factors: Option<Vec<Factor>>,
     pub description: Option<String>,
+}
+
+impl Topic {
+    pub fn is_raw_topic(&self) -> bool {
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_raw_topic())
+            .unwrap_or(false)
+    }
+
+    pub fn is_aggregation_topic(&self) -> bool {
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_aggregation_topic())
+            .unwrap_or(false)
+    }
 }
 
 /// the instance data id of topic
@@ -60,4 +87,3 @@ pub enum TopicDataValue {
 }
 
 pub type TopicData = HashMap<String, TopicDataValue>;
-

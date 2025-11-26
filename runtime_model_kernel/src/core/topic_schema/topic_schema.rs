@@ -1,6 +1,9 @@
+use crate::core::topic_schema::aid_hierarchy::{HierarchyAid, HierarchyAidIdGenerator};
 use crate::{
-    ArcTopic, TopicSchemaDefaultValueFactorGroup, TopicSchemaDefaultValueFactorGroups,
+    ArcTopic, TopicSchemaDateOrTimeFactorGroup, TopicSchemaDateOrTimeFactorGroups,
+    TopicSchemaDefaultValueFactorGroup, TopicSchemaDefaultValueFactorGroups,
     TopicSchemaEncryptFactorGroup, TopicSchemaEncryptFactorGroups, TopicSchemaFactorGroups,
+    TopicSchemaFlattenFactorGroup, TopicSchemaFlattenFactorGroups,
 };
 use std::sync::Arc;
 use watchmen_model::{Topic, TopicData, TopicKind};
@@ -10,8 +13,8 @@ use watchmen_model::{Topic, TopicData, TopicKind};
 #[derive(Debug)]
 pub struct TopicSchema {
     topic: Arc<ArcTopic>,
-    _flatten_factors: Option<String>, // Option<Arc<Vec<Arc<TopicSchemaFlattenFactor>>>>,
-    _date_or_time_factors: Option<String>, // Option<Arc<Vec<Arc<TopicSchemaDateOrTimeFactorGroup>>>>,
+    flatten_factors: Option<Arc<Vec<Arc<TopicSchemaFlattenFactorGroup>>>>,
+    date_or_time_factors: Option<Arc<Vec<Arc<TopicSchemaDateOrTimeFactorGroup>>>>,
     encrypt_factor_groups: Option<Arc<Vec<Arc<TopicSchemaEncryptFactorGroup>>>>,
     default_value_factor_groups: Option<Arc<Vec<Arc<TopicSchemaDefaultValueFactorGroup>>>>,
 }
@@ -21,8 +24,8 @@ impl TopicSchema {
         let arc_topic = ArcTopic::from(topic);
         TopicSchema {
             topic: arc_topic.clone(),
-            _flatten_factors: None,
-            _date_or_time_factors: None,
+            flatten_factors: TopicSchemaFlattenFactorGroups::create(&arc_topic),
+            date_or_time_factors: TopicSchemaDateOrTimeFactorGroups::create(&arc_topic),
             encrypt_factor_groups: TopicSchemaEncryptFactorGroups::create(&arc_topic),
             default_value_factor_groups: TopicSchemaDefaultValueFactorGroups::create(&arc_topic),
         }
@@ -66,6 +69,72 @@ impl TopicSchema {
                 }
             });
         }
+    }
+
+    /// given data might be changed
+    pub fn decrypt(&self, data: &mut TopicData) {
+        if self.should_encrypt() {
+            self.encrypt_factor_groups.as_deref().map(|groups| {
+                for group in groups.iter() {
+                    group.decrypt(data);
+                }
+            });
+        }
+    }
+
+    /// given data might be changed
+    pub fn try_cast_to_datetime(&self, data: &mut TopicData) {
+        self.date_or_time_factors.as_deref().map(|groups| {
+            for group in groups.iter() {
+                group.try_cast_to_datetime(data);
+            }
+        });
+    }
+
+    /// given data might be changed
+    pub fn flatten(&self, data: &mut TopicData) {
+        if self.topic.is_raw_topic() {
+            return;
+        }
+
+        self.flatten_factors.as_deref().map(|groups| {
+            for group in groups.iter() {
+                group.flatten(data);
+            }
+        });
+    }
+
+    fn should_aid_hierarchy(&self) -> bool {
+        let topic = self.topic();
+        if topic.is_raw_topic() {
+            return false;
+        }
+
+        match topic.name.as_deref() {
+            Some(name) => name.to_string() != "raw_pipeline_monitor_log",
+            _ => true,
+        }
+    }
+
+    fn ask_hierarchy_aid_id_generator(&self) -> Arc<dyn HierarchyAidIdGenerator> {
+        todo!("implement ask_hierarchy_aid_id_generator for TopicSchema")
+    }
+
+    /// given data might be changed
+    pub fn aid_hierarchy(&self, data: &mut TopicData) {
+        if self.should_aid_hierarchy() {
+            HierarchyAid::new(self.ask_hierarchy_aid_id_generator()).aid(data);
+        }
+    }
+
+    /// given data might be changed
+    pub fn prepare_data(&self, data: &mut TopicData) {
+        self.initialize_default_values(data);
+        self.try_cast_to_datetime(data);
+        self.encrypt(data);
+        self.aid_hierarchy(data);
+        // flatten must be the last step
+        self.flatten(data);
     }
 }
 

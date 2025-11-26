@@ -36,4 +36,18 @@ impl ArcTopic {
             version: topic.version,
         })
     }
+
+    pub fn is_raw_topic(&self) -> bool {
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_raw_topic())
+            .unwrap_or(false)
+    }
+
+    pub fn is_aggregation_topic(&self) -> bool {
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_aggregation_topic())
+            .unwrap_or(false)
+    }
 }

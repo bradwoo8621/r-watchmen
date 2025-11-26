@@ -40,21 +40,14 @@ impl ArcFactor {
         self.flatten.unwrap_or_else(|| false)
     }
 
-    pub fn is_date_or_time(&self) -> bool {
-        match &self.r#type {
-            Some(t) => match t.as_ref() {
-                FactorType::Date
-                | FactorType::Time
-                | FactorType::Datetime
-                | FactorType::FullDatetime
-                | FactorType::DateOfBirth => true,
-                _ => false,
-            },
-            _ => false,
-        }
-    }
-
     pub fn has_default_value(&self) -> bool {
         self.default_value.is_some()
+    }
+
+    pub fn is_date_or_time(&self) -> bool {
+        self.r#type
+            .as_ref()
+            .map(|t| t.is_date_or_time())
+            .unwrap_or(false)
     }
 }
