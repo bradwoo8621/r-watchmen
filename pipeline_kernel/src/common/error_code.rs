@@ -8,6 +8,8 @@ pub enum PipelineKernelErrorCode {
     TriggerTypeNotSupportedOnSynonym,
     TriggerDataMissed,
     TriggerTenantIdMissed,
+    TriggerTenantIdIsBlank,
+    TriggerTenantIdMismatchPrincipal,
 }
 
 impl StdErrorCode for PipelineKernelErrorCode {
@@ -20,6 +22,8 @@ impl StdErrorCode for PipelineKernelErrorCode {
             PipelineKernelErrorCode::TriggerTypeNotSupportedOnSynonym => "PLKN-00005",
             PipelineKernelErrorCode::TriggerDataMissed => "PLKN-00006",
             PipelineKernelErrorCode::TriggerTenantIdMissed => "PLKN-00007",
+            PipelineKernelErrorCode::TriggerTenantIdIsBlank => "PLKN-00008",
+            PipelineKernelErrorCode::TriggerTenantIdMismatchPrincipal => "PLKN-00009",
         }
     }
 }

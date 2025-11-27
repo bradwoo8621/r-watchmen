@@ -1,6 +1,7 @@
 use crate::{AuthErrorCode, AuthenticationScheme, Authorization};
 use watchmen_model::{StdErrorCode, StdR, TenantId, User, UserId, UserRole};
 
+#[derive(Clone)]
 pub struct Principal {
     pub tenant_id: TenantId,
     pub user_id: UserId,
@@ -9,6 +10,17 @@ pub struct Principal {
 }
 
 impl Principal {
+    /// switch to given tenant and role
+    /// keep the user
+    pub fn switch_tenant(&self, tenant_id: TenantId, role: UserRole) -> Self {
+        Principal {
+            tenant_id,
+            user_id: self.user_id.clone(),
+            name: self.name.clone(),
+            role,
+        }
+    }
+
     pub fn is_admin(&self) -> bool {
         match self.role {
             UserRole::Admin | UserRole::SuperAdmin => true,

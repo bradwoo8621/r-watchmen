@@ -1,9 +1,21 @@
-use crate::PipelineKernelErrorCode;
+use crate::{PipelineExecutionLogMonitor, PipelineKernelErrorCode, PipelineTrigger};
+use std::sync::Arc;
 use watchmen_auth::Principal;
 use watchmen_model::{
-    PipelineTriggerData, PipelineTriggerTraceId, StdErrorCode, StdR, StringUtils, VoidResultHelper,
-    TopicDataId, VoidR,
+    PipelineTriggerData, PipelineTriggerTraceId, PipelineTriggerType, StdErrorCode, StdR,
+    StringUtils, TopicCode, TopicData, TopicDataId, UserRole, VoidR, VoidResultHelper,
 };
+use watchmen_runtime_model_kernel::{IdGenerator, TopicSchema};
+
+struct CheckedPipelineTriggerData {
+    /// topic name
+    topic_schema: TopicSchema,
+    /// current data
+    trigger_data: TopicData,
+    trigger_type: PipelineTriggerType,
+    principal: Arc<Principal>,
+    trace_id: Arc<PipelineTriggerTraceId>,
+}
 
 pub struct PipelineEntrypoint {
     principal: Principal,
@@ -57,35 +69,102 @@ impl PipelineEntrypoint {
         let opt_tenant_id = &trigger_data.tenant_id;
 
         if principal.is_super_admin() {
-            if opt_tenant_id.is_none() {
+            if let Some(tenant_id) = opt_tenant_id {
+                if tenant_id.is_blank() {
+                    return PipelineKernelErrorCode::TriggerTenantIdIsBlank.msg(
+                        "Pipeline trigger tenant id cannot be blank when triggered by super admin.",
+                    );
+                }
+            } else {
                 return PipelineKernelErrorCode::TriggerTenantIdMissed.msg(
                     "Pipeline trigger tenant id cannot be empty when triggered by super admin.",
                 );
             }
         } else {
+            if let Some(tenant_id) = opt_tenant_id {
+                if tenant_id.is_not_blank() && *tenant_id != principal.tenant_id {
+                    return PipelineKernelErrorCode::TriggerTenantIdMismatchPrincipal
+                        .msg("Pipeline trigger tenant id does not match the principal's.");
+                }
+            }
         }
         Ok(())
     }
 
-    fn check(&self, trigger_data: &PipelineTriggerData) -> VoidR {
+    fn find_topic_schema(&self, _code: TopicCode) -> StdR<TopicSchema> {
+        todo!("implement find_topic_schema for PipelineEntrypoint")
+    }
+
+    fn ask_trace_id_generator(&self) -> StdR<Arc<dyn IdGenerator>> {
+        todo!("implement ask_trace_id_generator for PipelineEntrypoint")
+    }
+
+    fn check_and_prepare(
+        &self,
+        trigger_data: PipelineTriggerData,
+    ) -> StdR<CheckedPipelineTriggerData> {
+        // check given data
         Vec::new()
-            .collect(self.check_trigger_access(trigger_data))
-            .collect(self.check_trigger_code(trigger_data))
-            .collect(self.check_trigger_type(trigger_data))
-            .collect(self.check_trigger_data(trigger_data))
-            .accumulate()
+            .collect(self.check_trigger_access(&trigger_data))
+            .collect(self.check_trigger_code(&trigger_data))
+            .collect(self.check_trigger_type(&trigger_data))
+            .collect(self.check_trigger_data(&trigger_data))
+            .accumulate()?;
+
+        let topic_schema = self.find_topic_schema(trigger_data.code.unwrap())?;
+
+        // prepare execute principal
+        let execute_principal: Principal = if self.principal.is_super_admin() {
+            // switch to given tenant and fake as admin role
+            self.principal
+                .switch_tenant(trigger_data.tenant_id.unwrap(), UserRole::Admin)
+        } else {
+            // use current principal
+            self.principal.clone()
+        };
+
+        // prepare trace id
+        let trace_id = if let Some(trace_id) = &self.trace_id {
+            trace_id.clone()
+        } else {
+            self.ask_trace_id_generator()?.next_id().to_string()
+        };
+
+        Ok(CheckedPipelineTriggerData {
+            topic_schema,
+            trigger_data: trigger_data.data.unwrap(),
+            trigger_type: trigger_data.trigger_type.unwrap(),
+            principal: Arc::new(execute_principal),
+            trace_id: Arc::new(trace_id),
+        })
+    }
+
+    fn create_trigger(&self, trigger_data: CheckedPipelineTriggerData) -> PipelineTrigger {
+        PipelineTrigger {
+            topic_schema: trigger_data.topic_schema,
+            data: trigger_data.trigger_data,
+            r#type: trigger_data.trigger_type,
+            trace_id: trigger_data.trace_id.clone(),
+            principal: trigger_data.principal.clone(),
+            execution_log_monitor: PipelineExecutionLogMonitor {
+                trace_id: trigger_data.trace_id,
+                principal: trigger_data.principal,
+            },
+        }
     }
 
     pub fn execute(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        self.check(&trigger_data)?;
+        let checked_trigger_data = self.check_and_prepare(trigger_data)?;
 
-        todo!("implement execute for PipelineEntrypoint")
+        self.create_trigger(checked_trigger_data).execute()
     }
 
     pub async fn execute_async(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        self.check(&trigger_data)?;
+        let checked_trigger_data = self.check_and_prepare(trigger_data)?;
 
-        todo!("implement execute_async for PipelineEntrypoint")
+        self.create_trigger(checked_trigger_data)
+            .execute_async()
+            .await
     }
 }
 
