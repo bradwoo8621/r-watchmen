@@ -1,3 +1,4 @@
+use crate::IdGenerator;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -14,16 +15,12 @@ pub struct Ancestor {
     aid_id: String,
 }
 
-pub trait HierarchyAidIdGenerator {
-    fn next_id(&self) -> u128;
-}
-
 pub struct HierarchyAid {
-    id_generator: Arc<dyn HierarchyAidIdGenerator>,
+    id_generator: Arc<dyn IdGenerator>,
 }
 
 impl HierarchyAid {
-    pub fn new(id_generator: Arc<dyn HierarchyAidIdGenerator>) -> Self {
+    pub fn new(id_generator: Arc<dyn IdGenerator>) -> Self {
         HierarchyAid { id_generator }
     }
 

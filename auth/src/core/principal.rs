@@ -1,5 +1,5 @@
 use crate::{AuthErrorCode, AuthenticationScheme, Authorization};
-use watchmen_model::{StdErr, StdErrorCode, TenantId, User, UserId, UserRole};
+use watchmen_model::{StdErr, StdErrorCode, StdR, TenantId, User, UserId, UserRole};
 
 pub struct Principal {
     pub tenant_id: TenantId,
@@ -30,7 +30,7 @@ impl Principal {
         }
     }
 
-    pub fn from_user(user: User) -> Result<Principal, StdErr> {
+    pub fn from_user(user: User) -> StdR<Principal> {
         if user.tenant_id.is_none() {
             return StdErr::of(
                 AuthErrorCode::TenantIdMissedInUser.code(),
@@ -99,7 +99,7 @@ impl Principal {
         authorization: &Authorization,
         scheme: AuthenticationScheme,
         token: String,
-    ) -> Result<Self, StdErr> {
+    ) -> StdR<Self> {
         let user = authorization.authorize_token(scheme, token)?;
         Principal::from_user(user)
     }

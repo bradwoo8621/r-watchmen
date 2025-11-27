@@ -28,6 +28,9 @@ pub enum StdErrDetails {
     Sub(Vec<StdErr>),
 }
 
+/// In theory, errors support an infinite number of levels.
+/// However, in normal use, you should try to keep it to two levels.
+///
 /// Convert other types of exceptions to this exception to enable the use of the `?` syntactic sugar.
 #[derive(Serialize)]
 pub struct StdErr {
@@ -74,3 +77,6 @@ impl StdErr {
         })
     }
 }
+
+pub type StdR<T> = Result<T, StdErr>;
+pub type VoidR = StdR<()>;

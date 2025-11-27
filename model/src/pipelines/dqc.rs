@@ -1,11 +1,6 @@
-use crate::{
-    CaseThenParameter, CaseThenParameterRoute, ConstantParameter, DayOfMonthParameter,
-    EqualsExpression, FactorId, InsertOrMergeRowAction, MappingFactor, MonthOfParameter, Parameter,
-    ParameterJoint, ParameterKind, Pipeline, PipelineStage, PipelineTriggerType, PipelineUnit,
-    StdErr, Topic, TopicFactorParameter, TopicId, YearOfParameter,
-};
+use crate::{CaseThenParameter, CaseThenParameterRoute, ConstantParameter, DayOfMonthParameter, EqualsExpression, FactorId, InsertOrMergeRowAction, MappingFactor, MonthOfParameter, Parameter, ParameterJoint, ParameterKind, Pipeline, PipelineStage, PipelineTriggerType, PipelineUnit, StdErr, StdR, Topic, TopicFactorParameter, TopicId, YearOfParameter};
 
-fn find_topic<'a>(topics: &'a Vec<Topic>, topic_name: &'static str) -> Result<&'a Topic, StdErr> {
+fn find_topic<'a>(topics: &'a Vec<Topic>, topic_name: &'static str) -> StdR<&'a Topic> {
     let found = topics.into_iter().find(|topic| {
         if let Some(name) = &topic.name {
             name == topic_name
@@ -20,7 +15,7 @@ fn find_topic<'a>(topics: &'a Vec<Topic>, topic_name: &'static str) -> Result<&'
     }
 }
 
-fn find_topic_id(topic: &Topic) -> Result<&TopicId, StdErr> {
+fn find_topic_id(topic: &Topic) -> StdR<&TopicId> {
     if let Some(topic_id) = &topic.topic_id {
         Ok(topic_id)
     } else {
@@ -28,7 +23,7 @@ fn find_topic_id(topic: &Topic) -> Result<&TopicId, StdErr> {
     }
 }
 
-fn find_factor_id<'a>(topic: &'a Topic, factor_name: &'static str) -> Result<&'a FactorId, StdErr> {
+fn find_factor_id<'a>(topic: &'a Topic, factor_name: &'static str) -> StdR<&'a FactorId> {
     let found = if let Some(factors) = &topic.factors {
         factors.into_iter().find(|factor| {
             if let Some(name) = &factor.name {
@@ -79,7 +74,7 @@ fn day_of_month(topic_id: &TopicId, factor_id: &FactorId) -> Parameter {
         .to_parameter()
 }
 
-fn create_dqc_pipeline(topics: &Vec<Topic>) -> Result<Pipeline, StdErr> {
+fn create_dqc_pipeline(topics: &Vec<Topic>) -> StdR<Pipeline> {
     let topic_raw = find_topic(topics, "dqc_raw_rule_result")?;
     let src_tid = find_topic_id(topic_raw)?;
     let src_fid_rule_code = find_factor_id(topic_raw, "ruleCode")?;
@@ -191,7 +186,7 @@ fn create_dqc_pipeline(topics: &Vec<Topic>) -> Result<Pipeline, StdErr> {
         .stages(vec![stage]))
 }
 
-pub fn ask_dqc_pipelines(topics: &Vec<Topic>) -> Result<Vec<Pipeline>, StdErr> {
+pub fn ask_dqc_pipelines(topics: &Vec<Topic>) -> StdR<Vec<Pipeline>> {
     // define all dqc pipelines
 
     let mut pipelines = Vec::<Pipeline>::new();

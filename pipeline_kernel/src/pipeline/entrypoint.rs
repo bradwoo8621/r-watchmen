@@ -1,8 +1,6 @@
 use crate::PipelineKernelErrorCode;
 use watchmen_auth::Principal;
-use watchmen_model::{
-    PipelineTriggerData, PipelineTriggerTraceId, StdErr, StdErrorCode, StringUtils, TopicDataId,
-};
+use watchmen_model::{PipelineTriggerData, PipelineTriggerTraceId, StdErr, StdErrorCode, StdR, StringUtils, TopicDataId, VoidR};
 
 pub struct PipelineEntrypoint {
     principal: Principal,
@@ -22,7 +20,7 @@ impl PipelineEntrypoint {
         self
     }
 
-    fn check_trigger_code(trigger_data: &PipelineTriggerData) -> Result<(), StdErr> {
+    fn check_trigger_code(trigger_data: &PipelineTriggerData) -> VoidR {
         if let Some(code) = &trigger_data.code {
             if code.is_blank() {
                 StdErr::of(
@@ -40,7 +38,7 @@ impl PipelineEntrypoint {
         }
     }
 
-    fn check_trigger_type(trigger_data: &PipelineTriggerData) -> Result<(), StdErr> {
+    fn check_trigger_type(trigger_data: &PipelineTriggerData) -> VoidR {
         if trigger_data.trigger_type.is_none() {
             StdErr::of(
                 PipelineKernelErrorCode::TriggerTypeMissed.code(),
@@ -51,7 +49,7 @@ impl PipelineEntrypoint {
         }
     }
 
-    fn check_trigger_data(trigger_data: &PipelineTriggerData) -> Result<(), StdErr> {
+    fn check_trigger_data(trigger_data: &PipelineTriggerData) -> VoidR {
         if trigger_data.data.is_none() {
             StdErr::of(
                 PipelineKernelErrorCode::TriggerDataMissed.code(),
@@ -62,7 +60,7 @@ impl PipelineEntrypoint {
         }
     }
 
-    fn check(trigger_data: &PipelineTriggerData) -> Result<(), StdErr> {
+    fn check(trigger_data: &PipelineTriggerData) -> VoidR {
         let mut errors = Vec::new();
         vec![
             PipelineEntrypoint::check_trigger_code,
@@ -83,7 +81,7 @@ impl PipelineEntrypoint {
         }
     }
 
-    pub fn execute(&self, trigger_data: PipelineTriggerData) -> Result<TopicDataId, StdErr> {
+    pub fn execute(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
         PipelineEntrypoint::check(&trigger_data)?;
 
         todo!("implement execute for PipelineEntrypoint")
@@ -92,7 +90,7 @@ impl PipelineEntrypoint {
     pub async fn execute_async(
         &self,
         trigger_data: PipelineTriggerData,
-    ) -> Result<TopicDataId, StdErr> {
+    ) -> StdR<TopicDataId> {
         PipelineEntrypoint::check(&trigger_data)?;
 
         todo!("implement execute_async for PipelineEntrypoint")

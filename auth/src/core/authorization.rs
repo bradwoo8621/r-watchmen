@@ -1,5 +1,5 @@
 use crate::{AuthErrorCode, AuthenticationManager, AuthenticationScheme};
-use watchmen_model::{StdErr, StdErrorCode, User, UserRole};
+use watchmen_model::{StdErr, StdErrorCode, StdR, User, UserRole};
 
 pub struct Authorization {
     // TODO where to get the authenticator?
@@ -17,7 +17,7 @@ impl Authorization {
     }
 
     /// check the user role against allowed roles
-    pub fn authorize(&self, user: Option<User>) -> Result<User, StdErr> {
+    pub fn authorize(&self, user: Option<User>) -> StdR<User> {
         match user {
             Some(u) => {
                 if let Some(role) = &u.role {
@@ -41,7 +41,7 @@ impl Authorization {
         &self,
         scheme: AuthenticationScheme,
         token: String,
-    ) -> Result<User, StdErr> {
+    ) -> StdR<User> {
         if let Ok(user) = self.authenticator.authenticate(scheme, token) {
             self.authorize(Some(user))
         } else {

@@ -1,12 +1,12 @@
 use crate::{
-    ArcTopic, HierarchyAid, HierarchyAidIdGenerator, TopicSchemaDateOrTimeFactorGroup,
+    ArcTopic, HierarchyAid, IdGenerator, TopicSchemaDateOrTimeFactorGroup,
     TopicSchemaDateOrTimeFactorGroups, TopicSchemaDefaultValueFactorGroup,
     TopicSchemaDefaultValueFactorGroups, TopicSchemaEncryptFactorGroup,
     TopicSchemaEncryptFactorGroups, TopicSchemaFactorGroups, TopicSchemaFlattenFactorGroup,
     TopicSchemaFlattenFactorGroups,
 };
 use std::sync::Arc;
-use watchmen_model::{Topic, TopicData, TopicKind};
+use watchmen_model::{StdR, Topic, TopicData, TopicKind, VoidR};
 
 /// The schema of a topic, including various factor groups.
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
@@ -116,25 +116,27 @@ impl TopicSchema {
         }
     }
 
-    fn ask_hierarchy_aid_id_generator(&self) -> Arc<dyn HierarchyAidIdGenerator> {
+    fn ask_hierarchy_aid_id_generator(&self) -> StdR<Arc<dyn IdGenerator>> {
         todo!("implement ask_hierarchy_aid_id_generator for TopicSchema")
     }
 
     /// given data might be changed
-    pub fn aid_hierarchy(&self, data: &mut TopicData) {
+    pub fn aid_hierarchy(&self, data: &mut TopicData) -> VoidR {
         if self.should_aid_hierarchy() {
-            HierarchyAid::new(self.ask_hierarchy_aid_id_generator()).aid(data);
+            HierarchyAid::new(self.ask_hierarchy_aid_id_generator()?).aid(data);
         }
+        Ok(())
     }
 
     /// given data might be changed
-    pub fn prepare_data(&self, data: &mut TopicData) {
+    pub fn prepare_data(&self, data: &mut TopicData) -> VoidR {
         self.initialize_default_values(data);
         self.try_cast_to_datetime(data);
         self.encrypt(data);
-        self.aid_hierarchy(data);
+        self.aid_hierarchy(data)?;
         // flatten must be the last step
         self.flatten(data);
+        Ok(())
     }
 }
 

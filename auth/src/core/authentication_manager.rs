@@ -1,5 +1,5 @@
 use crate::{AuthErrorCode, AuthenticationDetails, AuthenticationProvider, AuthenticationScheme};
-use watchmen_model::{StdErr, StdErrorCode, User};
+use watchmen_model::{StdErr, StdErrorCode, StdR, User};
 
 pub struct AuthenticationManager {
     providers: Vec<Box<dyn AuthenticationProvider>>,
@@ -24,7 +24,7 @@ impl AuthenticationManager {
         return self;
     }
 
-    pub fn authenticate_details(&self, details: &AuthenticationDetails) -> Result<User, StdErr> {
+    pub fn authenticate_details(&self, details: &AuthenticationDetails) -> StdR<User> {
         for provider in &self.providers {
             if provider.accept(details) {
                 if let Some(user) = provider.authenticate(details) {
@@ -42,7 +42,7 @@ impl AuthenticationManager {
         &self,
         scheme: AuthenticationScheme,
         token: String,
-    ) -> Result<User, StdErr> {
+    ) -> StdR<User> {
         self.authenticate_details(&AuthenticationDetails::new(scheme, token))
     }
 }
