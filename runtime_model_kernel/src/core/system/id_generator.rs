@@ -7,7 +7,7 @@ pub trait IdGenerator: Send + Sync {
     fn next_id(&self) -> u128;
 }
 
-pub struct DummyIdGenerator();
+struct DummyIdGenerator();
 
 impl IdGenerator for DummyIdGenerator {
     fn next_id(&self) -> u128 {
@@ -17,6 +17,9 @@ impl IdGenerator for DummyIdGenerator {
 
 static GLOBAL_ID_GENERATOR: OnceLock<Arc<RwLock<Box<dyn IdGenerator>>>> = OnceLock::new();
 
+/// the default id generator is [DummyIdGenerator], which is panic!
+/// must [set] a new id generator to replace the default one before [get],
+/// to make sure no panic!
 pub struct IdGen();
 
 impl IdGen {
