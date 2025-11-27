@@ -1,6 +1,9 @@
 use crate::PipelineKernelErrorCode;
 use watchmen_auth::Principal;
-use watchmen_model::{PipelineTriggerData, PipelineTriggerTraceId, StdErr, StdErrorCode, StdR, StringUtils, TopicDataId, VoidR};
+use watchmen_model::{
+    PipelineTriggerData, PipelineTriggerTraceId, StdErr, StdErrorCode, StdR, StringUtils,
+    TopicDataId, VoidR,
+};
 
 pub struct PipelineEntrypoint {
     principal: Principal,
@@ -87,10 +90,7 @@ impl PipelineEntrypoint {
         todo!("implement execute for PipelineEntrypoint")
     }
 
-    pub async fn execute_async(
-        &self,
-        trigger_data: PipelineTriggerData,
-    ) -> StdR<TopicDataId> {
+    pub async fn execute_async(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
         PipelineEntrypoint::check(&trigger_data)?;
 
         todo!("implement execute_async for PipelineEntrypoint")

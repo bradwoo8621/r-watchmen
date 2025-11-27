@@ -1,7 +1,7 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    Auditable, BaseDataModel, ConvergenceId, ObjectiveId, OptimisticLock, SpaceId, Storable,
-    TenantBasedTuple, TenantId, Tuple, UserId,
+	Auditable, BaseDataModel, ConvergenceId, ObjectiveId, OptimisticLock, SpaceId, Storable,
+	TenantBasedTuple, TenantId, Tuple, UserId,
 };
 use watchmen_model_marco::adapt_model;
 

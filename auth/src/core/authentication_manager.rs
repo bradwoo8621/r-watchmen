@@ -38,11 +38,7 @@ impl AuthenticationManager {
         )
     }
 
-    pub fn authenticate(
-        &self,
-        scheme: AuthenticationScheme,
-        token: String,
-    ) -> StdR<User> {
+    pub fn authenticate(&self, scheme: AuthenticationScheme, token: String) -> StdR<User> {
         self.authenticate_details(&AuthenticationDetails::new(scheme, token))
     }
 }

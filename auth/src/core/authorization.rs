@@ -37,11 +37,7 @@ impl Authorization {
         }
     }
 
-    pub fn authorize_token(
-        &self,
-        scheme: AuthenticationScheme,
-        token: String,
-    ) -> StdR<User> {
+    pub fn authorize_token(&self, scheme: AuthenticationScheme, token: String) -> StdR<User> {
         if let Ok(user) = self.authenticator.authenticate(scheme, token) {
             self.authorize(Some(user))
         } else {

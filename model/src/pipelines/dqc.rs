@@ -1,4 +1,9 @@
-use crate::{CaseThenParameter, CaseThenParameterRoute, ConstantParameter, DayOfMonthParameter, EqualsExpression, FactorId, InsertOrMergeRowAction, MappingFactor, MonthOfParameter, Parameter, ParameterJoint, ParameterKind, Pipeline, PipelineStage, PipelineTriggerType, PipelineUnit, StdErr, StdR, Topic, TopicFactorParameter, TopicId, YearOfParameter};
+use crate::{
+    CaseThenParameter, CaseThenParameterRoute, ConstantParameter, DayOfMonthParameter,
+    EqualsExpression, FactorId, InsertOrMergeRowAction, MappingFactor, MonthOfParameter, Parameter,
+    ParameterJoint, ParameterKind, Pipeline, PipelineStage, PipelineTriggerType, PipelineUnit,
+    StdErr, StdR, Topic, TopicFactorParameter, TopicId, YearOfParameter,
+};
 
 fn find_topic<'a>(topics: &'a Vec<Topic>, topic_name: &'static str) -> StdR<&'a Topic> {
     let found = topics.into_iter().find(|topic| {
