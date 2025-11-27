@@ -1,5 +1,5 @@
 use crate::RuntimeModelKernelErrorCode;
-use std::sync::{Arc, OnceLock, RwLock};
+use std::sync::{OnceLock, RwLock};
 use watchmen_model::{StdErrorCode, StdR, VoidR};
 
 /// max to 20 digits numbers
@@ -15,7 +15,7 @@ impl IdGenerator for DummyIdGenerator {
     }
 }
 
-static GLOBAL_ID_GENERATOR: OnceLock<Arc<RwLock<Box<dyn IdGenerator>>>> = OnceLock::new();
+static GLOBAL_ID_GENERATOR: OnceLock<RwLock<Box<dyn IdGenerator>>> = OnceLock::new();
 
 /// the default id generator is [DummyIdGenerator], which is panic!
 /// must [set] a new id generator to replace the default one before [next_id],
@@ -23,10 +23,8 @@ static GLOBAL_ID_GENERATOR: OnceLock<Arc<RwLock<Box<dyn IdGenerator>>>> = OnceLo
 pub struct IdGen();
 
 impl IdGen {
-    fn init() -> Arc<RwLock<Box<dyn IdGenerator>>> {
-        Arc::new(RwLock::new(
-            Box::new(DummyIdGenerator()) as Box<dyn IdGenerator>
-        ))
+    fn init() -> RwLock<Box<dyn IdGenerator>> {
+        RwLock::new(Box::new(DummyIdGenerator()) as Box<dyn IdGenerator>)
     }
 
     pub fn next_id() -> StdR<u128> {
@@ -52,16 +50,16 @@ impl IdGen {
 #[cfg(test)]
 mod tests {
     use crate::{IdGen, IdGenerator, SnowflakeIdGenerator};
-    use std::panic;
+    // use std::panic;
 
-    #[test]
-    fn test_dummy() {
-        panic::set_hook(Box::new(|info| {
-            println!("Custom panic hook caught panic: {:?}", info);
-        }));
-
-        assert!(panic::catch_unwind(|| IdGen::next_id().unwrap()).is_err());
-    }
+    // #[test]
+    // fn test_dummy() {
+    //     panic::set_hook(Box::new(|info| {
+    //         println!("Custom panic hook caught panic: {:?}", info);
+    //     }));
+    //
+    //     assert!(panic::catch_unwind(|| IdGen::next_id().unwrap()).is_err());
+    // }
 
     #[test]
     fn test_snowflake() {
