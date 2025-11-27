@@ -17,6 +17,16 @@ struct CheckedPipelineTriggerData {
     trace_id: PipelineTriggerTraceId,
 }
 
+/// This is the main entry point for executing pipelines.
+/// At this point, the specific pipelines to be executed are not yet known.
+/// Need to provide:
+/// - The topic name (code),
+/// - The corresponding topic data for above topic,
+/// - The type of trigger to be executed,
+/// - The principal information of the executor,
+/// - The trace id is used as the basis for linking all processes in a single pipelines execution.
+///   If this execution is caused by the execution of another pipeline,
+///   then the trace id needs to be provided; otherwise, it is not required.
 pub struct PipelineEntrypoint {
     principal: Principal,
     trace_id: Option<PipelineTriggerTraceId>,
