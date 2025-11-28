@@ -10,7 +10,7 @@ pub struct TopicSchemaFactorInner {
 
 impl TopicSchemaFactorInner {
     pub fn new(factor: Arc<ArcFactor>) -> Self {
-        let factor_name = factor.name.clone().unwrap_or(Arc::new(String::from("")));
+        let factor_name = factor.name.clone();
         let names = Arc::new(factor_name.split('.').map(String::from).collect());
 
         TopicSchemaFactorInner {

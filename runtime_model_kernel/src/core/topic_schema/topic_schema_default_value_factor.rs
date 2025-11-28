@@ -4,9 +4,7 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{
-    BooleanUtils, FactorType, FactorTypeCategory, NumericUtils, TopicData, TopicDataValue,
-};
+use watchmen_model::{BooleanUtils, FactorTypeCategory, NumericUtils, TopicData, TopicDataValue};
 
 #[derive(Debug)]
 pub struct TopicSchemaDefaultValueFactor {
@@ -34,9 +32,8 @@ impl TopicSchemaDefaultValueFactor {
         }
 
         let defined_default_value = defined_default_value.as_ref().unwrap();
-        let factor_type = &factor.r#type.clone().unwrap_or(Arc::new(FactorType::Text));
 
-        let computed_default_value = match factor_type.category() {
+        let computed_default_value = match factor.r#type.category() {
             FactorTypeCategory::Text
             | FactorTypeCategory::TextLike
             | FactorTypeCategory::EnumText => {

@@ -14,17 +14,13 @@ pub trait TopicSchemaFactorGroups<F, G> {
         F: TopicSchemaFactor,
     {
         let factors = &topic.factors;
-        if factors.is_none() {
-            return None;
-        }
 
-        let factors = factors.as_ref().unwrap();
+        let factors = factors.as_ref();
         if factors.is_empty() {
             return None;
         }
 
         let groups = factors
-            .as_ref()
             .into_iter()
             // check the given factor is accepted or not
             .filter(|factor| Self::accept_factor(factor))

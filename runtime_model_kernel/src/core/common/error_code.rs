@@ -7,7 +7,10 @@ pub enum RuntimeModelKernelErrorCode {
     TopicNameMissed,
     TopicTypeMissed,
     TopicKindMissed,
-    TopicTenantMissed
+    TopicTenantMissed,
+    TopicFactorsMissed,
+    FactorNameMissed,
+    FactorTypeMissed,
 }
 
 impl StdErrorCode for RuntimeModelKernelErrorCode {
@@ -20,6 +23,9 @@ impl StdErrorCode for RuntimeModelKernelErrorCode {
             RuntimeModelKernelErrorCode::TopicTypeMissed => "RTMK-00005",
             RuntimeModelKernelErrorCode::TopicKindMissed => "RTMK-00006",
             RuntimeModelKernelErrorCode::TopicTenantMissed => "RTMK-00007",
+            RuntimeModelKernelErrorCode::TopicFactorsMissed => "RTMK-00008",
+            RuntimeModelKernelErrorCode::FactorNameMissed => "RTMK-00009",
+            RuntimeModelKernelErrorCode::FactorTypeMissed => "RTMK-00010",
         }
     }
 }

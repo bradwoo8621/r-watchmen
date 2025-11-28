@@ -16,7 +16,7 @@ pub struct ArcTopic {
     pub r#type: Arc<TopicType>,
     pub kind: Arc<TopicKind>,
     pub data_source_id: Option<Arc<DataSourceId>>,
-    pub factors: Option<Arc<Vec<Arc<ArcFactor>>>>,
+    pub factors: Arc<Vec<Arc<ArcFactor>>>,
     pub tenant_id: Arc<TenantId>,
     pub version: Option<u32>,
 }
@@ -42,6 +42,22 @@ impl ArcTopic {
             return RuntimeModelKernelErrorCode::TopicKindMissed
                 .msg(format!("Topic[{}] has no kind.", name));
         }
+        if topic.factors.is_none() {
+            return RuntimeModelKernelErrorCode::TopicFactorsMissed
+                .msg(format!("Topic[{}] has no factor.", name));
+        }
+
+        let factors = topic.factors.unwrap();
+        if factors.len() == 0 {
+            return RuntimeModelKernelErrorCode::TopicFactorsMissed
+                .msg(format!("Topic[{}] has no factor.", name));
+        }
+
+        let mut arc_factors = vec![];
+        for factor in factors {
+            arc_factors.push(ArcFactor::from(factor)?);
+        }
+        let arc_factors = Arc::new(arc_factors);
 
         Ok(Arc::new(ArcTopic {
             topic_id: topic.topic_id.map(Arc::new),
@@ -49,9 +65,7 @@ impl ArcTopic {
             r#type: Arc::new(topic.r#type.unwrap()),
             kind: Arc::new(topic.kind.unwrap()),
             data_source_id: topic.data_source_id.map(Arc::new),
-            factors: topic
-                .factors
-                .map(|factors| Arc::new(factors.into_iter().map(ArcFactor::from).collect())),
+            factors: arc_factors,
             tenant_id,
             version: topic.version,
         }))
