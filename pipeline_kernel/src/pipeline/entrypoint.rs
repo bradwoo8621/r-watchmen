@@ -147,12 +147,12 @@ impl PipelineEntrypoint {
     }
 
     pub fn execute(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        let (mut pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
+        let (pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
         pipeline_trigger.execute(topic_data)
     }
 
     pub async fn execute_async(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        let (mut pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
+        let (pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
         pipeline_trigger.execute_async(topic_data).await
     }
 }

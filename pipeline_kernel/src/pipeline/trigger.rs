@@ -25,7 +25,7 @@ impl PipelineTrigger {
         TopicDataService::with(&self.principal.tenant_id)
     }
 
-    fn save_trigger_data(&mut self, mut data: TopicData) -> StdR<Arc<TopicTrigger>> {
+    fn save_trigger_data(&self, mut data: TopicData) -> StdR<Arc<TopicTrigger>> {
         let topic_kind = &self.topic_schema.topic().kind;
         match topic_kind {
             Some(kind) => match kind.deref() {
@@ -80,12 +80,12 @@ impl PipelineTrigger {
         }
     }
 
-    pub fn execute(&mut self, data: TopicData) -> StdR<TopicDataId> {
+    pub fn execute(&self, data: TopicData) -> StdR<TopicDataId> {
         let topic_trigger = self.save_trigger_data(data)?;
         Ok(topic_trigger.data_id())
     }
 
-    pub async fn execute_async(&mut self, data: TopicData) -> StdR<TopicDataId> {
+    pub async fn execute_async(&self, data: TopicData) -> StdR<TopicDataId> {
         let topic_trigger = self.save_trigger_data(data)?;
         Ok(topic_trigger.data_id())
     }
