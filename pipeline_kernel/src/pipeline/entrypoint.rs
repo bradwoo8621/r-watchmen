@@ -2,20 +2,10 @@ use crate::{PipelineExecutionLogMonitor, PipelineKernelErrorCode, PipelineTrigge
 use std::sync::Arc;
 use watchmen_auth::Principal;
 use watchmen_model::{
-    PipelineTriggerData, PipelineTriggerTraceId, PipelineTriggerType, StdErrorCode, StdR,
+    PipelineTriggerData, PipelineTriggerTraceId, StdErrorCode, StdR,
     StringUtils, TopicCode, TopicData, TopicDataId, UserRole, VoidR, VoidResultHelper,
 };
 use watchmen_runtime_model_kernel::{IdGen, TopicMetaService, TopicSchema};
-
-struct CheckedPipelineTriggerData {
-    /// topic name
-    topic_schema: TopicSchema,
-    /// current data
-    trigger_data: TopicData,
-    trigger_type: PipelineTriggerType,
-    principal: Principal,
-    trace_id: PipelineTriggerTraceId,
-}
 
 /// This is the main entry point for executing pipelines.
 /// At this point, the specific pipelines to be executed are not yet known.
@@ -101,14 +91,18 @@ impl PipelineEntrypoint {
         Ok(())
     }
 
-    fn find_topic_schema(&self, _code: TopicCode) -> StdR<TopicSchema> {
-        TopicMetaService::with(self.principal.tenant_id.clone()).find_topic_schema()
+    fn find_topic_meta_service(&self) -> StdR<Arc<TopicMetaService>> {
+        TopicMetaService::with(&self.principal.tenant_id)
+    }
+
+    fn find_topic_schema(&self, _code: TopicCode) -> StdR<Arc<TopicSchema>> {
+        self.find_topic_meta_service()?.find_topic_schema()
     }
 
     fn check_and_prepare(
         &self,
         trigger_data: PipelineTriggerData,
-    ) -> StdR<CheckedPipelineTriggerData> {
+    ) -> StdR<(PipelineTrigger, TopicData)> {
         // check given data
         Vec::new()
             .collect(self.check_trigger_access(&trigger_data))
@@ -136,44 +130,30 @@ impl PipelineEntrypoint {
             IdGen::next_id()?.to_string()
         };
 
-        Ok(CheckedPipelineTriggerData {
+        let principal = Arc::new(execute_principal);
+        let trace_id = Arc::new(trace_id);
+        let pipeline_trigger = PipelineTrigger {
             topic_schema,
-            trigger_data: trigger_data.data.unwrap(),
-            trigger_type: trigger_data.trigger_type.unwrap(),
-            principal: execute_principal,
-            trace_id,
-        })
-    }
-
-    fn create_trigger(&self, trigger_data: CheckedPipelineTriggerData) -> PipelineTrigger {
-        let principal = Arc::new(trigger_data.principal);
-        let trace_id = Arc::new(trigger_data.trace_id);
-
-        PipelineTrigger {
-            topic_schema: trigger_data.topic_schema,
-            data: trigger_data.trigger_data,
-            r#type: trigger_data.trigger_type,
+            r#type: trigger_data.trigger_type.unwrap(),
             trace_id: trace_id.clone(),
             principal: principal.clone(),
             execution_log_monitor: PipelineExecutionLogMonitor {
                 trace_id,
                 principal,
             },
-        }
+        };
+        let topic_data = trigger_data.data.unwrap();
+        Ok((pipeline_trigger, topic_data))
     }
 
     pub fn execute(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        let checked_trigger_data = self.check_and_prepare(trigger_data)?;
-
-        self.create_trigger(checked_trigger_data).execute()
+        let (mut pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
+        pipeline_trigger.execute(topic_data)
     }
 
     pub async fn execute_async(&self, trigger_data: PipelineTriggerData) -> StdR<TopicDataId> {
-        let checked_trigger_data = self.check_and_prepare(trigger_data)?;
-
-        self.create_trigger(checked_trigger_data)
-            .execute_async()
-            .await
+        let (mut pipeline_trigger, topic_data) = self.check_and_prepare(trigger_data)?;
+        pipeline_trigger.execute_async(topic_data).await
     }
 }
 

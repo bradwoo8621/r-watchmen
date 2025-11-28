@@ -5,7 +5,7 @@ use crate::{
     TopicSchemaFlattenFactorGroup, TopicSchemaFlattenFactorGroups,
 };
 use std::sync::Arc;
-use watchmen_model::{Topic, TopicData, TopicKind, VoidR};
+use watchmen_model::{Topic, TopicCode, TopicData, TopicKind, VoidR};
 
 /// The schema of a topic, including various factor groups.
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
@@ -34,6 +34,13 @@ impl TopicSchema {
         &self.topic
     }
 
+    pub fn topic_name(&self) -> Arc<TopicCode> {
+        self.topic
+            .name
+            .clone()
+            .unwrap_or(Arc::new(String::from("")))
+    }
+
     fn should_init_default_values(&self) -> bool {
         match self.topic().name.as_deref() {
             Some(name) => name.to_string() != "raw_pipeline_monitor_log",
@@ -42,7 +49,7 @@ impl TopicSchema {
     }
 
     /// given data might be changed
-    pub fn initialize_default_values(&self, data: &mut TopicData) {
+    fn initialize_default_values(&self, data: &mut TopicData) {
         if self.should_init_default_values() {
             self.default_value_factor_groups.as_deref().map(|groups| {
                 for group in groups.iter() {
@@ -60,7 +67,7 @@ impl TopicSchema {
     }
 
     /// given data might be changed
-    pub fn encrypt(&self, data: &mut TopicData) {
+    fn encrypt(&self, data: &mut TopicData) {
         if self.should_encrypt() {
             self.encrypt_factor_groups.as_deref().map(|groups| {
                 for group in groups.iter() {
@@ -82,7 +89,7 @@ impl TopicSchema {
     }
 
     /// given data might be changed
-    pub fn try_cast_to_datetime(&self, data: &mut TopicData) {
+    fn try_cast_to_datetime(&self, data: &mut TopicData) {
         self.date_or_time_factors.as_deref().map(|groups| {
             for group in groups.iter() {
                 group.try_cast_to_datetime(data);
@@ -91,7 +98,7 @@ impl TopicSchema {
     }
 
     /// given data might be changed
-    pub fn flatten(&self, data: &mut TopicData) {
+    fn flatten(&self, data: &mut TopicData) {
         if self.topic.is_raw_topic() {
             return;
         }
@@ -116,7 +123,7 @@ impl TopicSchema {
     }
 
     /// given data might be changed
-    pub fn aid_hierarchy(&self, data: &mut TopicData) -> VoidR {
+    fn aid_hierarchy(&self, data: &mut TopicData) -> VoidR {
         if self.should_aid_hierarchy() {
             HierarchyAid::new().aid(data)?;
         }

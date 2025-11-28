@@ -1,4 +1,5 @@
 use crate::TopicSchema;
+use std::sync::Arc;
 use watchmen_model::{StdR, TenantId, Topic};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
@@ -9,15 +10,18 @@ pub struct TopicMetaService {
 }
 
 impl TopicMetaService {
-    pub fn with(tenant_id: TenantId) -> Self {
-        TopicMetaService { tenant_id }
+    pub fn with(tenant_id: &TenantId) -> StdR<Arc<Self>> {
+        // TODO maybe find from cache
+        Ok(Arc::new(TopicMetaService {
+            tenant_id: tenant_id.clone(),
+        }))
     }
 
     pub fn find_topic(&self) -> StdR<Topic> {
         todo!("implement find_topic for TopicMetaService")
     }
 
-    pub fn find_topic_schema(&self) -> StdR<TopicSchema> {
-        Ok(TopicSchema::new(self.find_topic()?))
+    pub fn find_topic_schema(&self) -> StdR<Arc<TopicSchema>> {
+        Ok(Arc::new(TopicSchema::new(self.find_topic()?)))
     }
 }

@@ -10,6 +10,8 @@ pub enum PipelineKernelErrorCode {
     TriggerTenantIdMissed,
     TriggerTenantIdIsBlank,
     TriggerTenantIdMismatchPrincipal,
+    TopicDataIdNotFound,
+    TopicDataIdTypeNotSupported,
 }
 
 impl StdErrorCode for PipelineKernelErrorCode {
@@ -24,6 +26,8 @@ impl StdErrorCode for PipelineKernelErrorCode {
             PipelineKernelErrorCode::TriggerTenantIdMissed => "PLKN-00007",
             PipelineKernelErrorCode::TriggerTenantIdIsBlank => "PLKN-00008",
             PipelineKernelErrorCode::TriggerTenantIdMismatchPrincipal => "PLKN-00009",
+            PipelineKernelErrorCode::TopicDataIdNotFound => "PLKN-000010",
+            PipelineKernelErrorCode::TopicDataIdTypeNotSupported => "PLKN-000011",
         }
     }
 }
