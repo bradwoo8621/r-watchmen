@@ -1,4 +1,4 @@
-use crate::{ArcFactor, RuntimeModelKernelErrorCode};
+use crate::{ArcFactor, ArcHelper, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
 use watchmen_model::{
     DataSourceId, StdErrorCode, StdR, TenantId, Topic, TopicCode, TopicId, TopicKind, TopicType,
@@ -21,32 +21,38 @@ pub struct ArcTopic {
     pub version: Option<u32>,
 }
 
+impl ArcHelper for ArcTopic {}
+
 impl ArcTopic {
     pub fn new(topic: Topic) -> StdR<Arc<Self>> {
-        if topic.topic_id.is_none() {
-            return RuntimeModelKernelErrorCode::TopicIdMissed.msg("Topic must have an id.");
-        }
+        let topic_id = Self::topic_id(topic.topic_id, || "Topic")?;
 
-        if topic.name.is_none() {
-            return RuntimeModelKernelErrorCode::TopicNameMissed.msg("Topic must have a name.");
-        }
-        let name = Arc::new(topic.name.unwrap());
-
+        let name = Self::not_blank(
+            topic.name,
+            || {
+                RuntimeModelKernelErrorCode::TopicNameMissed
+                    .msg(format!("Topic[{}] must have a name.", topic_id))
+            },
+            || {
+                RuntimeModelKernelErrorCode::TopicNameIsBlank
+                    .msg(format!("Topic[{}]'s name cannot be blank.", topic_id))
+            },
+        )?;
+        // TODO
         if topic.tenant_id.is_none() {
-            return RuntimeModelKernelErrorCode::TopicNameMissed
+            return RuntimeModelKernelErrorCode::TopicTenantMissed
                 .msg(format!("Topic[{}] has not tenant.", name));
         }
         let tenant_id = Arc::new(topic.tenant_id.unwrap());
 
-        if topic.r#type.is_none() {
-            return RuntimeModelKernelErrorCode::TopicTypeMissed
-                .msg(format!("Topic[{}] has no type.", name));
-        }
-
-        if topic.kind.is_none() {
-            return RuntimeModelKernelErrorCode::TopicKindMissed
-                .msg(format!("Topic[{}] has no kind.", name));
-        }
+        let r#type = Self::must(topic.r#type, || {
+            RuntimeModelKernelErrorCode::TopicTypeMissed
+                .msg(format!("Topic[{}] must have a type.", topic_id))
+        })?;
+        let kind = Self::must(topic.kind, || {
+            RuntimeModelKernelErrorCode::TopicKindMissed
+                .msg(format!("Topic[{}] must have a kind.", topic_id))
+        })?;
 
         if topic.factors.is_none() {
             return RuntimeModelKernelErrorCode::TopicFactorMissed
@@ -64,11 +70,11 @@ impl ArcTopic {
         let arc_factors = Arc::new(arc_factors);
 
         Ok(Arc::new(Self {
-            topic_id: Arc::new(topic.topic_id.unwrap()),
+            topic_id,
             name,
-            r#type: Arc::new(topic.r#type.unwrap()),
-            kind: Arc::new(topic.kind.unwrap()),
-            data_source_id: topic.data_source_id.map(Arc::new),
+            r#type,
+            kind,
+            data_source_id: Self::arc(topic.data_source_id),
             factors: arc_factors,
             tenant_id,
             version: topic.version,

@@ -1,29 +1,32 @@
-use crate::{ArcParameterJoint, ArcPipelineUnit, RuntimeModelKernelErrorCode};
+use crate::{ArcHelper, ArcParameterJoint, ArcPipelineUnit, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
 use watchmen_model::{PipelineStage, PipelineStageId, StdErrorCode, StdR};
 
 #[derive(Debug)]
 pub struct ArcPipelineStage {
-    pub stage_id: Option<Arc<PipelineStageId>>,
+    pub stage_id: Arc<PipelineStageId>,
     pub name: Arc<String>,
     pub units: Arc<Vec<Arc<ArcPipelineUnit>>>,
     pub conditional: bool,
     pub on: Option<Arc<ArcParameterJoint>>,
 }
 
+impl ArcHelper for ArcPipelineStage {}
+
 impl ArcPipelineStage {
     pub fn new(stage: PipelineStage) -> StdR<Arc<Self>> {
+        let stage_id = Self::or_empty_str(stage.stage_id);
         // TIP a default name will be generated if there is no name on stage
         let name = Arc::new(stage.name.unwrap_or(String::from("unnamed-stage")));
 
         if stage.units.is_none() {
             return RuntimeModelKernelErrorCode::PipelineUnitMissed
-                .msg(format!("Pipeline stage[{}] has no stage.", name));
+                .msg(format!("Pipeline stage[{}] has no stage.", stage_id));
         }
         let units = stage.units.unwrap();
         if units.len() == 0 {
             return RuntimeModelKernelErrorCode::PipelineUnitMissed
-                .msg(format!("Pipeline stage[{}] has no stage.", name));
+                .msg(format!("Pipeline stage[{}] has no stage.", stage_id));
         }
         let mut arc_units = vec![];
         for unit in units {
@@ -31,25 +34,18 @@ impl ArcPipelineStage {
         }
         let arc_units = Arc::new(arc_units);
 
-        let conditional = stage.conditional.unwrap_or(false);
-        let on = if conditional {
-            if stage.on.is_none() {
-                return RuntimeModelKernelErrorCode::PipelineConditionMissed.msg(format!(
-                    "Pipeline stage[{}] has no condition when conditional is true.",
-                    name
-                ));
-            } else {
-                Some(ArcParameterJoint::new(stage.on.unwrap())?)
-            }
-        } else {
-            None
-        };
+        let on = Self::conditional(stage.conditional, stage.on, || {
+            format!(
+                "Pipeline stage[{}] has no condition when conditional is true.",
+                stage_id
+            )
+        })?;
 
         Ok(Arc::new(Self {
-            stage_id: stage.stage_id.map(Arc::new),
+            stage_id,
             name,
             units: arc_units,
-            conditional,
+            conditional: on.is_some(),
             on,
         }))
     }

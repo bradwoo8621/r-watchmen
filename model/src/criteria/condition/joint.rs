@@ -1,7 +1,7 @@
 use crate::{BaseDataModel, ParameterCondition, Storable};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum ParameterJointType {
     And,
     Or,

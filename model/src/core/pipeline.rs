@@ -6,7 +6,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum PipelineActionType {
     // system actions
     Alarm,
@@ -61,7 +61,7 @@ impl PipelineActionType {
 
 pub type PipelineActionId = String;
 
-#[derive(Display, Serde, StrEnum)]
+#[derive(Display, Serde, Debug, StrEnum)]
 pub enum AlarmActionSeverity {
     Low,
     Medium,
