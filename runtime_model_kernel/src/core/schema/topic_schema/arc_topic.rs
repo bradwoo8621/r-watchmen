@@ -18,7 +18,7 @@ pub struct ArcTopic {
     pub data_source_id: Option<Arc<DataSourceId>>,
     pub factors: Arc<Vec<Arc<ArcFactor>>>,
     pub tenant_id: Arc<TenantId>,
-    pub version: Option<u32>,
+    pub version: u32,
 }
 
 impl ArcHelper for ArcTopic {}
@@ -26,25 +26,8 @@ impl ArcHelper for ArcTopic {}
 impl ArcTopic {
     pub fn new(topic: Topic) -> StdR<Arc<Self>> {
         let topic_id = Self::topic_id(topic.topic_id, || "Topic")?;
-
-        let name = Self::not_blank(
-            topic.name,
-            || {
-                RuntimeModelKernelErrorCode::TopicNameMissed
-                    .msg(format!("Topic[{}] must have a name.", topic_id))
-            },
-            || {
-                RuntimeModelKernelErrorCode::TopicNameIsBlank
-                    .msg(format!("Topic[{}]'s name cannot be blank.", topic_id))
-            },
-        )?;
-        // TODO
-        if topic.tenant_id.is_none() {
-            return RuntimeModelKernelErrorCode::TopicTenantMissed
-                .msg(format!("Topic[{}] has not tenant.", name));
-        }
-        let tenant_id = Arc::new(topic.tenant_id.unwrap());
-
+        let name = Self::name(topic.name, || format!("Topic[{}]", topic_id))?;
+        let tenant_id = Self::tenant_id(topic.tenant_id, || format!("Topic[{}]", topic_id))?;
         let r#type = Self::must(topic.r#type, || {
             RuntimeModelKernelErrorCode::TopicTypeMissed
                 .msg(format!("Topic[{}] must have a type.", topic_id))
@@ -53,21 +36,10 @@ impl ArcTopic {
             RuntimeModelKernelErrorCode::TopicKindMissed
                 .msg(format!("Topic[{}] must have a kind.", topic_id))
         })?;
-
-        if topic.factors.is_none() {
-            return RuntimeModelKernelErrorCode::TopicFactorMissed
-                .msg(format!("Topic[{}] has no factor.", name));
-        }
-        let factors = topic.factors.unwrap();
-        if factors.len() == 0 {
-            return RuntimeModelKernelErrorCode::TopicFactorMissed
-                .msg(format!("Topic[{}] has no factor.", name));
-        }
-        let mut arc_factors = vec![];
-        for factor in factors {
-            arc_factors.push(ArcFactor::new(factor)?);
-        }
-        let arc_factors = Arc::new(arc_factors);
+        let arc_factors = Self::must_vec(topic.factors, ArcFactor::new, || {
+            RuntimeModelKernelErrorCode::TopicFactorMissed
+                .msg(format!("Topic[{}] has no factor.", name))
+        })?;
 
         Ok(Arc::new(Self {
             topic_id,
@@ -77,7 +49,7 @@ impl ArcTopic {
             data_source_id: Self::arc(topic.data_source_id),
             factors: arc_factors,
             tenant_id,
-            version: topic.version,
+            version: topic.version.unwrap_or(0),
         }))
     }
 

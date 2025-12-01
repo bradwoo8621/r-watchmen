@@ -24,17 +24,7 @@ impl ArcHelper for ArcFactor {}
 impl ArcFactor {
     pub fn new(factor: Factor) -> StdR<Arc<Self>> {
         let factor_id = Self::factor_id(factor.factor_id, || "Factor")?;
-        let name = Self::not_blank(
-            factor.name,
-            || {
-                RuntimeModelKernelErrorCode::FactorNameMissed
-                    .msg(format!("Factor[{}] must have a name.", factor_id))
-            },
-            || {
-                RuntimeModelKernelErrorCode::FactorNameIsBlank
-                    .msg(format!("Factor[{}]'s name cannot be blank.", factor_id))
-            },
-        )?;
+        let name = Self::name(factor.name, || format!("Factor[{}]", factor_id))?;
         let r#type = Self::must(factor.r#type, || {
             RuntimeModelKernelErrorCode::FactorTypeMissed
                 .msg(format!("Factor[{}] must have a type.", factor_id))

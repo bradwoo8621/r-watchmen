@@ -27,12 +27,12 @@ impl ArcPipeline {
         }
 
         if pipeline.name.is_none() {
-            return RuntimeModelKernelErrorCode::TopicNameMissed.msg("Pipeline must have a name.");
+            return RuntimeModelKernelErrorCode::NameMissed.msg("Pipeline must have a name.");
         }
         let name = Arc::new(pipeline.name.unwrap());
 
         if pipeline.tenant_id.is_none() {
-            return RuntimeModelKernelErrorCode::TopicNameMissed
+            return RuntimeModelKernelErrorCode::NameMissed
                 .msg(format!("Topic[{}] has not tenant.", name));
         }
         let tenant_id = Arc::new(pipeline.tenant_id.unwrap());

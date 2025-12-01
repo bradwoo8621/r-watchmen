@@ -61,6 +61,44 @@ pub trait ArcHelper {
         )
     }
 
+    /// check name is not missing and not blank
+    fn name<F, P>(name: Option<FactorId>, pos: F) -> StdR<Arc<FactorId>>
+    where
+        F: Fn() -> P,
+        P: Into<String>,
+    {
+        Self::not_blank(
+            name,
+            || {
+                RuntimeModelKernelErrorCode::NameMissed
+                    .msg(format!("{} must have a name.", pos().into()))
+            },
+            || {
+                RuntimeModelKernelErrorCode::NameIsBlank
+                    .msg(format!("{} cannot be blank.", pos().into()))
+            },
+        )
+    }
+
+    /// check tenant id is not missing and not blank
+    fn tenant_id<F, P>(tenant_id: Option<FactorId>, pos: F) -> StdR<Arc<FactorId>>
+    where
+        F: Fn() -> P,
+        P: Into<String>,
+    {
+        Self::not_blank(
+            tenant_id,
+            || {
+                RuntimeModelKernelErrorCode::TenantIdMissed
+                    .msg(format!("{} must have a tenant id.", pos().into()))
+            },
+            || {
+                RuntimeModelKernelErrorCode::TenantIdIsBlank
+                    .msg(format!("{} cannot be blank.", pos().into()))
+            },
+        )
+    }
+
     /// check the given value:
     /// - empty: call [on_empty],
     /// - blank: call [on_blank],
@@ -79,6 +117,25 @@ pub trait ArcHelper {
         } else {
             on_empty()
         }
+    }
+
+    fn must_vec<V, ArcV, F1, F2>(values: Option<Vec<V>>, arc: F1, on_empty: F2) -> StdR<Arc<Vec<Arc<ArcV>>>>
+    where
+        F1: Fn(V) -> StdR<Arc<ArcV>>,
+        F2: FnOnce() -> StdR<Arc<Vec<Arc<ArcV>>>>,
+    {
+        if values.is_none() {
+            return on_empty();
+        }
+        let values = values.unwrap();
+        if values.len() == 0 {
+            return on_empty();
+        }
+        let mut arc_values = vec![];
+        for value in values {
+            arc_values.push(arc(value)?);
+        }
+        Ok(Arc::new(arc_values))
     }
 
     /// check the given args:
