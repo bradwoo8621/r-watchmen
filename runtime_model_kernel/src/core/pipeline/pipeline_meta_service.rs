@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use watchmen_model::{Pipeline, PipelineId, PipelineTriggerType, StdR, TenantId, TopicId};
+use watchmen_model::{Pipeline, PipelineId, StdR, TenantId, TopicId};
 
 /// TODO pipeline meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out pipeline meta.
@@ -20,11 +20,7 @@ impl PipelineMetaService {
         todo!("implement find_pipeline_by_id for PipelineMetaService")
     }
 
-    pub fn find_by_topic_and_pipeline_type(
-        &self,
-        _topic_id: &TopicId,
-        r#_type: &PipelineTriggerType,
-    ) -> StdR<Vec<Pipeline>> {
+    pub fn find_by_topic_and_pipeline_type(&self, _topic_id: &TopicId) -> StdR<Vec<Pipeline>> {
         todo!("implement find_pipeline_by_topic for PipelineMetaService")
     }
 }

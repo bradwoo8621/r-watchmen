@@ -65,7 +65,6 @@ impl PipelineTrigger {
         PipelineMetaService::with(&self.principal.tenant_id)
     }
 
-
     /// TODO
     fn prepare_executor(self) -> StdR<String> {
         let pipeline_meta_service = self.find_pipeline_meta_service()?;
@@ -73,20 +72,38 @@ impl PipelineTrigger {
             Some(pipeline_id) => {
                 let pipeline = pipeline_meta_service.find_by_id(&pipeline_id)?;
                 if let Some(pipeline) = pipeline {
-                    return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
-                        "Trigger type[{}] does not match pipeline[]",
-                        &self.r#type
-                    ));
+                    if let Some(t) = &pipeline.r#type {
+                        if *t != self.r#type {
+                            return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
+                                "Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
+                                pipeline_id,
+                                t,
+                                self.r#type
+                            ));
+                        }
+                    } else {
+                        return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
+                            "Defined pipeline[{}]'s trigger type not defined.",
+                            pipeline_id,
+                        ));
+                    }
                     vec![pipeline]
                 } else {
                     return PipelineKernelErrorCode::TriggerPipelineNotFound
                         .msg(format!("Trigger pipeline[{}] not found.", &pipeline_id));
                 }
             }
-            _ => pipeline_meta_service.find_by_topic_and_pipeline_type(
-                self.topic_schema.topic().topic_id.as_ref(),
-                &self.r#type,
-            )?,
+            _ => pipeline_meta_service
+                .find_by_topic_and_pipeline_type(self.topic_schema.topic().topic_id.as_ref())?
+                .iter()
+                .filter(|p| {
+                    if let Some(t) = &p.r#type {
+                        *t == self.r#type
+                    } else {
+                        false
+                    }
+                })
+                .collect(),
         };
 
         Ok("".to_string())
