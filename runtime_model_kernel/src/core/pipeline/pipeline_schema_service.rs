@@ -1,6 +1,6 @@
 use crate::{PipelineMetaService, PipelineSchema};
 use std::sync::Arc;
-use watchmen_model::{PipelineId, PipelineTriggerType, StdR, TenantId, TopicId};
+use watchmen_model::{PipelineId, StdR, TenantId, TopicId};
 
 /// TODO pipeline meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out pipeline meta.
@@ -32,16 +32,17 @@ impl PipelineSchemaService {
     pub fn find_by_topic_and_pipeline_type(
         &self,
         topic_id: &TopicId,
-        r#type: &PipelineTriggerType,
-    ) -> StdR<Vec<Arc<PipelineSchema>>> {
-        let pipelines = self
-            .meta
-            .find_by_topic_and_pipeline_type(topic_id, r#type)?;
-
-        let mut schemas = vec![];
-        for pipeline in pipelines {
-            schemas.push(Arc::new(PipelineSchema::new(pipeline)?));
+    ) -> StdR<Option<Vec<Arc<PipelineSchema>>>> {
+        let pipelines = self.meta.find_by_topic_and_pipeline_type(topic_id)?;
+        match pipelines {
+            Some(pipelines) => {
+                let mut schemas = vec![];
+                for pipeline in pipelines {
+                    schemas.push(Arc::new(PipelineSchema::new(pipeline)?));
+                }
+                Ok(Some(schemas))
+            }
+            _ => Ok(None)
         }
-        Ok(schemas)
     }
 }

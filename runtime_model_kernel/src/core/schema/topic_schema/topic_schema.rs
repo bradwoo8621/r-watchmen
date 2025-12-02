@@ -5,7 +5,7 @@ use crate::{
     TopicSchemaFlattenFactorGroup, TopicSchemaFlattenFactorGroups,
 };
 use std::sync::Arc;
-use watchmen_model::{StdR, Topic, TopicCode, TopicData, VoidR};
+use watchmen_model::{StdR, Topic, TopicCode, TopicData, TopicId, VoidR};
 
 /// The schema of a topic, including various factor groups.
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
@@ -33,12 +33,16 @@ impl TopicSchema {
         &self.inner
     }
 
-    pub fn topic_name(&self) -> Arc<TopicCode> {
-        self.topic().name.clone()
+    pub fn id(&self) -> &Arc<TopicId> {
+        &self.topic().topic_id
+    }
+
+    pub fn name(&self) -> &Arc<TopicCode> {
+        &self.topic().name
     }
 
     fn should_init_default_values(&self) -> bool {
-        self.topic_name().as_ref() != "raw_pipeline_monitor_log"
+        self.name().as_ref() != "raw_pipeline_monitor_log"
     }
 
     /// given data might be changed

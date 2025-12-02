@@ -1,6 +1,6 @@
 use crate::ArcPipeline;
 use std::sync::Arc;
-use watchmen_model::{Pipeline, StdR};
+use watchmen_model::{Pipeline, PipelineTriggerType, StdR};
 
 pub struct PipelineSchema {
     inner: Arc<ArcPipeline>,
@@ -17,7 +17,11 @@ impl PipelineSchema {
         &self.inner
     }
 
-    pub fn pipeline_name(&self) -> Arc<String> {
-        self.pipeline().name.clone()
+    pub fn name(&self) -> &Arc<String> {
+        &self.pipeline().name
+    }
+
+    pub fn r#type(&self) -> &Arc<PipelineTriggerType> {
+        &self.pipeline().r#type
     }
 }

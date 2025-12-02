@@ -17,10 +17,13 @@ impl PipelineMetaService {
     }
 
     pub fn find_by_id(&self, _pipeline_id: &PipelineId) -> StdR<Option<Pipeline>> {
-        todo!("implement find_pipeline_by_id for PipelineMetaService")
+        todo!("implement find_by_id for PipelineMetaService")
     }
 
-    pub fn find_by_topic_and_pipeline_type(&self, _topic_id: &TopicId) -> StdR<Vec<Pipeline>> {
+    pub fn find_by_topic_and_pipeline_type(
+        &self,
+        _topic_id: &TopicId,
+    ) -> StdR<Option<Vec<Pipeline>>> {
         todo!("implement find_pipeline_by_topic for PipelineMetaService")
     }
 }

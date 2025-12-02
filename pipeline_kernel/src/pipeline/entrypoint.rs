@@ -86,13 +86,13 @@ impl PipelineEntrypoint {
                         PipelineKernelErrorCode::TriggerTypeNotSupportedOnSynonym.msg(format!(
                             "Trigger type[{}] is not supported on synonym[{}].",
                             other,
-                            topic_schema.topic_name()
+                            topic_schema.name()
                         ))
                     } else if topic.is_raw_topic() {
                         PipelineKernelErrorCode::TriggerTypeNotSupportedOnRaw.msg(format!(
                             "Trigger type[{}] is not supported on raw[{}].",
                             other,
-                            topic_schema.topic_name()
+                            topic_schema.name()
                         ))
                     } else {
                         Ok(())

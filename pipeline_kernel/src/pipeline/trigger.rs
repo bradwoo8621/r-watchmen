@@ -1,11 +1,14 @@
 use crate::{PipelineExecutionLogMonitor, PipelineKernelErrorCode, TopicTrigger};
+use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_auth::Principal;
 use watchmen_model::{
     PipelineId, PipelineTriggerTraceId, PipelineTriggerType, StdErrorCode, StdR, TopicData,
     TopicDataId, VoidR,
 };
-use watchmen_runtime_model_kernel::{PipelineMetaService, TopicDataService, TopicSchema};
+use watchmen_runtime_model_kernel::{
+    PipelineSchema, PipelineSchemaService, TopicDataService, TopicSchema,
+};
 
 pub struct PipelineTrigger {
     pub pipeline_id: Option<PipelineId>,
@@ -61,61 +64,76 @@ impl PipelineTrigger {
         }
     }
 
-    fn find_pipeline_meta_service(&self) -> StdR<Arc<PipelineMetaService>> {
-        PipelineMetaService::with(&self.principal.tenant_id)
+    fn find_pipeline_meta_service(&self) -> StdR<Arc<PipelineSchemaService>> {
+        PipelineSchemaService::with(&self.principal.tenant_id)
     }
 
-    /// TODO
-    fn prepare_executor(self) -> StdR<String> {
+    fn load_pipelines(&self) -> StdR<Option<Vec<Arc<PipelineSchema>>>> {
         let pipeline_meta_service = self.find_pipeline_meta_service()?;
-        let pipelines = match self.pipeline_id {
+        let pipelines = match &self.pipeline_id {
             Some(pipeline_id) => {
                 let pipeline = pipeline_meta_service.find_by_id(&pipeline_id)?;
                 if let Some(pipeline) = pipeline {
-                    if let Some(t) = &pipeline.r#type {
-                        if *t != self.r#type {
-                            return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
+                    let r#type = pipeline.r#type();
+                    if *r#type.deref() != self.r#type {
+                        return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
                                 "Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
                                 pipeline_id,
-                                t,
+                                r#type,
                                 self.r#type
                             ));
-                        }
-                    } else {
-                        return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
-                            "Defined pipeline[{}]'s trigger type not defined.",
-                            pipeline_id,
-                        ));
                     }
-                    vec![pipeline]
+                    Some(vec![pipeline])
                 } else {
                     return PipelineKernelErrorCode::TriggerPipelineNotFound
                         .msg(format!("Trigger pipeline[{}] not found.", &pipeline_id));
                 }
             }
-            _ => pipeline_meta_service
-                .find_by_topic_and_pipeline_type(self.topic_schema.topic().topic_id.as_ref())?
-                .iter()
-                .filter(|p| {
-                    if let Some(t) = &p.r#type {
-                        *t == self.r#type
+            _ => {
+                let pipelines = pipeline_meta_service
+                    .find_by_topic_and_pipeline_type(self.topic_schema.topic().topic_id.as_ref())?;
+                if let Some(pipelines) = pipelines {
+                    let pipelines: Vec<Arc<PipelineSchema>> = pipelines
+                        .into_iter()
+                        .filter(|p| *p.r#type().deref() == self.r#type)
+                        .collect();
+                    if pipelines.len() == 0 {
+                        None
                     } else {
-                        false
+                        Some(pipelines)
                     }
-                })
-                .collect(),
+                } else {
+                    None
+                }
+            }
         };
 
-        Ok("".to_string())
+        Ok(pipelines)
+    }
+
+    fn prepare_execution(&self, data: TopicData) -> StdR<(TopicDataId)> {
+        let topic_trigger = self.save_trigger_data(data)?;
+        let topic_data_id = topic_trigger.data_id().clone();
+
+        let pipelines = self.load_pipelines()?;
+        if pipelines.is_none() {
+            println!(
+                "No pipeline needs to be triggered by topic[id={}, name={}].",
+                self.topic_schema.id(),
+                self.topic_schema.name()
+            );
+        }
+
+        Ok((topic_data_id))
     }
 
     pub fn execute(&self, data: TopicData) -> StdR<TopicDataId> {
-        let topic_trigger = self.save_trigger_data(data)?;
-        Ok(topic_trigger.data_id())
+        let (topic_data_id) = self.prepare_execution(data)?;
+        Ok(topic_data_id)
     }
 
     pub async fn execute_async(&self, data: TopicData) -> StdR<TopicDataId> {
-        let topic_trigger = self.save_trigger_data(data)?;
-        Ok(topic_trigger.data_id())
+        let (topic_data_id) = self.prepare_execution(data)?;
+        Ok(topic_data_id)
     }
 }
