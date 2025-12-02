@@ -1,4 +1,7 @@
-use crate::{PipelineExecutionLogMonitor, PipelineKernelErrorCode, TopicTrigger};
+use crate::{
+    PipelineExecutionContext, PipelineExecutionLogMonitor, PipelineExecutor,
+    PipelineKernelErrorCode, TopicTrigger,
+};
 use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_auth::Principal;
@@ -16,7 +19,7 @@ pub struct PipelineTrigger {
     pub r#type: PipelineTriggerType,
     pub principal: Arc<Principal>,
     pub trace_id: Arc<PipelineTriggerTraceId>,
-    pub execution_log_monitor: PipelineExecutionLogMonitor,
+    pub execution_log_monitor: Arc<PipelineExecutionLogMonitor>,
 }
 
 impl PipelineTrigger {
@@ -77,11 +80,11 @@ impl PipelineTrigger {
                     let r#type = pipeline.r#type();
                     if *r#type.deref() != self.r#type {
                         return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
-                                "Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
-                                pipeline_id,
-                                r#type,
-                                self.r#type
-                            ));
+							"Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
+							pipeline_id,
+							r#type,
+							self.r#type
+						));
                     }
                     Some(vec![pipeline])
                 } else {
@@ -111,29 +114,40 @@ impl PipelineTrigger {
         Ok(pipelines)
     }
 
-    fn prepare_execution(&self, data: TopicData) -> StdR<(TopicDataId)> {
+    fn prepare_execution(
+        &self,
+        data: TopicData,
+    ) -> StdR<(TopicDataId, Option<PipelineExecutionContext>)> {
         let topic_trigger = self.save_trigger_data(data)?;
         let topic_data_id = topic_trigger.data_id().clone();
 
         let pipelines = self.load_pipelines()?;
-        if pipelines.is_none() {
+        if let Some(pipelines) = pipelines {
+            let context = PipelineExecutionContext::new(self, topic_trigger, pipelines);
+            Ok((topic_data_id, Some(context)))
+        } else {
             println!(
                 "No pipeline needs to be triggered by topic[id={}, name={}].",
                 self.topic_schema.id(),
                 self.topic_schema.name()
             );
+            Ok((topic_data_id, None))
         }
-
-        Ok((topic_data_id))
     }
 
     pub fn execute(&self, data: TopicData) -> StdR<TopicDataId> {
-        let (topic_data_id) = self.prepare_execution(data)?;
+        let (topic_data_id, context) = self.prepare_execution(data)?;
+        if let Some(context) = context {
+            PipelineExecutor::execute(context)?;
+        }
         Ok(topic_data_id)
     }
 
     pub async fn execute_async(&self, data: TopicData) -> StdR<TopicDataId> {
-        let (topic_data_id) = self.prepare_execution(data)?;
+        let (topic_data_id, context) = self.prepare_execution(data)?;
+        if let Some(context) = context {
+            PipelineExecutor::execute_async(context).await?;
+        }
         Ok(topic_data_id)
     }
 }

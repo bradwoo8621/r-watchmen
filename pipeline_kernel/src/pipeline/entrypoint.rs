@@ -187,10 +187,10 @@ impl PipelineEntrypoint {
             r#type: trigger_data.trigger_type.unwrap(),
             trace_id: trace_id.clone(),
             principal: principal.clone(),
-            execution_log_monitor: PipelineExecutionLogMonitor {
+            execution_log_monitor: Arc::new(PipelineExecutionLogMonitor {
                 trace_id,
                 principal,
-            },
+            }),
         };
         let topic_data = trigger_data.data.unwrap();
         Ok((pipeline_trigger, topic_data))
