@@ -3,9 +3,9 @@ use std::sync::Arc;
 use watchmen_auth::Principal;
 use watchmen_model::{
     PipelineId, PipelineTriggerData, PipelineTriggerTraceId, PipelineTriggerType, StdErrorCode,
-    StdR, StringUtils, TopicCode, TopicData, TopicDataId, UserRole, VoidR, VoidResultHelper,
+    StdR, StringUtils, TopicData, TopicDataId, UserRole, VoidR, VoidResultHelper,
 };
-use watchmen_runtime_model_kernel::{IdGen, TopicSchema, TopicSchemaService};
+use watchmen_runtime_model_kernel::{IdGen, TopicSchema, TopicSchemaProvider};
 
 /// This is the main entry point for executing pipelines.
 /// At this point, the specific pipelines to be executed are not yet known.
@@ -139,14 +139,6 @@ impl PipelineEntrypoint {
         Ok(())
     }
 
-    fn find_topic_meta_service(&self) -> StdR<Arc<TopicSchemaService>> {
-        TopicSchemaService::with(&self.principal.tenant_id)
-    }
-
-    fn find_topic_schema(&self, code: &TopicCode) -> StdR<Arc<TopicSchema>> {
-        self.find_topic_meta_service()?.find_by_code(code)
-    }
-
     fn check_and_prepare(
         &self,
         trigger_data: PipelineTriggerData,
@@ -159,18 +151,21 @@ impl PipelineEntrypoint {
             .collect(self.check_trigger_data(&trigger_data))
             .accumulate()?;
 
-        let topic_schema = self.find_topic_schema(&trigger_data.code.as_ref().unwrap())?;
-        self.check_trigger_type_with_topic(&trigger_data, &topic_schema)?;
-
         // prepare execute principal
         let execute_principal: Principal = if self.principal.is_super_admin() {
             // switch to given tenant and fake as admin role
+            let trigger_tenant_id = trigger_data.tenant_id.clone().unwrap();
             self.principal
-                .switch_tenant(trigger_data.tenant_id.unwrap(), UserRole::Admin)
+                .switch_tenant(trigger_tenant_id, UserRole::Admin)
         } else {
             // use current principal
             self.principal.clone()
         };
+
+        let topic_schema = execute_principal
+            .topic_schema()?
+            .by_code(&trigger_data.code.as_ref().unwrap())?;
+        self.check_trigger_type_with_topic(&trigger_data, &topic_schema)?;
 
         // prepare trace id
         let trace_id = if let Some(trace_id) = &self.trace_id {

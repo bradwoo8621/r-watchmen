@@ -1,5 +1,6 @@
-use crate::{TopicMetaService, TopicSchema};
+use crate::{TenantBasedProvider, TopicMetaService, TopicSchema};
 use std::sync::Arc;
+use watchmen_auth::Principal;
 use watchmen_model::{StdR, TenantId, TopicCode};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
@@ -19,9 +20,17 @@ impl TopicSchemaService {
         }))
     }
 
-    pub fn find_by_code(&self, code: &TopicCode) -> StdR<Arc<TopicSchema>> {
+    pub fn by_code(&self, code: &TopicCode) -> StdR<Arc<TopicSchema>> {
         let topic = self.meta.find_by_code(code)?;
         let schema = TopicSchema::new(topic)?;
         Ok(Arc::new(schema))
     }
 }
+
+pub trait TopicSchemaProvider: TenantBasedProvider {
+    fn topic_schema(&self) -> StdR<Arc<TopicSchemaService>> {
+        TopicSchemaService::with(self.tenant_id())
+    }
+}
+
+impl TopicSchemaProvider for Principal {}

@@ -1,5 +1,6 @@
-use crate::{TopicMetaService, TopicSchema};
+use crate::{TenantBasedProvider, TopicMetaService, TopicSchema};
 use std::sync::Arc;
+use watchmen_auth::Principal;
 use watchmen_model::{StdR, TenantId, TopicData};
 
 pub struct TopicDataService {
@@ -40,3 +41,11 @@ impl TopicDataService {
         todo!("implement delete for TopicDataService")
     }
 }
+
+pub trait TopicDataProvider: TenantBasedProvider {
+    fn topic_data(&self) -> StdR<Arc<TopicDataService>> {
+        TopicDataService::with(self.tenant_id())
+    }
+}
+
+impl TopicDataProvider for Principal {}

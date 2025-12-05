@@ -377,6 +377,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "serde",
+ "watchmen_auth",
  "watchmen_model",
 ]
 

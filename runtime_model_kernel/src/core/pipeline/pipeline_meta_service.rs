@@ -1,4 +1,6 @@
+use crate::TenantBasedProvider;
 use std::sync::Arc;
+use watchmen_auth::Principal;
 use watchmen_model::{Pipeline, PipelineId, StdR, TenantId, TopicId};
 
 /// TODO pipeline meta service using tenant and it's meta datasource (or the global meta datasource)
@@ -16,14 +18,19 @@ impl PipelineMetaService {
         }))
     }
 
-    pub fn find_by_id(&self, _pipeline_id: &PipelineId) -> StdR<Option<Pipeline>> {
+    pub fn by_pipeline_id(&self, _pipeline_id: &PipelineId) -> StdR<Option<Pipeline>> {
         todo!("implement find_by_id for PipelineMetaService")
     }
 
-    pub fn find_by_topic_and_pipeline_type(
-        &self,
-        _topic_id: &TopicId,
-    ) -> StdR<Option<Vec<Pipeline>>> {
+    pub fn by_topic_id(&self, _topic_id: &TopicId) -> StdR<Option<Vec<Pipeline>>> {
         todo!("implement find_pipeline_by_topic for PipelineMetaService")
     }
 }
+
+pub trait PipelineMetaProvider: TenantBasedProvider {
+    fn pipeline_meta(&self) -> StdR<Arc<PipelineMetaService>> {
+        PipelineMetaService::with(self.tenant_id())
+    }
+}
+
+impl PipelineMetaProvider for Principal {}

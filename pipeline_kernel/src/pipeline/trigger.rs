@@ -10,7 +10,7 @@ use watchmen_model::{
     TopicDataId, VoidR,
 };
 use watchmen_runtime_model_kernel::{
-    PipelineSchema, PipelineSchemaService, TopicDataService, TopicSchema,
+    PipelineSchema, PipelineSchemaProvider, TopicDataService, TopicSchema,
 };
 
 pub struct PipelineTrigger {
@@ -67,24 +67,23 @@ impl PipelineTrigger {
         }
     }
 
-    fn find_pipeline_meta_service(&self) -> StdR<Arc<PipelineSchemaService>> {
-        PipelineSchemaService::with(&self.principal.tenant_id)
-    }
-
     fn load_pipelines(&self) -> StdR<Option<Vec<Arc<PipelineSchema>>>> {
-        let pipeline_meta_service = self.find_pipeline_meta_service()?;
         let pipelines = match &self.pipeline_id {
             Some(pipeline_id) => {
-                let pipeline = pipeline_meta_service.find_by_id(&pipeline_id)?;
+                let pipeline = self
+                    .principal
+                    .pipeline_schema()?
+                    .by_pipeline_id(&pipeline_id)?;
                 if let Some(pipeline) = pipeline {
                     let r#type = pipeline.r#type();
                     if *r#type.deref() != self.r#type {
-                        return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(format!(
-							"Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
-							pipeline_id,
-							r#type,
-							self.r#type
-						));
+                        return PipelineKernelErrorCode::TriggerTypeMismatchPipeline.msg(
+                            format!(
+                                "Defined pipeline[{}]'s trigger type[{}] does not match given trigger type[{}].",
+                                pipeline_id,
+                                r#type,
+                                self.r#type
+                            ));
                     }
                     Some(vec![pipeline])
                 } else {
@@ -93,8 +92,10 @@ impl PipelineTrigger {
                 }
             }
             _ => {
-                let pipelines = pipeline_meta_service
-                    .find_by_topic_and_pipeline_type(self.topic_schema.topic().topic_id.deref())?;
+                let pipelines = self
+                    .principal
+                    .pipeline_schema()?
+                    .by_topic_id(self.topic_schema.topic().topic_id.deref())?;
                 if let Some(pipelines) = pipelines {
                     let pipelines: Vec<Arc<PipelineSchema>> = pipelines
                         .into_iter()

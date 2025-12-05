@@ -1,4 +1,6 @@
+use crate::TenantBasedProvider;
 use std::sync::Arc;
+use watchmen_auth::Principal;
 use watchmen_model::{StdR, TenantId, Topic, TopicCode};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
@@ -20,3 +22,11 @@ impl TopicMetaService {
         todo!("implement find_topic for TopicMetaService")
     }
 }
+
+pub trait TopicMetaProvider: TenantBasedProvider {
+    fn topic_meta(&self) -> StdR<Arc<TopicMetaService>> {
+        TopicMetaService::with(self.tenant_id())
+    }
+}
+
+impl TopicMetaProvider for Principal {}
