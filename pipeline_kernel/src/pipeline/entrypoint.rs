@@ -5,7 +5,7 @@ use watchmen_model::{
     PipelineId, PipelineTriggerData, PipelineTriggerTraceId, PipelineTriggerType, StdErrorCode,
     StdR, StringUtils, TopicData, TopicDataId, UserRole, VoidR, VoidResultHelper,
 };
-use watchmen_runtime_model_kernel::{IdGen, TopicSchema, TopicSchemaProvider};
+use watchmen_runtime_model_kernel::{IdGen, TopicSchema, TopicSchemaProvider, TopicService};
 
 /// This is the main entry point for executing pipelines.
 /// At this point, the specific pipelines to be executed are not yet known.
@@ -151,6 +151,10 @@ impl PipelineEntrypoint {
             .collect(self.check_trigger_data(&trigger_data))
             .accumulate()?;
 
+        let topic_schema =
+            TopicService::schema()?.by_code(&trigger_data.code.as_ref().unwrap())?;
+        self.check_trigger_type_with_topic(&trigger_data, &topic_schema)?;
+
         // prepare execute principal
         let execute_principal: Principal = if self.principal.is_super_admin() {
             // switch to given tenant and fake as admin role
@@ -161,11 +165,6 @@ impl PipelineEntrypoint {
             // use current principal
             self.principal.clone()
         };
-
-        let topic_schema = execute_principal
-            .topic_schema()?
-            .by_code(&trigger_data.code.as_ref().unwrap())?;
-        self.check_trigger_type_with_topic(&trigger_data, &topic_schema)?;
 
         // prepare trace id
         let trace_id = if let Some(trace_id) = &self.trace_id {

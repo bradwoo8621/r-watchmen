@@ -1,20 +1,15 @@
-use crate::{TenantBasedProvider, TopicMetaService, TopicSchema};
+use crate::{TopicMetaProvider, TopicSchema};
 use std::sync::Arc;
-use watchmen_auth::Principal;
-use watchmen_model::{StdR, TenantId, TopicData};
+use watchmen_model::{StdR, TopicData};
 
-pub struct TopicDataService {
-    tenant_id: TenantId,
-    meta: Arc<TopicMetaService>,
-}
+pub struct TopicDataService {}
+
+impl TopicMetaProvider for TopicDataService {}
 
 impl TopicDataService {
-    pub fn with(tenant_id: &TenantId) -> StdR<Arc<Self>> {
+    fn new() -> StdR<Arc<Self>> {
         // TODO maybe find from cache
-        Ok(Arc::new(Self {
-            tenant_id: tenant_id.clone(),
-            meta: TopicMetaService::with(&tenant_id)?,
-        }))
+        Ok(Arc::new(Self {}))
     }
 
     pub fn insert(&self, _topic_schema: &Arc<TopicSchema>, _data: TopicData) -> StdR<TopicData> {
@@ -42,10 +37,8 @@ impl TopicDataService {
     }
 }
 
-pub trait TopicDataProvider: TenantBasedProvider {
-    fn topic_data(&self) -> StdR<Arc<TopicDataService>> {
-        TopicDataService::with(self.tenant_id())
+pub trait TopicDataProvider {
+    fn data() -> StdR<Arc<TopicDataService>> {
+        TopicDataService::new()
     }
 }
-
-impl TopicDataProvider for Principal {}
