@@ -22,7 +22,7 @@ mod objective_timeframe;
 mod objective_variable;
 mod pipeline;
 mod pipeline_monitor_log;
-pub mod pipeline_trigger_data;
+mod pipeline_trigger_data;
 mod report;
 mod space;
 mod subject;
@@ -30,7 +30,7 @@ mod subject_dataset;
 mod subject_ext;
 mod subject_with_column_type;
 mod topic;
-pub mod topic_data;
+mod topic_data;
 mod topic_snapshot;
 
 pub use achievement_plugin_task::*;
