@@ -23,42 +23,33 @@ pub enum CompiledParameterExpression {
 }
 
 impl CompiledParameterExpression {
-    pub fn new(value: Arc<ArcParameterExpression>) -> Self {
+    pub fn new(value: Arc<ArcParameterExpression>) -> StdR<Self> {
         match value.deref() {
-            ArcParameterExpression::Empty(v) => {
-                CompiledParameterExpression::Empty(CompiledEmptyExpression::new(v.clone()))
-            }
-            ArcParameterExpression::NotEmpty(v) => {
-                CompiledParameterExpression::NotEmpty(CompiledNotEmptyExpression::new(v.clone()))
-            }
-            ArcParameterExpression::Equals(v) => {
-                CompiledParameterExpression::Equals(CompiledEqualsExpression::new(v.clone()))
-            }
-            ArcParameterExpression::NotEquals(v) => {
-                CompiledParameterExpression::NotEquals(CompiledNotEqualsExpression::new(v.clone()))
-            }
-            ArcParameterExpression::LessThan(v) => {
-                CompiledParameterExpression::LessThan(CompiledLessThanExpression::new(v.clone()))
-            }
+            ArcParameterExpression::Empty(v) => CompiledEmptyExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::Empty(p)),
+            ArcParameterExpression::NotEmpty(v) => CompiledNotEmptyExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::NotEmpty(p)),
+            ArcParameterExpression::Equals(v) => CompiledEqualsExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::Equals(p)),
+            ArcParameterExpression::NotEquals(v) => CompiledNotEqualsExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::NotEquals(p)),
+            ArcParameterExpression::LessThan(v) => CompiledLessThanExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::LessThan(p)),
             ArcParameterExpression::LessThanOrEquals(v) => {
-                CompiledParameterExpression::LessThanOrEquals(
-                    CompiledLessThanOrEqualsExpression::new(v.clone()),
-                )
+                CompiledLessThanOrEqualsExpression::new(v.clone())
+                    .map(|p| CompiledParameterExpression::LessThanOrEquals(p))
             }
-            ArcParameterExpression::MoreThan(v) => {
-                CompiledParameterExpression::MoreThan(CompiledMoreThanExpression::new(v.clone()))
-            }
+            ArcParameterExpression::MoreThan(v) => CompiledMoreThanExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::MoreThan(p)),
             ArcParameterExpression::MoreThanOrEquals(v) => {
-                CompiledParameterExpression::MoreThanOrEquals(
-                    CompiledMoreThanOrEqualsExpression::new(v.clone()),
-                )
+                CompiledMoreThanOrEqualsExpression::new(v.clone())
+                    .map(|p| CompiledParameterExpression::MoreThanOrEquals(p))
             }
             ArcParameterExpression::In(v) => {
-                CompiledParameterExpression::In(CompiledInExpression::new(v.clone()))
+                CompiledInExpression::new(v.clone()).map(|p| CompiledParameterExpression::In(p))
             }
-            ArcParameterExpression::NotIn(v) => {
-                CompiledParameterExpression::NotIn(CompiledNotInExpression::new(v.clone()))
-            }
+            ArcParameterExpression::NotIn(v) => CompiledNotInExpression::new(v.clone())
+                .map(|p| CompiledParameterExpression::NotIn(p)),
         }
     }
 }

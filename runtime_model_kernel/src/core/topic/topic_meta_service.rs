@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use watchmen_model::{StdR, Topic, TopicCode};
+use watchmen_model::{StdR, Topic, TopicCode, TopicId};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out topic meta.
@@ -12,8 +12,12 @@ impl TopicMetaService {
         Ok(Arc::new(Self {}))
     }
 
-    pub fn find_by_code(&self, _code: &TopicCode) -> StdR<Topic> {
-        todo!("implement find_topic for TopicMetaService")
+    pub fn find_by_id(&self, _topic_id: &TopicId) -> StdR<Topic> {
+        todo!("implement find_by_id for TopicMetaService")
+    }
+
+    pub fn find_by_code(&self, _topic_code: &TopicCode) -> StdR<Topic> {
+        todo!("implement find_by_code for TopicMetaService")
     }
 }
 

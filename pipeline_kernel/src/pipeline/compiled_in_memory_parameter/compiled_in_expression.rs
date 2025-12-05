@@ -11,11 +11,11 @@ pub struct CompiledInExpression {
 }
 
 impl CompiledInExpression {
-    pub fn new(exp: Arc<ArcInExpression>) -> Self {
-        CompiledInExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-            right: CompiledParameter::new(exp.right.clone()),
-        }
+    pub fn new(exp: Arc<ArcInExpression>) -> StdR<Self> {
+        Ok(CompiledInExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+            right: CompiledParameter::new(exp.right.clone())?,
+        })
     }
 }
 

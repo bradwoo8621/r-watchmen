@@ -3,16 +3,12 @@ use std::sync::Arc;
 use watchmen_model::{StdR, TenantId};
 use watchmen_runtime_model_kernel::{PipelineSchema, TopicSchema};
 
-pub struct PipelineCompileService {
-    tenant_id: TenantId,
-}
+pub struct PipelineCompileService {}
 
 impl PipelineCompileService {
     pub fn with(tenant_id: &TenantId) -> StdR<Arc<Self>> {
         // TODO maybe find from cache
-        Ok(Arc::new(Self {
-            tenant_id: tenant_id.clone(),
-        }))
+        Ok(Arc::new(Self {}))
     }
 
     pub fn compile(

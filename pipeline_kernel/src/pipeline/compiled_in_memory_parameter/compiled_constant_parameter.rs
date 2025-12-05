@@ -1,13 +1,13 @@
 use crate::{InMemoryParameter, PipelineExecutionVariables};
 use std::sync::Arc;
-use watchmen_model::TopicDataValue;
+use watchmen_model::{StdR, TopicDataValue};
 use watchmen_runtime_model_kernel::ArcConstantParameter;
 
 pub struct CompiledConstantParameter {}
 
 impl CompiledConstantParameter {
-    pub fn new(parameter: Arc<ArcConstantParameter>) -> Self {
-        CompiledConstantParameter {}
+    pub fn new(parameter: Arc<ArcConstantParameter>) -> StdR<Self> {
+        Ok(CompiledConstantParameter {})
     }
 }
 

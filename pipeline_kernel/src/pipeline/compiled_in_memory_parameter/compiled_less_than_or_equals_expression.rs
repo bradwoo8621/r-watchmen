@@ -11,11 +11,11 @@ pub struct CompiledLessThanOrEqualsExpression {
 }
 
 impl CompiledLessThanOrEqualsExpression {
-    pub fn new(exp: Arc<ArcLessThanOrEqualsExpression>) -> Self {
-        CompiledLessThanOrEqualsExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-            right: CompiledParameter::new(exp.right.clone()),
-        }
+    pub fn new(exp: Arc<ArcLessThanOrEqualsExpression>) -> StdR<Self> {
+        Ok(CompiledLessThanOrEqualsExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+            right: CompiledParameter::new(exp.right.clone())?,
+        })
     }
 }
 

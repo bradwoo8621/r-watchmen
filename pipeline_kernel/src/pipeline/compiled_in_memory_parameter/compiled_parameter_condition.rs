@@ -13,13 +13,12 @@ pub enum CompiledParameterCondition {
 }
 
 impl CompiledParameterCondition {
-    pub fn new(value: Arc<ArcParameterCondition>) -> Self {
+    pub fn new(value: Arc<ArcParameterCondition>) -> StdR<Self> {
         match value.deref() {
-            ArcParameterCondition::Expression(v) => {
-                CompiledParameterCondition::Expression(CompiledParameterExpression::new(v.clone()))
-            }
+            ArcParameterCondition::Expression(v) => CompiledParameterExpression::new(v.clone())
+                .map(|p| CompiledParameterCondition::Expression(p)),
             ArcParameterCondition::Joint(v) => {
-                CompiledParameterCondition::Joint(CompiledParameterJoint::new(v.clone()))
+                CompiledParameterJoint::new(v.clone()).map(|p| CompiledParameterCondition::Joint(p))
             }
         }
     }

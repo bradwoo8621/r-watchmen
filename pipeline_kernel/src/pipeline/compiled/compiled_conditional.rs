@@ -10,14 +10,14 @@ pub struct CompiledConditional {
 }
 
 impl CompiledConditional {
-    pub fn new(conditional: Option<Arc<ArcParameterJoint>>) -> Self {
-        if let Some(conditional) = &conditional {
+    pub fn new(conditional: Option<Arc<ArcParameterJoint>>) -> StdR<Self> {
+        Ok(if let Some(conditional) = &conditional {
             CompiledConditional {
-                inner: Some(CompiledParameterJoint::new(conditional.clone())),
+                inner: Some(CompiledParameterJoint::new(conditional.clone())?),
             }
         } else {
             CompiledConditional { inner: None }
-        }
+        })
     }
 
     pub fn is_true(&self, variables: &PipelineExecutionVariables) -> StdR<bool> {

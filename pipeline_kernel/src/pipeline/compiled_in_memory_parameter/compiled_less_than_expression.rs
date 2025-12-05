@@ -11,11 +11,11 @@ pub struct CompiledLessThanExpression {
 }
 
 impl CompiledLessThanExpression {
-    pub fn new(exp: Arc<ArcLessThanExpression>) -> Self {
-        CompiledLessThanExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-            right: CompiledParameter::new(exp.right.clone()),
-        }
+    pub fn new(exp: Arc<ArcLessThanExpression>) -> StdR<Self> {
+        Ok(CompiledLessThanExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+            right: CompiledParameter::new(exp.right.clone())?,
+        })
     }
 }
 

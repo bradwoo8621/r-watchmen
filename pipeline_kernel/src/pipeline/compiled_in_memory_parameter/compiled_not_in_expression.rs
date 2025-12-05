@@ -11,11 +11,11 @@ pub struct CompiledNotInExpression {
 }
 
 impl CompiledNotInExpression {
-    pub fn new(exp: Arc<ArcNotInExpression>) -> Self {
-        CompiledNotInExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-            right: CompiledParameter::new(exp.right.clone()),
-        }
+    pub fn new(exp: Arc<ArcNotInExpression>) -> StdR<Self> {
+        Ok(CompiledNotInExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+            right: CompiledParameter::new(exp.right.clone())?,
+        })
     }
 }
 

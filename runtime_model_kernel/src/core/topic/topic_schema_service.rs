@@ -1,6 +1,6 @@
 use crate::{TopicMetaProvider, TopicSchema};
 use std::sync::Arc;
-use watchmen_model::{StdR, TopicCode};
+use watchmen_model::{StdR, TopicCode, TopicId};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out topic meta.
@@ -15,8 +15,14 @@ impl TopicSchemaService {
         Ok(Arc::new(Self {}))
     }
 
-    pub fn by_code(&self, code: &TopicCode) -> StdR<Arc<TopicSchema>> {
-        let topic = Self::meta()?.find_by_code(code)?;
+    pub fn by_id(&self, topic_id: &TopicId) -> StdR<Arc<TopicSchema>> {
+        let topic = Self::meta()?.find_by_id(topic_id)?;
+        let schema = TopicSchema::new(topic)?;
+        Ok(Arc::new(schema))
+    }
+
+    pub fn by_code(&self, topic_code: &TopicCode) -> StdR<Arc<TopicSchema>> {
+        let topic = Self::meta()?.find_by_code(topic_code)?;
         let schema = TopicSchema::new(topic)?;
         Ok(Arc::new(schema))
     }

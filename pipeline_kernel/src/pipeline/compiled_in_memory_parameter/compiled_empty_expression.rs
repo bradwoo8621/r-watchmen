@@ -10,10 +10,10 @@ pub struct CompiledEmptyExpression {
 }
 
 impl CompiledEmptyExpression {
-    pub fn new(exp: Arc<ArcEmptyExpression>) -> Self {
-        CompiledEmptyExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-        }
+    pub fn new(exp: Arc<ArcEmptyExpression>) -> StdR<Self> {
+        Ok(CompiledEmptyExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+        })
     }
 }
 

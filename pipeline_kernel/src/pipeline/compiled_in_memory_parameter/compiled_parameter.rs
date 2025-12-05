@@ -1,10 +1,10 @@
 use crate::{
-    CompiledComputedParameter, CompiledConstantParameter, CompiledTopicFactorParameter,
-    InMemoryParameter, PipelineExecutionVariables,
+	CompiledComputedParameter, CompiledConstantParameter, CompiledTopicFactorParameter,
+	InMemoryParameter, PipelineExecutionVariables,
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::TopicDataValue;
+use watchmen_model::{StdR, TopicDataValue};
 use watchmen_runtime_model_kernel::ArcParameter;
 
 pub enum CompiledParameter {
@@ -14,16 +14,16 @@ pub enum CompiledParameter {
 }
 
 impl CompiledParameter {
-    pub fn new(value: Arc<ArcParameter>) -> Self {
+    pub fn new(value: Arc<ArcParameter>) -> StdR<Self> {
         match value.deref() {
             ArcParameter::Topic(v) => {
-                CompiledParameter::Topic(CompiledTopicFactorParameter::new(v.clone()))
+                CompiledTopicFactorParameter::new(v.clone()).map(|p| CompiledParameter::Topic(p))
             }
             ArcParameter::Constant(v) => {
-                CompiledParameter::Constant(CompiledConstantParameter::new(v.clone()))
+                CompiledConstantParameter::new(v.clone()).map(|p| CompiledParameter::Constant(p))
             }
             ArcParameter::Computed(v) => {
-                CompiledParameter::Computed(CompiledComputedParameter::new(v.clone()))
+                CompiledComputedParameter::new(v.clone()).map(|p| CompiledParameter::Computed(p))
             }
         }
     }

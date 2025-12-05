@@ -11,16 +11,16 @@ pub struct CompiledParameterJoint {
 }
 
 impl CompiledParameterJoint {
-    pub fn new(value: Arc<ArcParameterJoint>) -> Self {
-        CompiledParameterJoint {
-            r#type: value.joint_type.clone(),
-            conditions: value
-                .filters
-                .deref()
-                .into_iter()
-                .map(|f| CompiledParameterCondition::new(f.clone()))
-                .collect(),
+    pub fn new(value: Arc<ArcParameterJoint>) -> StdR<Self> {
+        let mut conditions = vec![];
+        for filter in value.filters.deref() {
+            conditions.push(CompiledParameterCondition::new(filter.clone())?)
         }
+
+        Ok(CompiledParameterJoint {
+            r#type: value.joint_type.clone(),
+            conditions,
+        })
     }
 }
 

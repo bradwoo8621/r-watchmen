@@ -11,11 +11,11 @@ pub struct CompiledEqualsExpression {
 }
 
 impl CompiledEqualsExpression {
-    pub fn new(exp: Arc<ArcEqualsExpression>) -> Self {
-        CompiledEqualsExpression {
-            left: CompiledParameter::new(exp.left.clone()),
-            right: CompiledParameter::new(exp.right.clone()),
-        }
+    pub fn new(exp: Arc<ArcEqualsExpression>) -> StdR<Self> {
+        Ok(CompiledEqualsExpression {
+            left: CompiledParameter::new(exp.left.clone())?,
+            right: CompiledParameter::new(exp.right.clone())?,
+        })
     }
 }
 
