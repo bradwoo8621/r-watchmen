@@ -722,18 +722,31 @@ impl TopicDataUtils for TopicData {
             TopicDataProperty::Vec((_, names, array)) => {
                 let data = self.get(&names[0]);
                 if data.is_none() {
-                    if *array {
-                        return Ok(&EMPTY_VEC);
+                    return if *array {
+                        Ok(&EMPTY_VEC)
                     } else {
-                        return Ok(&TopicDataValue::None);
-                    }
+                        Ok(&TopicDataValue::None)
+                    };
                 }
 
+                let mut data = data.unwrap();
                 let mut remain_count = names.len() - 1;
                 let mut current_index = 1;
                 while current_index <= remain_count {
                     let current_name = &names[current_index];
-                    if let Some(_func) = VariablePredefineFunctions::try_parse(current_name) {}
+                    if let Some(func) = VariablePredefineFunctions::try_parse(current_name) {
+                        match func {
+                            VariablePredefineFunctions::Count => {}
+                            VariablePredefineFunctions::Length => {}
+                            VariablePredefineFunctions::Join => {}
+                            VariablePredefineFunctions::Min => {}
+                            VariablePredefineFunctions::Max => {}
+                            VariablePredefineFunctions::Sum => {}
+                            _ => {}
+                        }
+                    } else {
+
+                    }
                 }
 
                 Ok(&TopicDataValue::None)
