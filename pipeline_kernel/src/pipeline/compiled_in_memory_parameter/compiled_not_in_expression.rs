@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::{
     CompiledParameter, InMemoryParameter, InMemoryParameterCondition, PipelineExecutionVariables,
 };
@@ -23,12 +24,12 @@ impl InMemoryParameterCondition for CompiledNotInExpression {
     fn is_true(&self, variables: &PipelineExecutionVariables) -> StdR<bool> {
         self.left
             .value_from(variables)?
-            .is_not_in(self.right.value_from(variables)?)
+            .is_not_in(self.right.value_from(variables)?.deref())
     }
 
     fn is_false(&self, variables: &PipelineExecutionVariables) -> StdR<bool> {
         self.left
             .value_from(variables)?
-            .is_in(self.right.value_from(variables)?)
+            .is_in(self.right.value_from(variables)?.deref())
     }
 }

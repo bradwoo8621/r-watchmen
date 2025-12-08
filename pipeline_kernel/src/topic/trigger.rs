@@ -1,4 +1,4 @@
-use crate::PipelineKernelErrorCode;
+use crate::{ArcTopicData, ArcTopicDataBuilder, PipelineKernelErrorCode};
 use std::sync::Arc;
 use watchmen_model::{
     PipelineTriggerType, StdErrorCode, StdR, TopicData, TopicDataColumnNames, TopicDataId,
@@ -7,8 +7,8 @@ use watchmen_model::{
 
 /// will be used in the execution of multiple pipelines.
 pub struct TopicTrigger {
-    pub previous: Option<Arc<TopicData>>,
-    pub current: Option<Arc<TopicData>>,
+    pub previous: Option<ArcTopicData>,
+    pub current: Option<ArcTopicData>,
     pub r#type: PipelineTriggerType,
     pub internal_data_id: Arc<TopicDataId>,
 }
@@ -32,7 +32,7 @@ impl TopicTrigger {
 
     pub fn insert_to_synonym(current: TopicData) -> StdR<Arc<TopicTrigger>> {
         Ok(Arc::new(TopicTrigger {
-            current: Some(Arc::new(current)),
+            current: Some(ArcTopicData::build(current)),
             previous: None,
             r#type: PipelineTriggerType::Insert,
             internal_data_id: Arc::new("-1".to_string()),
@@ -43,7 +43,7 @@ impl TopicTrigger {
         let data_id = TopicTrigger::get_data_id(&current)?;
 
         Ok(Arc::new(TopicTrigger {
-            current: Some(Arc::new(current)),
+            current: Some(ArcTopicData::build(current)),
             previous: None,
             r#type: PipelineTriggerType::Insert,
             internal_data_id: data_id,
@@ -54,8 +54,8 @@ impl TopicTrigger {
         let data_id = TopicTrigger::get_data_id(&current)?;
 
         Ok(Arc::new(TopicTrigger {
-            current: Some(Arc::new(current)),
-            previous: Some(Arc::new(previous)),
+            current: Some(ArcTopicData::build(current)),
+            previous: Some(ArcTopicData::build(previous)),
             r#type: PipelineTriggerType::Merge,
             internal_data_id: data_id,
         }))
@@ -66,7 +66,7 @@ impl TopicTrigger {
 
         Ok(Arc::new(TopicTrigger {
             current: None,
-            previous: Some(Arc::new(previous)),
+            previous: Some(ArcTopicData::build(previous)),
             r#type: PipelineTriggerType::Delete,
             internal_data_id: data_id,
         }))

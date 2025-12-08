@@ -1,8 +1,9 @@
-use crate::{InMemoryParameter, PipelineExecutionVariables, PipelineKernelErrorCode};
-use std::sync::Arc;
-use watchmen_model::{
-    FactorType, StdErrorCode, StdR, TenantId, TopicDataProperty, TopicDataUtils, TopicDataValue,
+use crate::{
+    ArcTopicDataValue, InMemoryParameter, PipelineExecutionVariables, PipelineKernelErrorCode,
+    TopicDataProperty, TopicDataUtils,
 };
+use std::sync::Arc;
+use watchmen_model::{FactorType, StdErrorCode, StdR, TenantId};
 use watchmen_runtime_model_kernel::{ArcTopicFactorParameter, TopicSchemaProvider, TopicService};
 
 pub struct CompiledTopicFactorParameter {
@@ -45,10 +46,7 @@ impl CompiledTopicFactorParameter {
 
 /// topic factor parameter always retrieve data from current trigger data
 impl InMemoryParameter for CompiledTopicFactorParameter {
-    fn value_from<'a>(
-        &self,
-        variables: &'a PipelineExecutionVariables,
-    ) -> StdR<&'a TopicDataValue> {
+    fn value_from(&self, variables: &PipelineExecutionVariables) -> StdR<Arc<ArcTopicDataValue>> {
         variables.get_current_data()?.value_of(&self.property)
     }
 }

@@ -365,6 +365,8 @@ dependencies = [
 name = "watchmen_pipeline_kernel"
 version = "0.1.0"
 dependencies = [
+ "bigdecimal",
+ "chrono",
  "tokio",
  "watchmen_auth",
  "watchmen_model",

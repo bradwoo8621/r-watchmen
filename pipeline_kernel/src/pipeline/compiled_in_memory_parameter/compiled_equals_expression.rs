@@ -1,6 +1,7 @@
 use crate::{
     CompiledParameter, InMemoryParameter, InMemoryParameterCondition, PipelineExecutionVariables,
 };
+use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_model::{StdR, TenantId};
 use watchmen_runtime_model_kernel::ArcEqualsExpression;
@@ -24,13 +25,13 @@ impl InMemoryParameterCondition for CompiledEqualsExpression {
         Ok(self
             .left
             .value_from(variables)?
-            .is_same_as(self.right.value_from(variables)?))
+            .is_same_as(&self.right.value_from(variables)?.deref()))
     }
 
     fn is_false(&self, variables: &PipelineExecutionVariables) -> StdR<bool> {
         Ok(self
             .left
             .value_from(variables)?
-            .is_not_same_as(self.right.value_from(variables)?))
+            .is_not_same_as(&self.right.value_from(variables)?.deref()))
     }
 }

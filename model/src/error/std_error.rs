@@ -19,6 +19,7 @@ pub enum StdErrCode {
     DecimalParse,
     ValuesNotComparable,
     StrEnumParse,
+    VariableFuncNotSupported,
     /// with multiple sub errors
     Multiple,
     Unknown,
@@ -30,6 +31,7 @@ impl StdErrorCode for StdErrCode {
             StdErrCode::DecimalParse => "STDE-00001",
             StdErrCode::ValuesNotComparable => "STDE-00002",
             StdErrCode::StrEnumParse => "STDE-00003",
+            StdErrCode::VariableFuncNotSupported => "STDE-00004",
 
             StdErrCode::Multiple => "STDE-99998",
             StdErrCode::Unknown => "STDE-99999",

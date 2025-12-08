@@ -1,10 +1,10 @@
 use crate::{
-    CompiledComputedParameter, CompiledConstantParameter, CompiledTopicFactorParameter,
-    InMemoryParameter, PipelineExecutionVariables,
+    ArcTopicDataValue, CompiledComputedParameter, CompiledConstantParameter,
+    CompiledTopicFactorParameter, InMemoryParameter, PipelineExecutionVariables,
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId, TopicDataValue};
+use watchmen_model::{StdR, TenantId};
 use watchmen_runtime_model_kernel::ArcParameter;
 
 pub enum CompiledParameter {
@@ -30,10 +30,7 @@ impl CompiledParameter {
 }
 
 impl InMemoryParameter for CompiledParameter {
-    fn value_from<'a>(
-        &self,
-        variables: &'a PipelineExecutionVariables,
-    ) -> StdR<&'a TopicDataValue> {
+    fn value_from(&self, variables: &PipelineExecutionVariables) -> StdR<Arc<ArcTopicDataValue>> {
         match self {
             CompiledParameter::Topic(v) => v.value_from(variables),
             CompiledParameter::Constant(v) => v.value_from(variables),

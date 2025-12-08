@@ -1,6 +1,6 @@
-use crate::{InMemoryParameter, PipelineExecutionVariables};
+use crate::{ArcTopicDataValue, InMemoryParameter, PipelineExecutionVariables};
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId, TopicDataValue};
+use watchmen_model::{StdR, TenantId};
 use watchmen_runtime_model_kernel::ArcConstantParameter;
 
 pub struct CompiledConstantParameter {}
@@ -12,10 +12,7 @@ impl CompiledConstantParameter {
 }
 
 impl InMemoryParameter for CompiledConstantParameter {
-    fn value_from<'a>(
-        &self,
-        _variables: &'a PipelineExecutionVariables,
-    ) -> StdR<&'a TopicDataValue> {
+    fn value_from(&self, _variables: &PipelineExecutionVariables) -> StdR<Arc<ArcTopicDataValue>> {
         todo!("implement value_from for CompiledConstantParameter")
     }
 }
