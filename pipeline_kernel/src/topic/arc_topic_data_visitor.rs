@@ -4,7 +4,9 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErrCode, StdErrorCode, StdR, StringConverter, VariablePredefineFunctions};
+use watchmen_model::{
+    StdErr, StdErrCode, StdErrorCode, StdR, StringConverter, VariablePredefineFunctions,
+};
 
 pub enum TopicDataProperty {
     /// 0. property name,
@@ -34,42 +36,50 @@ impl TopicDataProperty {
 impl ArcTopicDataValue {
     /// try to count, can only apply to vec or map
     /// otherwise raise error by given functions
-    pub fn count<F1, F2>(&self, f1: F1, f2: F2) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn count<DecimalParseErr, NotSupport>(
+        &self,
+        decimal_parse_err: DecimalParseErr,
+        not_support: NotSupport,
+    ) -> StdR<Arc<ArcTopicDataValue>>
     where
         // decimal parse error
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        DecimalParseErr: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
         // functions not supported
-        F2: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         match self {
             ArcTopicDataValue::Vec(vec) => BigDecimal::from_usize(vec.len())
                 .map(|value| Ok(Arc::new(ArcTopicDataValue::Num(Arc::new(value)))))
-                .unwrap_or(f1()),
+                .unwrap_or(decimal_parse_err()),
             ArcTopicDataValue::Map(map) => BigDecimal::from_usize(map.len())
                 .map(|value| Ok(Arc::new(ArcTopicDataValue::Num(Arc::new(value)))))
-                .unwrap_or(f1()),
-            _ => f2(),
+                .unwrap_or(decimal_parse_err()),
+            _ => not_support(),
         }
     }
 
     /// get chars count of string, or decimal to string
-    pub fn length<F1, F2>(&self, f1: F1, f2: F2) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn length<DecimalParseErr, NotSupport>(
+        &self,
+        decimal_parse_err: DecimalParseErr,
+        not_support: NotSupport,
+    ) -> StdR<Arc<ArcTopicDataValue>>
     where
         // decimal parse error
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        DecimalParseErr: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
         // functions not supported
-        F2: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         match self {
             ArcTopicDataValue::Str(str) => BigDecimal::from_usize(str.chars().count())
                 .map(|value| Ok(Arc::new(ArcTopicDataValue::Num(Arc::new(value)))))
-                .unwrap_or(f1()),
+                .unwrap_or(decimal_parse_err()),
             ArcTopicDataValue::Num(num) => {
                 BigDecimal::from_usize(String::from_decimal(num).chars().count())
                     .map(|value| Ok(Arc::new(ArcTopicDataValue::Num(Arc::new(value)))))
-                    .unwrap_or(f1())
+                    .unwrap_or(decimal_parse_err())
             }
-            _ => f2(),
+            _ => not_support(),
         }
     }
 
@@ -79,10 +89,10 @@ impl ArcTopicDataValue {
     /// - bool -> maximum 2: true and false,
     /// - none -> maximum 1
     /// - vec, map -> cannot be removed as duplicates and are always added to the result.
-    pub fn distinct<F1>(&self, f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn distinct<NotSupport>(&self, not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         match self {
             ArcTopicDataValue::Vec(vec) => {
@@ -168,16 +178,20 @@ impl ArcTopicDataValue {
 
                 Ok(Arc::new(ArcTopicDataValue::Vec(Arc::new(distinct_values))))
             }
-            _ => f1(),
+            _ => not_support(),
         }
     }
 
     /// 1. return cloned string when self is string
     /// 2. return joined string when self is vec, and element of vec cannot be vec or map. note the none value is ignored
-    pub fn join<F1>(&self, sep: &str, f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn join<NotSupport>(
+        &self,
+        sep: &str,
+        not_support: NotSupport,
+    ) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         match self {
             ArcTopicDataValue::Str(str) => Ok(Arc::new(ArcTopicDataValue::Str(str.clone()))),
@@ -207,7 +221,7 @@ impl ArcTopicDataValue {
                                 segments.push(String::from_time(time));
                             }
                             ArcTopicDataValue::None => {}
-                            _ => return f1(),
+                            _ => return not_support(),
                         }
                     }
                     Ok(Arc::new(ArcTopicDataValue::Str(Arc::new(
@@ -215,7 +229,7 @@ impl ArcTopicDataValue {
                     ))))
                 }
             }
-            _ => f1(),
+            _ => not_support(),
         }
     }
 
@@ -223,38 +237,38 @@ impl ArcTopicDataValue {
     /// - if there is no element in vec, returns none.
     /// - all elements must, can be converted to one single type,
     /// - if there are datetime and date, returns date.
-    pub fn min<F1>(&self, f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn min<NotSupport>(&self, not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: Fn() -> StdErr,
     {
         // go through the elements first, in case there might be any parse occurs
         match self {
-            ArcTopicDataValue::Vec(vec) => Self::min_of(vec, f1),
-            _ => f1(),
+            ArcTopicDataValue::Vec(vec) => Self::min_of(vec, not_support),
+            _ => Err(not_support()),
         }
     }
 
-    pub fn max<F1>(&self, _f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn max<NotSupport>(&self, _not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: Fn() -> StdErr,
     {
         todo!("implement max for ArcTopicDataValue")
     }
 
-    pub fn sum<F1>(&self, _f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn sum<NotSupport>(&self, _not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         todo!("implement sum for ArcTopicDataValue")
     }
 
-    pub fn avg<F1>(&self, _f1: F1) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn avg<NotSupport>(&self, _not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        F1: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
     {
         todo!("implement avg for ArcTopicDataValue")
     }
@@ -277,7 +291,14 @@ pub trait TopicDataUtils {
     where
         Self: Debug,
     {
-        PipelineKernelErrorCode::VariableFuncNotSupported.msg(format!(
+        Err(self.err_function_not_supported(name, current_name))
+    }
+
+    fn err_function_not_supported(&self, name: &String, current_name: &String) -> StdErr
+    where
+        Self: Debug,
+    {
+        PipelineKernelErrorCode::VariableFuncNotSupported.e_msg(format!(
             "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
             name, current_name, &self
         ))
@@ -336,11 +357,11 @@ impl TopicDataUtils for ArcTopicData {
                             }
                             VariablePredefineFunctions::Min => {
                                 return data
-                                    .min(|| self.function_not_supported(name, current_name));
+                                    .min(|| self.err_function_not_supported(name, current_name));
                             }
                             VariablePredefineFunctions::Max => {
                                 return data
-                                    .max(|| self.function_not_supported(name, current_name));
+                                    .max(|| self.err_function_not_supported(name, current_name));
                             }
                             VariablePredefineFunctions::Sum => {
                                 return data

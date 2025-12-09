@@ -3,7 +3,7 @@ use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{DateTimeUtils, NumericUtils, StdR};
+use watchmen_model::{DateTimeUtils, NumericUtils, StdErr, StdR};
 
 trait MinmaxComparator<V: PartialOrd> {
     fn replace_self_if_greater_than(&mut self, b: &Arc<V>);
@@ -54,86 +54,158 @@ impl Minmax {
     }
 
     /// false means not supported detected
-    fn with_decimal(&mut self, decimal: &Arc<BigDecimal>) -> bool {
+    fn with_decimal<NotSupport>(
+        &mut self,
+        decimal: &Arc<BigDecimal>,
+        not_support: &NotSupport,
+    ) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_datetime || self.has_date || self.has_time {
-            false
+            Err(not_support())
         } else {
             self.has_decimal = true;
             self.min_decimal.replace_self_if_greater_than(decimal);
-            true
+            Ok(true)
         }
     }
 
     /// false means not supported detected
-    fn with_datetime(&mut self, datetime: &Arc<NaiveDateTime>) -> bool {
+    fn with_datetime<NotSupport>(
+        &mut self,
+        datetime: &Arc<NaiveDateTime>,
+        not_support: &NotSupport,
+    ) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_decimal || self.has_time {
-            false
+            Err(not_support())
         } else {
             self.has_datetime = true;
             self.min_datetime.replace_self_if_greater_than(datetime);
             // datetime also can be compared with date
             self.min_date
                 .replace_self_if_greater_than(&Arc::new(datetime.date()));
-            true
+            Ok(true)
         }
     }
 
     /// false means not supported detected
-    fn with_date(&mut self, date: &Arc<NaiveDate>) -> bool {
+    fn with_date<NotSupport>(
+        &mut self,
+        date: &Arc<NaiveDate>,
+        not_support: &NotSupport,
+    ) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_decimal || self.has_time {
-            false
+            Err(not_support())
         } else {
             self.has_date = true;
             self.min_date.replace_self_if_greater_than(date);
-            true
+            Ok(true)
         }
     }
 
     /// false means not supported detected
-    fn with_time(&mut self, time: &Arc<NaiveTime>) -> bool {
+    fn with_time<NotSupport>(
+        &mut self,
+        time: &Arc<NaiveTime>,
+        not_support: &NotSupport,
+    ) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_decimal || self.has_datetime || self.has_date {
-            false
+            Err(not_support())
         } else {
             self.has_time = true;
             self.min_time.replace_self_if_greater_than(time);
-            true
+            Ok(true)
         }
     }
 
     /// false means not supported detected
-    fn with_decimal_by_string_elements(&mut self) -> bool {
+    /// 1. process when [has_decimal] is true
+    ///    - error when not support detected
+    ///    - true when handled
+    /// 2. false when [has_decimal] is false
+    fn with_decimal_by_string_elements<NotSupport>(
+        &mut self,
+        not_support: &NotSupport,
+    ) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_decimal {
             for value in self.string_elements.clone().iter() {
                 if let Ok(decimal) = value.to_decimal() {
-                    self.with_decimal(&Arc::new(decimal));
+                    self.with_decimal(&Arc::new(decimal), not_support)?;
                 } else {
-                    return false;
+                    return Err(not_support());
                 }
             }
+            Ok(true)
+        } else {
+            Ok(false)
         }
-        true
     }
 
     /// false means not supported detected
-    fn with_date_by_string_elements(&mut self) -> bool {
+    /// 1. process when [has_date] is true
+    ///    - error when not support detected
+    ///    - true when handled
+    /// 2. false when [has_date] is false
+    fn with_date_by_string_elements<NotSupport>(&mut self, not_support: &NotSupport) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.has_date {
             for value in self.string_elements.clone().iter() {
                 if let Ok(date) = value.to_date_loose() {
-                    self.with_date(&Arc::new(date));
+                    self.with_date(&Arc::new(date), not_support)?;
                 } else {
-                    return false;
+                    return Err(not_support());
                 }
             }
+            Ok(true)
+        } else {
+            Ok(false)
         }
-        true
     }
 
     /// false means not supported detected
-    fn handle_string_elements(&mut self) -> bool {
+    fn handle_string_elements<NotSupport>(&mut self, not_support: &NotSupport) -> StdR<bool>
+    where
+        // functions not supported
+        NotSupport: Fn() -> StdErr,
+    {
         if self.string_elements.len() == 0 {
-            return true;
+            return Ok(true);
         }
-        // let _ = self.with_decimal_by_string_elements() && self.with_date_by_string_elements();
+
+        let mut handled = self.with_decimal_by_string_elements(not_support)?;
+        if !handled {
+            handled = self.with_date_by_string_elements(not_support)?;
+        }
+        if !handled {
+            handled = self.with_datetime_by_string_elements(not_support)?;
+        }
+        if !handled {
+            handled = self.with_time_by_string_elements(not_support)?;
+        }
+        if !handled {
+            self.with_unknown_by_string_elements(not_support)?;
+        }
         // } else if has_datetime {
         //     let mut downgrade_to_date = false;
         //     // There will still be strings that can only be parsed as the date type and cannot be parsed as datetime.
@@ -164,13 +236,16 @@ impl Minmax {
         //     // TODO no decimal/datetime/date/time, tricky thing!
         //     return not_support();
         // }
-        true
+        Ok(true)
     }
 
-    fn try_get_min_value<NotSupport>(&self, not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
+    fn try_get_min_value<NotSupport>(
+        &self,
+        not_support: &NotSupport,
+    ) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: Fn() -> StdErr,
     {
         if self.has_decimal {
             Ok(Arc::new(ArcTopicDataValue::Num(
@@ -191,7 +266,7 @@ impl Minmax {
         } else {
             // no decimal/datetime/date/time/string,
             // function is not supported, since don't know how to compare
-            not_support()
+            Err(not_support())
         }
     }
 }
@@ -203,7 +278,7 @@ pub trait ArcTopicDataValueMinmax {
     ) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
-        NotSupport: FnOnce() -> StdR<Arc<ArcTopicDataValue>>,
+        NotSupport: Fn() -> StdErr,
     {
         if vec.len() == 0 {
             return Ok(Arc::new(ArcTopicDataValue::None));
@@ -213,36 +288,28 @@ pub trait ArcTopicDataValueMinmax {
 
         for value in vec.iter() {
             match value.deref() {
-                ArcTopicDataValue::Str(str) => minmax.string_elements.push(str.clone()),
-                ArcTopicDataValue::Num(decimal) => {
-                    if minmax.with_decimal(decimal) {
-                        return not_support();
-                    }
-                }
-                ArcTopicDataValue::DateTime(datetime) => {
-                    if minmax.with_datetime(datetime) {
-                        return not_support();
-                    }
-                }
-                ArcTopicDataValue::Date(date) => {
-                    if minmax.with_date(date) {
-                        return not_support();
-                    }
-                }
-                ArcTopicDataValue::Time(time) => {
-                    if minmax.with_time(time) {
-                        return not_support();
-                    }
-                }
                 ArcTopicDataValue::None => {
                     return Ok(Arc::new(ArcTopicDataValue::None));
                 }
-                _ => return not_support(),
+                ArcTopicDataValue::Str(str) => minmax.string_elements.push(str.clone()),
+                ArcTopicDataValue::Num(decimal) => {
+                    minmax.with_decimal(decimal, &not_support)?;
+                }
+                ArcTopicDataValue::DateTime(datetime) => {
+                    minmax.with_datetime(datetime, &not_support)?;
+                }
+                ArcTopicDataValue::Date(date) => {
+                    minmax.with_date(date, &not_support)?;
+                }
+                ArcTopicDataValue::Time(time) => {
+                    minmax.with_time(time, &not_support)?;
+                }
+                _ => return Err(not_support()),
             }
         }
 
-        minmax.handle_string_elements();
-        minmax.try_get_min_value(not_support)
+        minmax.handle_string_elements(&not_support)?;
+        minmax.try_get_min_value(&not_support)
     }
 }
 
@@ -251,15 +318,28 @@ impl ArcTopicDataValueMinmax for ArcTopicDataValue {}
 #[cfg(test)]
 mod tests {
     use crate::topic::arc_topic_data_minmax::Minmax;
+    use crate::PipelineKernelErrorCode;
     use bigdecimal::BigDecimal;
     use std::str::FromStr;
     use std::sync::Arc;
+    use watchmen_model::StdErrorCode;
 
     #[test]
     fn test() {
         let mut minmax = Minmax::new();
-        minmax.with_decimal(&Arc::new(BigDecimal::from_str("100").unwrap()));
-        minmax.with_decimal(&Arc::new(BigDecimal::from_str("200").unwrap()));
+        let not_support = || PipelineKernelErrorCode::VariableFuncNotSupported.e();
+        minmax
+            .with_decimal(
+                &Arc::new(BigDecimal::from_str("100").unwrap()),
+                &not_support,
+            )
+            .expect("100 not supported");
+        minmax
+            .with_decimal(
+                &Arc::new(BigDecimal::from_str("200").unwrap()),
+                &not_support,
+            )
+            .expect("200 not supported");
         println!("{:?}", minmax);
     }
 }

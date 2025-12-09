@@ -13,6 +13,23 @@ pub trait StdErrorCode {
     fn err<R>(&self) -> StdR<R> {
         StdErr::code_only(self.code())
     }
+
+    fn e_msg<M>(&self, msg: M) -> StdErr
+    where
+        M: Into<String>,
+    {
+        StdErr {
+            code: self.code(),
+            details: Some(StdErrDetails::Str(msg.into())),
+        }
+    }
+
+    fn e(&self) -> StdErr {
+        StdErr {
+            code: self.code(),
+            details: None,
+        }
+    }
 }
 
 pub enum StdErrCode {
