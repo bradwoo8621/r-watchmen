@@ -1,4 +1,4 @@
-use crate::{ArcTopicData, ArcTopicDataValue, ArcTopicDataValueMinmax, PipelineKernelErrorCode};
+use crate::{ArcTopicData, ArcTopicDataValue, ArcTopicDataVecValueMinmax, PipelineKernelErrorCode};
 use bigdecimal::{BigDecimal, FromPrimitive};
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -242,19 +242,21 @@ impl ArcTopicDataValue {
         // functions not supported
         NotSupport: Fn() -> StdErr,
     {
-        // go through the elements first, in case there might be any parse occurs
         match self {
-            ArcTopicDataValue::Vec(vec) => Self::min_of(vec, not_support),
+            ArcTopicDataValue::Vec(vec) => vec.min_value(not_support),
             _ => Err(not_support()),
         }
     }
 
-    pub fn max<NotSupport>(&self, _not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
+    pub fn max<NotSupport>(&self, not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
     where
         // functions not supported
         NotSupport: Fn() -> StdErr,
     {
-        todo!("implement max for ArcTopicDataValue")
+        match self {
+            ArcTopicDataValue::Vec(vec) => vec.max_value(not_support),
+            _ => Err(not_support()),
+        }
     }
 
     pub fn sum<NotSupport>(&self, _not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
