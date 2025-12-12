@@ -11,9 +11,10 @@ pub enum ArcTopicDataValue {
     Str(Arc<String>),
     Num(Arc<BigDecimal>),
     Bool(bool),
-    Map(Arc<HashMap<String, Arc<ArcTopicDataValue>>>),
+    Map(ArcTopicData),
     Vec(Arc<Vec<Arc<ArcTopicDataValue>>>),
     None,
 }
 
-pub type ArcTopicData = Arc<HashMap<String, Arc<ArcTopicDataValue>>>;
+pub type ArcTopicDataMap = HashMap<String, Arc<ArcTopicDataValue>>;
+pub type ArcTopicData = Arc<ArcTopicDataMap>;

@@ -1,5 +1,4 @@
-use crate::{ArcTopicDataValue, DataPath, DataVisitorBase};
-use std::collections::HashMap;
+use crate::{ArcTopicDataMap, ArcTopicDataValue, DataPath, DataVisitorBase};
 use std::sync::Arc;
 use watchmen_model::StdR;
 
@@ -7,7 +6,7 @@ pub trait DataVisitor {
     fn value_of(&self, path: &DataPath) -> StdR<Arc<ArcTopicDataValue>>;
 }
 
-impl DataVisitor for HashMap<String, Arc<ArcTopicDataValue>> {
+impl DataVisitor for ArcTopicDataMap {
     fn value_of(&self, path: &DataPath) -> StdR<Arc<ArcTopicDataValue>> {
         match path {
             DataPath::Simple(parsed_path) => self.value_of_simple_path(parsed_path),

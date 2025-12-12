@@ -19,6 +19,7 @@ pub enum VariablePredefineFunctions {
     /// alias of [Slice]
     Substr,
     Find,
+    /// alias of [Find]
     Index,
     StartsWith,
     /// alias of [StartsWith]

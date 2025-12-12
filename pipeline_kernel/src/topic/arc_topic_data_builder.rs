@@ -1,4 +1,4 @@
-use crate::{ArcTopicData, ArcTopicDataValue};
+use crate::{ArcTopicData, ArcTopicDataMap, ArcTopicDataValue};
 use std::collections::HashMap;
 use std::sync::Arc;
 use watchmen_model::{TopicData, TopicDataValue};
@@ -22,7 +22,7 @@ pub trait ArcTopicDataBuilder {
         vec.into_iter().map(|v| Self::build_value(v)).collect()
     }
 
-    fn build_map(map: HashMap<String, TopicDataValue>) -> HashMap<String, Arc<ArcTopicDataValue>> {
+    fn build_map(map: HashMap<String, TopicDataValue>) -> ArcTopicDataMap {
         map.into_iter()
             .map(|(k, v)| (k, Self::build_value(v)))
             .collect()

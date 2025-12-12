@@ -1,42 +1,14 @@
 use crate::{
-    ArcTopicDataValue, DataPathSegment, ParsedDataPath, PipelineKernelErrorCode, PlainDataPath,
+    ArcTopicDataMap, ArcTopicDataValue, DataPathSegment, ParsedDataPath, PipelineKernelErrorCode,
+    PlainDataPath, VariablePredefineFunctionCaller,
 };
-use std::collections::HashMap;
-use std::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErr, StdErrCode, StdErrorCode, StdR, VariablePredefineFunctions};
+use watchmen_model::{StdErrorCode, StdR};
 
 pub trait DataVisitorBase {
-    fn decimal_parse_error<R>(&self, name: &String, current_name: &String) -> StdR<R>
-    where
-        Self: Debug,
-    {
-        StdErrCode::DecimalParse.msg(format!(
-            "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
-            name, current_name, &self
-        ))
-    }
-
-    fn function_not_supported<R>(&self, name: &String, current_name: &String) -> StdR<R>
-    where
-        Self: Debug,
-    {
-        Err(self.err_function_not_supported(name, current_name))
-    }
-
-    fn err_function_not_supported(&self, name: &String, current_name: &String) -> StdErr
-    where
-        Self: Debug,
-    {
-        PipelineKernelErrorCode::VariableFuncNotSupported.e_msg(format!(
-            "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
-            name, current_name, &self
-        ))
-    }
-
     /// returns empty vec when first segment identify the value is a vec type
-    fn none_value_of_first_segment(
+    fn transform_none_value_for_first_segment(
         &self,
         data_path: &ParsedDataPath,
     ) -> StdR<Arc<ArcTopicDataValue>> {
@@ -67,18 +39,10 @@ pub trait DataVisitorBase {
         full_path: &String,
     ) -> StdR<Arc<ArcTopicDataValue>>;
 
-    fn value_of_func(
-        &self,
-        value: &Arc<ArcTopicDataValue>,
-        func: VariablePredefineFunctions,
-        path: &String,
-        segment: &String,
-    ) -> StdR<Arc<ArcTopicDataValue>>;
-
     fn value_of_complex_path(&self, parsed_path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>>;
 }
 
-impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
+impl DataVisitorBase for ArcTopicDataMap {
     /// simple path has only one segment
     fn value_of_simple_path(&self, path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>> {
         // use none if name not exists, never mind the array or not
@@ -86,10 +50,32 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
         if value.is_some() {
             Ok(value.unwrap().clone())
         } else {
-            self.none_value_of_first_segment(path)
+            self.transform_none_value_for_first_segment(path)
         }
     }
 
+    /// get value from given data by given segment
+    /// only map and vec are supported
+    /// - when given data is a map, return none when nothing found from this map,
+    /// - when given data is a vec, then only none and map element are supported,
+    ///   and the returned data is a vec.
+    ///   - when given segment is identified as a vec,
+    ///     - ignore the none element of given vec,
+    ///     - ignore when nothing found from the map element of given vec,
+    ///     - ignore the none value found from the map element of given vec,
+    ///
+    /// e.g.
+    /// 1. given data is a map, as `{a: 1, b: 2, d: none}`,
+    ///    - segment is `a` -> `1`
+    ///    - segment is `c` -> `none`
+    ///    - segment is `d` -> `none`
+    /// 2. given data is a vec, as `[none, {a: [1, 2], b: 3, d: none}]`,
+    ///    - segment is `a`, [is_vec] is not true -> `[none, 1, 2]`,
+    ///    - segment is `a`, [is_vec] is true -> `[1, 2]`,
+    ///    - segment is `c`, [is_vec] is not true -> `[none, none]`
+    ///    - segment is `c`, [is_vec] is true -> `[]`
+    ///    - segment is `d`, [is_vec] is not true -> `[none, none]`
+    ///    - segment is `d`, [is_vec] is true -> `[]`
     fn value_of_plain_segment(
         &self,
         data: &Arc<ArcTopicDataValue>,
@@ -111,7 +97,11 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
                 let mut values = vec![];
                 for value in vec.iter() {
                     match value.deref() {
-                        ArcTopicDataValue::None => {}
+                        ArcTopicDataValue::None => {
+                            if !current_is_vec {
+                                values.push(value.clone());
+                            }
+                        }
                         ArcTopicDataValue::Map(map) => {
                             if let Some(value) = map.get(current_path) {
                                 match value.deref() {
@@ -148,44 +138,6 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
         }
     }
 
-    fn value_of_func(
-        &self,
-        value: &Arc<ArcTopicDataValue>,
-        func: VariablePredefineFunctions,
-        path: &String,
-        segment: &String,
-    ) -> StdR<Arc<ArcTopicDataValue>> {
-        let decimal_parse_err = || || self.decimal_parse_error(path, segment);
-        let not_support = || || self.function_not_supported(path, segment);
-        let not_support_e = || || self.err_function_not_supported(path, segment);
-
-        match func {
-            VariablePredefineFunctions::Count => value.count(decimal_parse_err(), not_support()),
-            VariablePredefineFunctions::Length | VariablePredefineFunctions::Len => {
-                value.length(decimal_parse_err(), not_support())
-            }
-            VariablePredefineFunctions::Join => value.join(",", not_support()),
-            VariablePredefineFunctions::Distinct => value.distinct(not_support()),
-            VariablePredefineFunctions::Min => value.min(not_support_e()),
-            VariablePredefineFunctions::MinNum => value.min_decimal(not_support_e()),
-            VariablePredefineFunctions::MinDate => value.min_date(not_support_e()),
-            VariablePredefineFunctions::MinDatetime | VariablePredefineFunctions::MinDt => {
-                value.min_datetime(not_support_e())
-            }
-            VariablePredefineFunctions::MinTime => value.min_time(not_support_e()),
-            VariablePredefineFunctions::Max => value.max(not_support_e()),
-            VariablePredefineFunctions::MaxNum => value.max_decimal(not_support_e()),
-            VariablePredefineFunctions::MaxDate => value.max_date(not_support_e()),
-            VariablePredefineFunctions::MaxDatetime | VariablePredefineFunctions::MaxDt => {
-                value.max_datetime(not_support_e())
-            }
-            VariablePredefineFunctions::MaxTime => value.max_time(not_support_e()),
-            VariablePredefineFunctions::Sum => value.sum(not_support()),
-            VariablePredefineFunctions::Avg => value.avg(not_support()),
-            _ => not_support()(),
-        }
-    }
-
     fn value_of_complex_path(&self, parsed_path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>> {
         let path = &parsed_path.path;
         let segments = &parsed_path.segments;
@@ -199,7 +151,7 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
                 let data = self.get(&first_segment.path);
                 // value not exists
                 if data.is_none() {
-                    return self.none_value_of_first_segment(parsed_path);
+                    return self.transform_none_value_for_first_segment(parsed_path);
                 }
 
                 // loop from index 1
@@ -211,19 +163,24 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
                     let current_is_vec = match segment {
                         DataPathSegment::Plain(plain_segment) => {
                             data = self.value_of_plain_segment(&data, plain_segment, path)?;
+                            // to identify that the returned data needs to be transformed or not
                             plain_segment.is_vec.unwrap_or(false)
                         }
-                        DataPathSegment::Func(_func_segment) => {
-                            // TODO
+                        DataPathSegment::Func(func_segment) => {
+                            data =
+                                VariablePredefineFunctionCaller::prepare(&self, path, func_segment)
+                                    .value_of(&data)?;
                             // never mind, just keep the value which returned
                             // no need to transform
                             false
                         }
                     };
 
+                    // recheck the data, is there none, empty vec, then there is no need to go deeper.
+                    // and when current segment says the value should be a vec, convert none to empty vec
+                    // and return directly
                     match data.deref() {
                         ArcTopicDataValue::None => {
-                            // no need to go deeper
                             return if current_is_vec {
                                 Ok(Arc::new(ArcTopicDataValue::Vec(vec![].into())))
                             } else {
@@ -231,7 +188,6 @@ impl DataVisitorBase for HashMap<String, Arc<ArcTopicDataValue>> {
                             };
                         }
                         ArcTopicDataValue::Vec(vec) => {
-                            // no need to go deeper, return empty vec directly
                             if vec.is_empty() {
                                 return Ok(data.clone());
                             }
