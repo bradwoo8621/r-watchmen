@@ -1,5 +1,5 @@
 use crate::{
-    ArcTopicDataMap, ArcTopicDataValue, DataPathSegment, ParsedDataPath, PipelineKernelErrorCode,
+    ArcTopicData, ArcTopicDataValue, DataPath, DataPathSegment, PipelineKernelErrorCode,
     PlainDataPath, VariablePredefineFunctionCaller,
 };
 use std::ops::Deref;
@@ -10,7 +10,7 @@ pub trait DataVisitorBase {
     /// returns empty vec when first segment identify the value is a vec type
     fn transform_none_value_for_first_segment(
         &self,
-        data_path: &ParsedDataPath,
+        data_path: &DataPath,
     ) -> StdR<Arc<ArcTopicDataValue>> {
         if data_path.segments.is_empty() {
             // never happen, at least segments has one element
@@ -30,8 +30,6 @@ pub trait DataVisitorBase {
         }
     }
 
-    fn value_of_simple_path(&self, parsed_path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>>;
-
     fn value_of_plain_segment(
         &self,
         data: &Arc<ArcTopicDataValue>,
@@ -39,21 +37,10 @@ pub trait DataVisitorBase {
         full_path: &String,
     ) -> StdR<Arc<ArcTopicDataValue>>;
 
-    fn value_of_complex_path(&self, parsed_path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>>;
+    fn value_of_path(&self, parsed_path: &DataPath) -> StdR<Arc<ArcTopicDataValue>>;
 }
 
-impl DataVisitorBase for ArcTopicDataMap {
-    /// simple path has only one segment
-    fn value_of_simple_path(&self, path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>> {
-        // use none if name not exists, never mind the array or not
-        let value = self.get(&path.path).clone();
-        if value.is_some() {
-            Ok(value.unwrap().clone())
-        } else {
-            self.transform_none_value_for_first_segment(path)
-        }
-    }
-
+impl DataVisitorBase for ArcTopicData {
     /// get value from given data by given segment
     /// only map and vec are supported
     /// - when given data is a map, return none when nothing found from this map,
@@ -138,70 +125,43 @@ impl DataVisitorBase for ArcTopicDataMap {
         }
     }
 
-    fn value_of_complex_path(&self, parsed_path: &ParsedDataPath) -> StdR<Arc<ArcTopicDataValue>> {
+    fn value_of_path(&self, parsed_path: &DataPath) -> StdR<Arc<ArcTopicDataValue>> {
         let path = &parsed_path.path;
-        let segments = &parsed_path.segments;
-        let first_segment = &segments[0];
-        match first_segment {
-            DataPathSegment::Func(_) => PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
-                "Data path[{}] is incorrect, first segment cannot be function.",
-                path
-            )),
-            DataPathSegment::Plain(first_segment) => {
-                let data = self.get(&first_segment.path);
-                // value not exists
-                if data.is_none() {
-                    return self.transform_none_value_for_first_segment(parsed_path);
+        let mut data = Arc::new(ArcTopicDataValue::Map(self.clone()));
+        for segment in &parsed_path.segments {
+            let current_is_vec = match segment {
+                DataPathSegment::Func(segment) => {
+                    data = VariablePredefineFunctionCaller::prepare(&self, path, segment)
+                        .value_of(&data)?;
+                    // never mind, just keep the value which returned, no need to do post transforming
+                    false
                 }
+                DataPathSegment::Plain(segment) => {
+                    data = self.value_of_plain_segment(&data, segment, path)?;
+                    segment.is_vec.unwrap_or(false)
+                }
+            };
 
-                // loop from index 1
-                let mut data = data.unwrap().clone();
-                let remain_count = segments.len() - 1;
-                let mut current_index = 1;
-                while current_index <= remain_count {
-                    let segment = &segments[current_index];
-                    let current_is_vec = match segment {
-                        DataPathSegment::Plain(plain_segment) => {
-                            data = self.value_of_plain_segment(&data, plain_segment, path)?;
-                            // to identify that the returned data needs to be transformed or not
-                            plain_segment.is_vec.unwrap_or(false)
-                        }
-                        DataPathSegment::Func(func_segment) => {
-                            data =
-                                VariablePredefineFunctionCaller::prepare(&self, path, func_segment)
-                                    .value_of(&data)?;
-                            // never mind, just keep the value which returned
-                            // no need to transform
-                            false
-                        }
+            // recheck the data, is there none, empty vec, then there is no need to go deeper.
+            // and when current segment says the value should be a vec, convert none to empty vec
+            // and return directly
+            match data.deref() {
+                ArcTopicDataValue::None => {
+                    return if current_is_vec {
+                        Ok(Arc::new(ArcTopicDataValue::Vec(vec![].into())))
+                    } else {
+                        Ok(Arc::new(ArcTopicDataValue::None))
                     };
-
-                    // recheck the data, is there none, empty vec, then there is no need to go deeper.
-                    // and when current segment says the value should be a vec, convert none to empty vec
-                    // and return directly
-                    match data.deref() {
-                        ArcTopicDataValue::None => {
-                            return if current_is_vec {
-                                Ok(Arc::new(ArcTopicDataValue::Vec(vec![].into())))
-                            } else {
-                                Ok(Arc::new(ArcTopicDataValue::None))
-                            };
-                        }
-                        ArcTopicDataValue::Vec(vec) => {
-                            if vec.is_empty() {
-                                return Ok(data.clone());
-                            }
-                        }
-                        _ => {}
-                    }
-
-                    // next loop
-                    current_index = current_index + 1
                 }
-
-                // return get value
-                Ok(data.clone())
+                ArcTopicDataValue::Vec(vec) => {
+                    if vec.is_empty() {
+                        return Ok(data.clone());
+                    }
+                }
+                _ => {}
             }
         }
+
+        Ok(data.clone())
     }
 }

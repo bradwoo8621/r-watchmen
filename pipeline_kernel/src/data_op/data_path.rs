@@ -16,7 +16,7 @@ pub enum FuncDataPathParamPart {
     DateTime(NaiveDateTime),
     Date(NaiveDate),
     Time(NaiveTime),
-    Variable(ParsedDataPath),
+    Variable(DataPath),
 }
 
 pub struct FuncDataPathParam {
@@ -35,13 +35,8 @@ pub enum DataPathSegment {
     Func(FuncDataPath),
 }
 
-pub struct ParsedDataPath {
+pub struct DataPath {
     pub path: String,
     /// at least one segment, which means no [.] included
     pub segments: Vec<DataPathSegment>,
-}
-
-pub enum DataPath {
-    Simple(ParsedDataPath),
-    Complex(ParsedDataPath),
 }
