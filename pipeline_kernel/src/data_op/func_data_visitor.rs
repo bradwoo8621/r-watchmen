@@ -34,7 +34,7 @@ impl<'a> VariablePredefineFunctionCaller<'a> {
 
     fn err_function_not_supported(&self) -> StdErr {
         PipelineKernelErrorCode::VariableFuncNotSupported.e_msg(format!(
-            "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
+            "Cannot retrieve[key={}, current={}] from [{:?}], caused by function not supported.",
             self.full_path, self.segment.path, self.root
         ))
     }

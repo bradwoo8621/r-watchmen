@@ -2,6 +2,7 @@ use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use watchmen_model::VariablePredefineFunctions;
 
+/// plain path, a string which is property name
 pub struct PlainDataPath {
     pub path: String,
     /// if this path refers to a factor, then should know that the factor is vec (array) or not
@@ -9,28 +10,30 @@ pub struct PlainDataPath {
     pub is_vec: Option<bool>,
 }
 
-pub enum FuncDataPathParamPart {
+pub enum DataPathValue {
     Str(String),
     Num(BigDecimal),
     Bool(bool),
     DateTime(NaiveDateTime),
     Date(NaiveDate),
     Time(NaiveTime),
-    Variable(DataPathSegment),
 }
 
-pub struct FuncDataPathParam {
+/// value path, a definite value
+/// only param of func can be a value path
+pub struct ValueDataPath {
     pub path: String,
-    pub part: FuncDataPathParamPart,
+    pub value: DataPathValue,
 }
 
 pub struct FuncDataPath {
     pub path: String,
     pub func: VariablePredefineFunctions,
-    pub params: Option<Vec<FuncDataPathParam>>,
+    pub params: Option<Vec<DataPathSegment>>,
 }
 
 pub enum DataPathSegment {
+    Value(ValueDataPath),
     Plain(PlainDataPath),
     Func(FuncDataPath),
 }
@@ -45,9 +48,6 @@ pub enum DataPathSegment {
 /// - Other functions are designed to with/without context. For example, `[a.&length]` is same as `[&length(a)]`.
 ///   With putting the context object as the first parameter.
 /// - If it is a function without parameters, then `[()]` is optional.
-/// - In function parameters, unless the parameter type is a string, the whitespace characters before and after the parameter will be ignored.
-///   e.g. [&yearDiff( d1 , d2 )] equals [&yearDiff(d1,d2)]: whitespaces ignored,
-///   e.g. [a.&find( )] means [a.find(" ")]: whitespaces not ignored.
 /// - It is allowed to use character concatenation with specific syntax to replace the `&concat` function. For example, `[a{a.b}b]`.
 ///   Here, the `[a]` and `[b]` will be regarded as a string,
 ///   while `[{a.b}]` will be treated as a standard path, which means getting the value of `[a.b]`.

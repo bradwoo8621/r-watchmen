@@ -7,29 +7,6 @@ use std::sync::Arc;
 use watchmen_model::{StdErrorCode, StdR};
 
 pub trait DataVisitorBase {
-    /// returns empty vec when first segment identify the value is a vec type
-    fn transform_none_value_for_first_segment(
-        &self,
-        data_path: &DataPath,
-    ) -> StdR<Arc<ArcTopicDataValue>> {
-        if data_path.segments.is_empty() {
-            // never happen, at least segments has one element
-            // anyway, return none
-            Ok(Arc::new(ArcTopicDataValue::None))
-        } else {
-            match &data_path.segments[0] {
-                DataPathSegment::Plain(first_segment) => {
-                    if first_segment.is_vec.unwrap_or(false) {
-                        Ok(Arc::new(ArcTopicDataValue::Vec(vec![].into())))
-                    } else {
-                        Ok(Arc::new(ArcTopicDataValue::None))
-                    }
-                }
-                DataPathSegment::Func(_) => Ok(Arc::new(ArcTopicDataValue::None)),
-            }
-        }
-    }
-
     fn value_of_plain_segment(
         &self,
         data: &Arc<ArcTopicDataValue>,
@@ -110,7 +87,7 @@ impl DataVisitorBase for ArcTopicData {
                         }
                         _ => {
                             return PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
-                                "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
+                                "Cannot retrieve[key={}, current={}] from [{:?}], caused by element type of vec is not none or map.",
                                 full_path, current_path, &self
                             ));
                         }
@@ -119,7 +96,7 @@ impl DataVisitorBase for ArcTopicData {
                 Ok(Arc::new(ArcTopicDataValue::Vec(Arc::new(values))))
             }
             _ => PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
-                "Cannot retrieve[key={}, current={}] as decimal from [{:?}].",
+                "Cannot retrieve[key={}, current={}] from [{:?}], caused by data type is not vec or map.",
                 full_path, current_path, &self
             )),
         }
@@ -139,6 +116,12 @@ impl DataVisitorBase for ArcTopicData {
                 DataPathSegment::Plain(segment) => {
                     data = self.value_of_plain_segment(&data, segment, path)?;
                     segment.is_vec.unwrap_or(false)
+                }
+                DataPathSegment::Value(segment) => {
+                    return PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
+                        "Cannot retrieve[key={}, current={}] from [{:?}], caused by current segment is a value path.",
+                        parsed_path.path, segment.path, &self
+                    ));
                 }
             };
 
