@@ -10,7 +10,7 @@ pub struct PlainDataPath {
     pub is_vec: Option<bool>,
 }
 
-pub enum DataPathValue {
+pub enum FuncParamValue {
     Str(String),
     Num(BigDecimal),
     Bool(bool),
@@ -21,19 +21,25 @@ pub enum DataPathValue {
 
 /// value path, a definite value
 /// only param of func can be a value path
-pub struct ValueDataPath {
+pub struct FuncParamValuePath {
     pub path: String,
-    pub value: DataPathValue,
+    pub value: FuncParamValue,
+}
+
+pub enum FuncDataPathParam {
+    Value(FuncParamValuePath),
+    Plain(PlainDataPath),
+    Func(FuncDataPath),
+    Path(DataPath),
 }
 
 pub struct FuncDataPath {
     pub path: String,
     pub func: VariablePredefineFunctions,
-    pub params: Option<Vec<DataPathSegment>>,
+    pub params: Option<Vec<FuncDataPathParam>>,
 }
 
 pub enum DataPathSegment {
-    Value(ValueDataPath),
     Plain(PlainDataPath),
     Func(FuncDataPath),
 }

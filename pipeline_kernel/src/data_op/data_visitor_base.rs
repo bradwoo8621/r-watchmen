@@ -117,12 +117,6 @@ impl DataVisitorBase for ArcTopicData {
                     data = self.value_of_plain_segment(&data, segment, path)?;
                     segment.is_vec.unwrap_or(false)
                 }
-                DataPathSegment::Value(segment) => {
-                    return PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
-                        "Cannot retrieve[key={}, current={}] from [{:?}], caused by current segment is a value path.",
-                        parsed_path.path, segment.path, &self
-                    ));
-                }
             };
 
             // recheck the data, is there none, empty vec, then there is no need to go deeper.
