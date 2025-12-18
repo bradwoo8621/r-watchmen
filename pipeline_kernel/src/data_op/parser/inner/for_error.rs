@@ -3,6 +3,11 @@ use watchmen_model::{StdErrCode, StdErrorCode, StdR};
 
 /// report error
 impl ParserInnerState<'_> {
+    pub fn incorrect_empty_path<R>(&self) -> StdR<R> {
+        PipelineKernelErrorCode::IncorrectDataPath
+            .msg("Incorrect data path, caused by not content determined.")
+    }
+
     fn incorrect_char_at_index<R>(&self, reason: &str) -> StdR<R> {
         PipelineKernelErrorCode::IncorrectDataPath.msg(format!(
             "Incorrect data path[{}], caused by incorrect {} at index[{}].",

@@ -3,6 +3,54 @@ use watchmen_model::StdR;
 
 /// consume path
 impl PathParser<'_> {
+    /// try to consume in-memory chars when dot met.
+    /// - not allowed:
+    ///   - continuous dots,
+    ///   - after left parenthesis,
+    ///   - after left brace,
+    ///   - after ampersand,
+    ///   - start of qualified path
+    fn consume_in_memory_chars_before_dot(&mut self) -> StdR<()> {
+        if self.inner.in_memory_chars_is_empty() {
+            // check the previous char
+            // all chars were consumed already
+            if let Some(previous_char) = self.inner.previous_char() {
+                match previous_char {
+                    // continuous dots, after left parenthesis, left brace, ampersand are not allowed
+                    '.' | '(' | '{' | '&' => self.inner.incorrect_dot(),
+                    _ => {
+                        self.inner.move_char_index_to_next();
+                        Ok(())
+                    }
+                }
+            } else {
+                // no char before dot, dot cannot be the first char
+                self.inner.incorrect_dot()
+            }
+        } else {
+            self.consume_in_memory_chars_as_plain_path(true)
+        }
+    }
+
+    fn consume_in_memory_chars_before_end(&mut self) -> StdR<()> {
+        if self.inner.in_memory_chars_is_empty() {
+            // all chars were consumed already
+            // check the previous char
+            if let Some(previous_char) = self.inner.previous_char() {
+                match previous_char {
+                    // no content after dot
+                    '.' => self.inner.incorrect_dot(),
+                    _ => Ok(()),
+                }
+            } else {
+                // no char before end, dot cannot be the first char
+                self.inner.incorrect_empty_path()
+            }
+        } else {
+            self.consume_in_memory_chars_as_plain_path(false)
+        }
+    }
+
     /// path can contain multiple segments
     /// each segment can be,
     /// - starts with [&]: function,
@@ -27,7 +75,7 @@ impl PathParser<'_> {
                     '{' => self.consume_literal_concat_function()?,
                     '}' => self.inner.incorrect_right_brace()?,
                     // segment end
-                    '.' => self.consume_in_memory_chars_as_plain_path(true)?,
+                    '.' => self.consume_in_memory_chars_before_dot()?,
                     ',' => self.inner.incorrect_comma()?,
                     // potential escape char, check next char
                     '\\' => self.inner.consume_potential_escape_char(),
@@ -39,9 +87,7 @@ impl PathParser<'_> {
             } else {
                 // reach the end of chars,
                 // consume the chars in-memory as plain path
-                if self.inner.in_memory_chars_is_not_empty() {
-                    self.consume_in_memory_chars_as_plain_path(false)?;
-                }
+                self.consume_in_memory_chars_before_end()?;
                 break;
             }
         }
@@ -66,11 +112,12 @@ impl PathParser<'_> {
                     '{' => self.consume_literal_concat_function()?,
                     // end
                     '}' => {
+                        // TODO in-memory chars could be empty, which leads error
                         self.consume_in_memory_chars_as_plain_path(true)?;
                         break;
                     }
                     // segment end
-                    '.' => self.consume_in_memory_chars_as_plain_path(true)?,
+                    '.' => self.consume_in_memory_chars_before_dot()?,
                     ',' => self.inner.incorrect_comma()?,
                     // potential escape char, check next char
                     '\\' => self.inner.consume_potential_escape_char(),

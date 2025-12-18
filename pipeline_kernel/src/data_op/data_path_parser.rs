@@ -61,8 +61,9 @@ impl DataPath {
 mod tests {
     mod helper {
         use crate::{DataPathSegment, FuncDataPathParam, FuncParamValue};
+        use watchmen_model::VariablePredefineFunctions;
 
-        pub fn assert_plain(segment: &DataPathSegment, value: &str) {
+        pub fn assert_plain_segment(segment: &DataPathSegment, value: &str) {
             assert!(matches!(segment, DataPathSegment::Plain(_)));
             match segment {
                 DataPathSegment::Plain(path) => {
@@ -99,10 +100,29 @@ mod tests {
                 _ => panic!(),
             }
         }
+
+        pub fn assert_func_segment<F1, F2>(segment: &DataPathSegment, path: &str, f1: F1, f2: F2)
+        where
+            F1: FnOnce(&VariablePredefineFunctions),
+            F2: FnOnce(&Vec<FuncDataPathParam>),
+        {
+            assert!(matches!(segment, DataPathSegment::Func(_)));
+            match segment {
+                DataPathSegment::Func(func_path) => {
+                    assert_eq!(func_path.path, path);
+                    f1(&func_path.func);
+                    assert!(func_path.params.is_some());
+                    if let Some(params) = &func_path.params {
+                        f2(params);
+                    }
+                }
+                _ => {}
+            }
+        }
     }
 
     mod plain {
-        use crate::data_op::data_path_parser::tests::helper::assert_plain;
+        use crate::data_op::data_path_parser::tests::helper::assert_plain_segment;
         use crate::DataPath;
 
         #[test]
@@ -112,7 +132,7 @@ mod tests {
             let path = DataPath::from_str("a").unwrap();
             assert_eq!(path.path, "a");
             assert_eq!(path.segments.len(), 1);
-            assert_plain(&path.segments[0], "a");
+            assert_plain_segment(&path.segments[0], "a");
         }
 
         #[test]
@@ -122,8 +142,8 @@ mod tests {
             let path = DataPath::from_str("a.b").unwrap();
             assert_eq!(path.path, "a.b");
             assert_eq!(path.segments.len(), 2);
-            assert_plain(&path.segments[0], "a");
-            assert_plain(&path.segments[1], "b");
+            assert_plain_segment(&path.segments[0], "a");
+            assert_plain_segment(&path.segments[1], "b");
         }
 
         #[test]
@@ -133,15 +153,17 @@ mod tests {
             let path = DataPath::from_str("a.b.c").unwrap();
             assert_eq!(path.path, "a.b.c");
             assert_eq!(path.segments.len(), 3);
-            assert_plain(&path.segments[0], "a");
-            assert_plain(&path.segments[1], "b");
-            assert_plain(&path.segments[2], "c");
+            assert_plain_segment(&path.segments[0], "a");
+            assert_plain_segment(&path.segments[1], "b");
+            assert_plain_segment(&path.segments[2], "c");
         }
     }
 
     mod literal_concat {
-        use crate::data_op::data_path_parser::tests::helper::{assert_param_plain, assert_param_str};
-        use crate::{DataPath, DataPathSegment};
+        use crate::data_op::data_path_parser::tests::helper::{
+            assert_func_segment, assert_param_plain, assert_param_str,
+        };
+        use crate::DataPath;
         use watchmen_model::VariablePredefineFunctions;
 
         #[test]
@@ -151,22 +173,15 @@ mod tests {
             let path = DataPath::from_str("{a}").unwrap();
             assert_eq!(path.path, "{a}");
             assert_eq!(path.segments.len(), 1);
-            assert!(matches!(&path.segments[0], DataPathSegment::Func(_)));
-            match &path.segments[0] {
-                DataPathSegment::Func(func_path) => {
-                    assert_eq!(func_path.path, "{a}");
-                    assert!(matches!(
-                        &func_path.func,
-                        VariablePredefineFunctions::Concat
-                    ));
-                    assert!(func_path.params.is_some());
-                    if let Some(params) = &func_path.params {
-                        assert_eq!(params.len(), 1);
-                        assert_param_plain(&params[0], "a");
-                    }
-                }
-                _ => {}
-            }
+            assert_func_segment(
+                &path.segments[0],
+                "{a}",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 1);
+                    assert_param_plain(&params[0], "a");
+                },
+            );
         }
 
         #[test]
@@ -176,23 +191,87 @@ mod tests {
             let path = DataPath::from_str("{a}b").unwrap();
             assert_eq!(path.path, "{a}b");
             assert_eq!(path.segments.len(), 1);
-            assert!(matches!(&path.segments[0], DataPathSegment::Func(_)));
-            match &path.segments[0] {
-                DataPathSegment::Func(func_path) => {
-                    assert_eq!(func_path.path, "{a}b");
-                    assert!(matches!(
-                        &func_path.func,
-                        VariablePredefineFunctions::Concat
-                    ));
-                    assert!(func_path.params.is_some());
-                    if let Some(params) = &func_path.params {
-                        assert_eq!(params.len(), 2);
-                        assert_param_plain(&params[0], "a");
-                        assert_param_str(&params[1], "b");
-                    }
-                }
-                _ => {}
-            }
+            assert_func_segment(
+                &path.segments[0],
+                "{a}b",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 2);
+                    assert_param_plain(&params[0], "a");
+                    assert_param_str(&params[1], "b");
+                },
+            );
+        }
+
+        #[test]
+        fn test__aLBbRB() {
+            println!("test__aLBbRB");
+
+            let path = DataPath::from_str("a{b}").unwrap();
+            assert_eq!(path.path, "a{b}");
+            assert_eq!(path.segments.len(), 1);
+            assert_func_segment(
+                &path.segments[0],
+                "a{b}",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 2);
+                    assert_param_str(&params[0], "a");
+                    assert_param_plain(&params[1], "b");
+                },
+            );
+        }
+
+        #[test]
+        fn test__aLBbRBc() {
+            println!("test__aLBbRBc");
+
+            let path = DataPath::from_str("a{b}c").unwrap();
+            assert_eq!(path.path, "a{b}c");
+            assert_eq!(path.segments.len(), 1);
+            assert_func_segment(
+                &path.segments[0],
+                "a{b}c",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 3);
+                    assert_param_str(&params[0], "a");
+                    assert_param_plain(&params[1], "b");
+                    assert_param_str(&params[2], "c");
+                },
+            );
+        }
+    }
+
+    mod plain__literal_concat {
+        use crate::data_op::data_path_parser::tests::helper::{
+            assert_func_segment, assert_param_plain, assert_param_str, assert_plain_segment,
+        };
+        use crate::DataPath;
+        use watchmen_model::VariablePredefineFunctions;
+
+        #[test]
+        fn test__a_b_c_dLBeRBf_g() {
+            println!("test__a_b_c_dLBeRBf_g");
+
+            let path = DataPath::from_str("a.b.c.d{e}f.g").unwrap();
+            assert_eq!(path.path, "a.b.c.d{e}f.g");
+            assert_eq!(path.segments.len(), 5);
+            assert_plain_segment(&path.segments[0], "a");
+            assert_plain_segment(&path.segments[1], "b");
+            assert_plain_segment(&path.segments[2], "c");
+            assert_func_segment(
+                &path.segments[3],
+                "d{e}f",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 3);
+                    assert_param_str(&params[0], "d");
+                    assert_param_plain(&params[1], "e");
+                    assert_param_str(&params[2], "f");
+                },
+            );
+            assert_plain_segment(&path.segments[4], "g");
         }
     }
 }

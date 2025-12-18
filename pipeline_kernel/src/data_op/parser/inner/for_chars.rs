@@ -8,6 +8,12 @@ impl ParserInnerState<'_> {
         self.char_index += 1;
     }
 
+    /// get previous char
+    /// char index not change
+    pub fn previous_char(&self) -> Option<&char> {
+        self.char_at(self.char_index as i64 - 1)
+    }
+
     /// get current char
     /// char index not change
     pub fn current_char(&self) -> Option<&char> {

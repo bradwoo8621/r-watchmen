@@ -14,6 +14,7 @@ impl PathParser<'_> {
                 inner.char_index,
             );
         }
+        
         self.segments.push(DataPathSegment::Plain(PlainDataPath {
             path: inner.in_memory_chars.clone(),
             is_vec: None,
