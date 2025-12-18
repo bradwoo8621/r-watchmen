@@ -36,14 +36,29 @@ impl PathParser<'_> {
         let start_index_of_func = inner.char_index;
         inner.consume_char_into_memory_and_move_char_index_to_next('&');
 
+        let mut whitespace_met = false;
         let mut will_start_params = false;
         loop {
             if let Some(char) = self.inner.current_char() {
                 match char {
                     // function name can be A-Za-z0-9_
-                    'A'..='Z' | 'a'..='z' | '0'..='9' | '_' => self
-                        .inner
-                        .consume_char_into_memory_and_move_char_index_to_next(*char),
+                    'A'..='Z' | 'a'..='z' | '0'..='9' | '_' => {
+                        if whitespace_met {
+                            self.inner.incorrect_function_name_contains_whitespace(
+                                start_index_of_func,
+                                self.inner.char_index + 1,
+                            )?;
+                        } else {
+                            self.inner
+                                .consume_char_into_memory_and_move_char_index_to_next(*char)
+                        }
+                    }
+                    // \s, ignore.
+                    // in python version, whitespaces after function name is allowed, compatible logic here
+                    ' ' | '\t' | '\r' | '\n' | '\x0C' | '\x0B' => {
+                        whitespace_met = true;
+                        self.inner.move_char_index_to_next();
+                    }
                     '&' => self.inner.incorrect_ampersand()?,
                     // end of function name, start function parameters
                     '(' => {
@@ -72,14 +87,15 @@ impl PathParser<'_> {
                 inner: ParserInnerState {
                     full_path: self.inner.full_path,
                     all_chars: self.inner.all_chars,
-                    // skip the "{"
+                    // skip the "("
                     char_index: self.inner.char_index + 1,
                     in_memory_chars: String::new(),
                 },
                 func,
                 params: vec![],
+                with_context: !self.segments.is_empty()
             };
-            func_parser.parse(!self.segments.is_empty())?;
+            func_parser.parse()?;
             // hand back
             // copy char index to current state
             self.inner.char_index = func_parser.inner.char_index;
@@ -87,7 +103,11 @@ impl PathParser<'_> {
             self.append_segment(DataPathSegment::Func(FuncDataPath {
                 path: self.inner.full_path[start_index_of_func..self.inner.char_index].to_string(),
                 func: func_parser.func,
-                params: Some(func_parser.params),
+                params: if func_parser.params.is_empty() {
+                    None
+                } else {
+                    Some(func_parser.params)
+                },
             }));
         } else {
             // no params followed

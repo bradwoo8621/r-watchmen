@@ -164,7 +164,7 @@ impl PathParser<'_> {
                 };
             } else {
                 // reach the end, no char anymore
-                // consume the chars in-memory as plain path
+                // "}" not encountered, raise error
                 return self.inner.incorrect_wrapped_path(index_of_left_brace);
             }
         }

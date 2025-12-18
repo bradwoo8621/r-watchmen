@@ -27,6 +27,9 @@ impl ParserInnerState<'_> {
                 '.' | ',' | '(' | ')' | '{' | '}' | '&' => {
                     self.consume_char_into_memory_and_move_char_index_to_next(*next_c);
                 }
+                't' => self.consume_char_into_memory_and_move_char_index_to_next('\t'),
+                'r' => self.consume_char_into_memory_and_move_char_index_to_next('\r'),
+                'n' => self.consume_char_into_memory_and_move_char_index_to_next('\n'),
                 _ => {
                     self.consume_char_into_memory_and_keep_char_index('\\');
                 }

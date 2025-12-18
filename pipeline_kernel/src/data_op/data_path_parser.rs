@@ -33,14 +33,17 @@ impl DataPath {
         })
     }
 
-    /// all kinds escapes, functions, variables
-    /// - \. escapes dot,
-    /// - \, escapes comma,
-    /// - \( escapes left parenthesis,
-    /// - \) escapes right parenthesis,
-    /// - \{ escapes left brace,
-    /// - \} escapes right brace,
-    /// - \& escapes ampersand,
+    /// all kinds escape chars, functions, variables
+    /// - \. escape of dot,
+    /// - \, escape of comma,
+    /// - \( escape of left parenthesis,
+    /// - \) escape of right parenthesis,
+    /// - \{ escape of left brace,
+    /// - \} escape of right brace,
+    /// - \& escape of ampersand,
+    /// - \t escape of tab,
+    /// - \r escape of carriage return,
+    /// - \n escape of newline,
     /// - abc{ef} escapes path [ef],
     ///
     /// and fail fast

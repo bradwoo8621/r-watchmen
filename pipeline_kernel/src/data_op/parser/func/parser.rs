@@ -5,4 +5,5 @@ pub struct FuncParser<'a> {
     pub inner: ParserInnerState<'a>,
     pub func: VariablePredefineFunctions,
     pub params: Vec<FuncDataPathParam>,
+    pub with_context: bool,
 }

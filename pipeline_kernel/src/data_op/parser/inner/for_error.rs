@@ -105,6 +105,20 @@ impl ParserInnerState<'_> {
         ))
     }
 
+    pub fn incorrect_function_name_contains_whitespace<R>(
+        &self,
+        start_char_index: usize,
+        end_char_index: usize,
+    ) -> StdR<R> {
+        self.error(format!(
+            "Incorrect data path[{}], caused by function name[{}] contains whitespace(s) at index[{}, {}].",
+            self.full_path,
+            self.full_path[start_char_index..end_char_index].to_string(),
+            start_char_index,
+            end_char_index
+        ))
+    }
+
     pub fn incorrect_function_no_param<R>(
         &self,
         start_char_index: usize,
@@ -130,6 +144,13 @@ impl ParserInnerState<'_> {
             self.full_path[start_char_index..end_char_index].to_string(),
             start_char_index,
             end_char_index
+        ))
+    }
+
+    pub fn incorrect_function_params<R>(&self, start_char_index: usize) -> StdR<R> {
+        self.error(format!(
+            "Incorrect data path[{}], caused by the closing \")\" is not matched, the opening \"(\" is at index [{}].",
+            self.full_path, start_char_index
         ))
     }
 
