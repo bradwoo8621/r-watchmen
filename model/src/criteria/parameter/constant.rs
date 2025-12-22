@@ -31,10 +31,10 @@ pub enum VariablePredefineFunctions {
     ///
     /// - [context]: string, decimal or none.
     /// - [none context]: returns 0.
-    #[restrict(none_context = true, max_param_count = 0)]
+    #[restrict(none_context = true, blank_context = true, max_param_count = 0)]
     Length,
     /// alias of [VariablePredefineFunctions::Length]. [x.&len], [x.&len()], [&len(x)]
-    #[restrict(none_context = true, max_param_count = 0)]
+    #[restrict(none_context = true, blank_context = true, max_param_count = 0)]
     Len,
     /// get substring of string.
     /// - from start (included) to end (excluded): [x.&slice(start, end)], [&slice(x, start, end)],
@@ -46,13 +46,13 @@ pub enum VariablePredefineFunctions {
     /// - [start]: zero-based index, negative not allowed.
     /// - [end]: zero-based index, negative not allowed.
     ///   the maximum length of the string will be used as the limit when end is out of range.
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 2)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 2)]
     Slice,
     /// alias of [VariablePredefineFunctions::Slice].
     /// - from start (included) to end (excluded): [x.&substr(start, end)], [&substr(x, start, end)],
     /// - from start (included) to end of string: [x.&substr(start)], [x.&substr(start, )], [&substr(x, start)], [&substr(x, start, )]
     /// - from 0 to end (excluded): [x.&substr(, end)], [&substr(x, , end)],
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 2)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 2)]
     Substr,
     /// find substring in string, return the start index, -1 if not found.
     /// [x.&find(substring)], [&find(x, substring)]
@@ -62,11 +62,11 @@ pub enum VariablePredefineFunctions {
     ///   - returns -1 when substring is not empty.
     ///   - returns 0 when substring is empty or none.
     /// - [substring]: string, none. if none, treat as empty string and returns 0.
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     Find,
     /// alias of [VariablePredefineFunctions::Find].
     /// [x.&index(substring)], [&index(x, substring)]
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     Index,
     /// check if string starts with substring, return boolean.
     /// [x.&startsWith(substring)], [&startsWith(x, substring)]
@@ -74,12 +74,12 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns true.
     /// - [substring]: string, none. if none, treat as empty string and returns true.
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     StartsWith,
     /// alias of [VariablePredefineFunctions::StartsWith].
     /// [x.&startswith(substring)], [&startswith(x, substring)]
     #[display = "&startswith"]
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     Startswith,
     /// check if string ends with substring, return boolean.
     /// [x.&endsWith(substring)], [&endsWith(x, substring)]
@@ -87,12 +87,12 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns true.
     /// - [substring]: string, none. if none, treat as empty string and returns true.
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     EndsWith,
     /// alias of [VariablePredefineFunctions::EndsWith].
     /// [x.&endswith(substring)], [&endswith(x, substring)]
     #[display = "&endswith"]
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     Endswith,
     /// strip leading and trailing string (default whitespaces) from string.
     /// - strip whitespaces: [x.&strip], [x.&strip()], [&strip(x)],
@@ -101,12 +101,12 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns empty string.
     /// - [stripString]: string, none. if none, treat as whitespaces.
-    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
     Strip,
     /// alias of [VariablePredefineFunctions::Strip]
     /// - trim whitespaces: [x.&trim], [x.&trim()], [&trim(x)],
     /// - trim given string: [x.&trim(trimString)], [&trim(x, trimString)]
-    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
     Trim,
     /// replace all occurrences of a substring with another substring in string.
     /// [x.&replace(oldSubstring, newSubstring)], [&replace(x, oldSubstring, newSubstring)]
@@ -115,7 +115,7 @@ pub enum VariablePredefineFunctions {
     /// - [none context] returns empty string.
     /// - [oldSubstring]: string, none. if none, treat as empty string.
     /// - [newSubstring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, min_param_count = 2, max_param_count = 2)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 2, max_param_count = 2)]
     Replace,
     /// replace first occurrence of a substring with another substring in string.
     /// [x.&replaceFirst(oldSubstring, newSubstring)], [&replaceFirst(x, oldSubstring, newSubstring)]
@@ -124,21 +124,21 @@ pub enum VariablePredefineFunctions {
     /// - [none context] returns empty string.
     /// - [oldSubstring]: string, none. if none, treat as empty string.
     /// - [newSubstring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, min_param_count = 2, max_param_count = 2)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 2, max_param_count = 2)]
     ReplaceFirst,
     /// convert string to upper case.
     /// [x.&upper], [x.&upper()], [&upper(x)]
     ///
     /// - [context]: string, none.
     /// - [none context] returns empty string.
-    #[restrict(none_context = true, max_param_count = 0)]
+    #[restrict(none_context = true, blank_context = true, max_param_count = 0)]
     Upper,
     /// convert string to lower case.
     /// [x.&lower], [x.&lower()], [&lower(x)]
     ///
     /// - [context]: string, none.
     /// - [none context] returns empty string.
-    #[restrict(none_context = true, max_param_count = 0)]
+    #[restrict(none_context = true, blank_context = true, max_param_count = 0)]
     Lower,
     /// check if string contains substring, return boolean.
     /// [x.&contains(substring)], [&contains(x, substring)]
@@ -148,7 +148,7 @@ pub enum VariablePredefineFunctions {
     ///   - returns false when given substring is not empty.
     ///   - returns true when given substring is empty,
     /// - [substring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
     Contains,
     /// split string to vec by given separator string (default comma).
     /// - split by comma: [x.&split], [x.&split()], [&split(x)],
@@ -159,7 +159,7 @@ pub enum VariablePredefineFunctions {
     ///   - returns vec with single empty string element when given separator is not empty.
     ///   - returns empty vec when given separator is empty,
     /// - [separator]: string, none. if none, treat as comma.
-    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
     Split,
     /// concatenate multiple strings to one string.
     /// - [x.&concat(y, ...)], [&concat(x, y, ...)]
@@ -169,7 +169,7 @@ pub enum VariablePredefineFunctions {
     /// - [y, ...]: strings or nones. none values are ignored.
     ///
     /// return empty string when values are all none.
-    #[restrict(none_context = true, min_param_count = 1)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 1)]
     Concat,
     /// concatenate multiple strings in vec to one string with separator
     /// - [x.&concatWith(separator, y, ...)], [&concatWith(x, separator, y, ...)].
@@ -179,7 +179,7 @@ pub enum VariablePredefineFunctions {
     /// - [y, ...]: strings or nones. none values are ignored.
     ///
     /// return empty string when values are all none.
-    #[restrict(none_context = true, min_param_count = 2)]
+    #[restrict(none_context = true, blank_context = true, min_param_count = 2)]
     ConcatWith,
     /// join the elements of vec to a string, [only in-memory]
     /// - join with comma: [x.join], [x.&join()], [&join(x)]

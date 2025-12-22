@@ -107,8 +107,8 @@ impl PathParser<'_> {
         if self.inner.in_memory_chars_is_not_empty() {
             // create a value path
             params.push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: self.inner.in_memory_chars.clone(),
-                value: FuncParamValue::Str(self.inner.in_memory_chars.clone()),
+                path: self.inner.clone_in_memory_chars(),
+                value: FuncParamValue::Str(self.inner.clone_in_memory_chars()),
             }));
             self.inner.clear_in_memory_chars();
         }

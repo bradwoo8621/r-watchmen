@@ -15,8 +15,8 @@ impl LiteralConcatFuncParser<'_> {
 
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: inner.in_memory_chars.clone(),
-                value: FuncParamValue::Str(inner.in_memory_chars.clone()),
+                path: inner.clone_in_memory_chars(),
+                value: FuncParamValue::Str(inner.clone_in_memory_chars()),
             }));
 
         inner.clear_in_memory_chars();

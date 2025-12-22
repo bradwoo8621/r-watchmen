@@ -4,21 +4,19 @@ use watchmen_model::{StdR, VariablePredefineFunctions};
 /// consume function
 impl PathParser<'_> {
     /// consume in-memory chars as a function name.
-    /// the in-memory chars never be empty, at least a [{] in it.
+    /// the in-memory chars never be empty, at least a [&] in it.
     /// and clear in-memory chars if consumed, will not move char index
     fn consume_in_memory_chars_as_func_name(&mut self) -> StdR<VariablePredefineFunctions> {
-        let in_memory_chars = &self.inner.in_memory_chars;
-        if in_memory_chars.len() <= 1 {
-            self.inner
-                .incorrect_empty_function_name(self.inner.char_index - 1)
-        } else if let Some(func) = VariablePredefineFunctions::try_parse(in_memory_chars) {
+        let in_memory_chars_count = self.inner.in_memory_chars_count();
+        if in_memory_chars_count <= 1 {
+            self.incorrect_empty_function_name()
+        } else if let Some(func) =
+            VariablePredefineFunctions::try_parse(&self.inner.in_memory_chars)
+        {
             self.inner.clear_in_memory_chars();
             Ok(func)
         } else {
-            self.inner.incorrect_function_name(
-                self.inner.char_index - in_memory_chars.len(),
-                self.inner.char_index,
-            )
+            self.incorrect_function_name(in_memory_chars_count)
         }
     }
 
@@ -44,10 +42,7 @@ impl PathParser<'_> {
                     // function name can be A-Za-z0-9_
                     'A'..='Z' | 'a'..='z' | '0'..='9' | '_' => {
                         if whitespace_met {
-                            self.inner.incorrect_function_name_contains_whitespace(
-                                start_index_of_func,
-                                self.inner.char_index + 1,
-                            )?;
+                            self.incorrect_function_name_contains_whitespace(start_index_of_func)?;
                         } else {
                             self.inner
                                 .consume_char_into_memory_and_move_char_index_to_next(*char)
@@ -72,7 +67,7 @@ impl PathParser<'_> {
                     '.' => break,
                     // end of function name, if it is in parameter slot
                     ',' => break,
-                    _ => self.inner.incorrect_function_name_char(*char)?,
+                    _ => self.incorrect_function_name_char(*char)?,
                 }
             } else {
                 // reach the end, no char anymore
@@ -84,9 +79,7 @@ impl PathParser<'_> {
         // check has context and allowable
         let has_context = !self.segments.is_empty();
         if !func.require_context() && has_context {
-            return self
-                .inner
-                .incorrect_function_has_context(start_index_of_func, self.inner.char_index);
+            return self.incorrect_function_has_context(start_index_of_func);
         }
 
         if will_start_params {
@@ -124,18 +117,15 @@ impl PathParser<'_> {
             // - has no context and not context disallowed, which means context
             let min_param_count = func.min_param_count();
             if min_param_count > 0 || !has_context {
-                return self.inner.incorrect_function_no_param(
-                    self.inner.char_index - func.to_string().len(),
-                    self.inner.char_index,
-                );
+                return self.incorrect_function_no_param(&func);
+            } else {
+                // func with has no param
+                self.append_segment(DataPathSegment::Func(FuncDataPath {
+                    path: func.to_string(),
+                    func,
+                    params: None,
+                }));
             }
-
-            // func with has no param
-            self.append_segment(DataPathSegment::Func(FuncDataPath {
-                path: func.to_string(),
-                func,
-                params: None,
-            }))
         }
 
         Ok(())

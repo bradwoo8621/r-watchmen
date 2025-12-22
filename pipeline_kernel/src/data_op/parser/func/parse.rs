@@ -1,10 +1,92 @@
-use crate::FuncParser;
+use crate::{FuncDataPathParam, FuncParamValue, FuncParamValuePath, FuncParser};
 use watchmen_model::StdR;
 
 impl FuncParser<'_> {
     fn parse_param(&mut self) -> StdR<()> {
         // TODO
         Ok(())
+    }
+
+    fn check_tailing_whitespaces_when_param_parsed(&self) -> StdR<()> {
+        if self.inner.in_memory_chars_is_not_empty() {
+            // never happens, all chars should be consumed in parse_param
+            self.incorrect_function_param_tailing_whitespaces(self.inner.in_memory_chars_count())
+        } else {
+            Ok(())
+        }
+    }
+
+    /// consume in-memory chars as blank string parameter.
+    /// and clear in-memory chars
+    fn append_blank_param(&mut self) -> StdR<()> {
+        self.params
+            .push(FuncDataPathParam::Value(FuncParamValuePath {
+                path: self.inner.clone_in_memory_chars(),
+                value: FuncParamValue::Str(self.inner.clone_in_memory_chars()),
+            }));
+
+        self.inner.clear_in_memory_chars();
+
+        Ok(())
+    }
+
+    /// consume in-memory chars as none parameter.
+    /// and clear in-memory chars
+    ///
+    /// note the in-memory chars might not empty, it is treated as none here.
+    fn append_none_param(&mut self) -> StdR<()> {
+        self.params
+            .push(FuncDataPathParam::Value(FuncParamValuePath {
+                path: self.inner.clone_in_memory_chars(),
+                value: FuncParamValue::None,
+            }));
+
+        self.inner.clear_in_memory_chars();
+
+        Ok(())
+    }
+
+    fn end_param_at_0(&mut self) -> StdR<()> {
+        let parsed_count = self.params.len();
+        if parsed_count != 0 {
+            return self.check_tailing_whitespaces_when_param_parsed();
+        }
+
+        if self.func.require_context() {
+            // current is context
+            if self.inner.in_memory_chars_is_not_empty() {
+                // there are chars in memory
+                if self.func.allow_blank_context() {
+                    // context allows string
+                    self.append_blank_param()
+                } else if self.func.allow_none_context() {
+                    self.append_none_param()
+                } else {
+                    // context does not allow none, raise error
+                    self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+                }
+            } else {
+                // no char in memory, check none is acceptable or not
+                if self.func.allow_none_context() {
+                    self.append_none_param()
+                } else {
+                    // context does not allow none, raise error
+                    self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+                }
+            }
+        } else {
+            // current is parameter
+            let max_param_count = self.func.max_param_count();
+            if let Some(max_count) = max_param_count {
+                if max_count == 0 {
+                    // no parameter allowed, simply ignore
+                    return Ok(());
+                }
+            }
+
+            // TODO at least one parameter required, or no limit
+            Ok(())
+        }
     }
 
     /// end param parse when one of [,)] detected
@@ -22,37 +104,14 @@ impl FuncParser<'_> {
     ///   - none of above accepted, raise error (since blank plain path is not accepted).
     /// move char index to next at last
     fn end_param(&mut self, param_index: usize) -> StdR<()> {
-        if param_index == self.params.len() {
-            if let Some(max_param_count) = self.func.max_param_count() {
-                if max_param_count == 0 && param_index == 0 {
-                    // no param allowed, and param index is 0
-                    // ignore the in-memory chars
-                    self.inner.move_char_index_to_next();
-
-                    return Ok(());
-                }
-            }
-
-            let real_param_index = if !self.with_context && self.func.require_context() {
-                param_index as i64 - 1
-            } else {
-                param_index as i64
-            };
-
-            // TODO
-            if self.inner.in_memory_chars_is_empty() {
-                // not parsed yet, check in-memory chars
-                // if self.func.accept_empty_str_at(real_param_index) {
-                // } else if self.func.accept_none_at(real_param_index) {
-                // } else {
-                // }
-            } else {
-                // if self.func.accept_blank_str_at(real_param_index) {
-                // } else if self.func.accept_empty_str_at(real_param_index) {
-                // } else if self.func.accept_none_at(real_param_index) {
-                // } else {
-                // }
-            }
+        let parsed_count = self.params.len();
+        if param_index == 0 {
+            // no parameter parsed, current is the first parameter.
+            self.end_param_at_0()?
+        } else if parsed_count < param_index {
+        } else {
+            // already parsed, do nothing
+            self.check_tailing_whitespaces_when_param_parsed()?;
         }
 
         // move to next char, skip the ")" or ","
@@ -151,9 +210,7 @@ impl FuncParser<'_> {
             } else {
                 // reach the end, no char anymore
                 // ")" not encountered, raise error
-                return self
-                    .inner
-                    .incorrect_function_params(index_of_left_parenthesis);
+                return self.incorrect_function_params_not_close(index_of_left_parenthesis);
             }
         }
 

@@ -17,6 +17,7 @@ pub enum FuncParamValue {
     DateTime(NaiveDateTime),
     Date(NaiveDate),
     Time(NaiveTime),
+    None,
 }
 
 /// value path, a definite value

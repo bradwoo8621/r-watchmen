@@ -9,6 +9,7 @@ struct VPFRestriction<'a> {
     name: &'a Ident,
     context: bool,
     none_context: Option<bool>,
+    blank_context: Option<bool>,
     min_param_count: usize,
     max_param_count: Option<usize>,
 }
@@ -33,6 +34,18 @@ fn read_none_context_value(ident: &Ident, value: &MetaNameValue) -> bool {
     }
     panic!(
         "For #[restrict(none_context)] at [{}], expected bool literal.",
+        ident
+    )
+}
+
+fn read_blank_context_value(ident: &Ident, value: &MetaNameValue) -> bool {
+    if let Expr::Lit(expr_lit) = &value.value {
+        if let Lit::Bool(lit) = &expr_lit.lit {
+            return lit.value;
+        }
+    }
+    panic!(
+        "For #[restrict(blank_context)] at [{}], expected bool literal.",
         ident
     )
 }
@@ -77,9 +90,10 @@ fn read_max_param_count_value(ident: &Ident, value: &MetaNameValue) -> Option<us
 
 fn get_restriction(variant: &'_ Variant) -> VPFRestriction<'_> {
     let mut context = true;
+    let mut blank_context: Option<bool> = None;
+    let mut none_context: Option<bool> = None;
     let mut min_param_count: usize = 0;
     let mut max_param_count: Option<usize> = None;
-    let mut none_context: Option<bool> = None;
 
     for attr in &variant.attrs {
         if let Meta::List(list) = &attr.meta {
@@ -89,17 +103,19 @@ fn get_restriction(variant: &'_ Variant) -> VPFRestriction<'_> {
                     .parse(TokenStream::from(list.tokens.clone()))
                     .expect(format!("Unrecognized attribute #[restrict(...)] at [{}], \
                     valid format are \
-                    [context = bool, none_context = bool, min_param_count = usize, max_param_count = usize].", &variant.ident).as_str());
+                    [context = bool, none_context = bool, blank_context = bool, min_param_count = usize, max_param_count = usize].", &variant.ident).as_str());
                 args_parsed.iter().for_each(|arg| {
                     let arg_path = &arg.path;
                     if arg_path.is_ident("context") {
                         context = read_context_value(&variant.ident, arg);
+                    } else if arg_path.is_ident("none_context") {
+                        none_context = Some(read_none_context_value(&variant.ident, arg));
+                    } else if arg_path.is_ident("blank_context") {
+                        blank_context = Some(read_blank_context_value(&variant.ident, arg));
                     } else if arg_path.is_ident("min_param_count") {
                         min_param_count = read_min_param_count_value(&variant.ident, arg);
                     } else if arg_path.is_ident("max_param_count") {
                         max_param_count = read_max_param_count_value(&variant.ident, arg);
-                    } else if arg_path.is_ident("none_context") {
-                        none_context = Some(read_none_context_value(&variant.ident, arg));
                     } else {
                         panic!(
                             "Unrecognized attribute #[restrict({})] at [{}].",
@@ -132,6 +148,7 @@ fn get_restriction(variant: &'_ Variant) -> VPFRestriction<'_> {
         name: &variant.ident,
         context,
         none_context,
+        blank_context,
         min_param_count,
         max_param_count,
     }
@@ -157,6 +174,17 @@ pub fn impl_vpf_enum(item: TokenStream) -> TokenStream {
         let for_none_context = variants.iter().map(|var| {
             let variant_name = var.name;
             match var.none_context {
+                Some(allow) => quote! {
+                    #name::#variant_name => #allow,
+                },
+                None => quote! {
+                    #name::#variant_name => false,
+                },
+            }
+        });
+        let for_blank_context = variants.iter().map(|var| {
+            let variant_name = var.name;
+            match var.blank_context {
                 Some(allow) => quote! {
                     #name::#variant_name => #allow,
                 },
@@ -198,6 +226,14 @@ pub fn impl_vpf_enum(item: TokenStream) -> TokenStream {
                 pub fn allow_none_context(&self) -> bool {
                     match self {
                         #(#for_none_context)*
+                    }
+                }
+
+                /// whether the function allow blank or empty string as context.
+                /// returns false if the function require_context is false (context is not allowed).
+                pub fn allow_blank_context(&self) -> bool {
+                    match self {
+                        #(#for_blank_context)*
                     }
                 }
 

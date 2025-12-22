@@ -56,7 +56,7 @@ impl PathParser<'_> {
                 }
             } else {
                 // no char before end, empty path is not allowed
-                self.inner.incorrect_empty_path()
+                self.incorrect_empty_path()
             }
         } else {
             self.consume_in_memory_chars_as_plain_path(false)
@@ -165,7 +165,7 @@ impl PathParser<'_> {
             } else {
                 // reach the end, no char anymore
                 // "}" not encountered, raise error
-                return self.inner.incorrect_wrapped_path(index_of_left_brace);
+                return self.incorrect_wrapped_path(index_of_left_brace);
             }
         }
 

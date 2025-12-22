@@ -5,13 +5,13 @@ impl ParserInnerState<'_> {
     /// append given char to in-memory chars
     /// and move char index to next
     pub fn consume_char_into_memory_and_keep_char_index(&mut self, char: char) {
-        self.in_memory_chars.push(char);
+        self.collect_char_into_memory(char);
     }
 
     /// append given char to in-memory chars
     /// and move char index to next
     pub fn consume_char_into_memory_and_move_char_index_to_next(&mut self, char: char) {
-        self.in_memory_chars.push(char);
+        self.collect_char_into_memory(char);
         self.move_char_index_to_next();
     }
 

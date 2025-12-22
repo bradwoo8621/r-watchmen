@@ -20,10 +20,7 @@ impl FuncParser<'_> {
 
         if self.with_context && !self.func.require_context() {
             // basically, never happen
-            return self.inner.incorrect_function_has_context(
-                self.start_char_index_of_func,
-                self.inner.char_index,
-            );
+            return self.incorrect_function_has_context();
         }
 
         let max_param_count = max_param_count.unwrap();
@@ -38,10 +35,8 @@ impl FuncParser<'_> {
         let at_least_param_count =
             parsed_param_count + param_on_air_count + more_param_count - context_param_count;
         if at_least_param_count > max_param_count {
-            return self.inner.incorrect_function_param_over_max_count(
-                &self.func,
+            return self.incorrect_function_param_over_max_count(
                 index_of_left_parenthesis,
-                self.inner.char_index,
                 max_param_count,
             );
         }
