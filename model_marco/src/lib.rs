@@ -2,7 +2,7 @@ mod enum_adapt;
 mod model_adapt;
 mod utils;
 
-use crate::enum_adapt::{impl_display, impl_enum_type, impl_serde, impl_str_enum};
+use crate::enum_adapt::{impl_display, impl_enum_type, impl_serde, impl_str_enum, impl_vpf_enum};
 use proc_macro::TokenStream;
 
 /// Adapt the model struct or enum to various traits and fields based on the provided attributes.
@@ -112,4 +112,9 @@ pub fn impl_various_struct_types_form_enum(item: TokenStream) -> TokenStream {
 #[proc_macro_derive(StrEnum, attributes(pattern, display))]
 pub fn impl_str_enum_form_enum(item: TokenStream) -> TokenStream {
     impl_str_enum(item)
+}
+
+#[proc_macro_derive(VPF, attributes(restrict))]
+pub fn impl_vpf_enum_for_enum(item: TokenStream) -> TokenStream {
+    impl_vpf_enum(item)
 }

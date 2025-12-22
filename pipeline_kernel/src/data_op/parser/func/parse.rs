@@ -7,10 +7,57 @@ impl FuncParser<'_> {
         Ok(())
     }
 
-    fn end_param(&mut self) -> StdR<()> {
-        // TODO
+    /// end param parse when one of [,)] detected
+    /// check parsed parameters count, if given param index already parsed (by [parse_param]),
+    /// then do nothing.
+    /// otherwise check the in-memory chars,
+    /// - not empty,
+    ///   - check function accept none in current param index or not
+    ///   - check function accept blank string in current param index or not
+    ///   - check function accept empty string in current param index or not
+    ///   - none of above accepted, raise error (since blank plain path is not accepted).
+    /// - empty,
+    ///   - check function accept none in current param index or not
+    ///   - check function accept empty string in current param index or not
+    ///   - none of above accepted, raise error (since blank plain path is not accepted).
+    /// move char index to next at last
+    fn end_param(&mut self, param_index: usize) -> StdR<()> {
+        if param_index == self.params.len() {
+            if let Some(max_param_count) = self.func.max_param_count() {
+                if max_param_count == 0 && param_index == 0 {
+                    // no param allowed, and param index is 0
+                    // ignore the in-memory chars
+                    self.inner.move_char_index_to_next();
+
+                    return Ok(());
+                }
+            }
+
+            let real_param_index = if !self.with_context && self.func.require_context() {
+                param_index as i64 - 1
+            } else {
+                param_index as i64
+            };
+
+            // TODO
+            if self.inner.in_memory_chars_is_empty() {
+                // not parsed yet, check in-memory chars
+                // if self.func.accept_empty_str_at(real_param_index) {
+                // } else if self.func.accept_none_at(real_param_index) {
+                // } else {
+                // }
+            } else {
+                // if self.func.accept_blank_str_at(real_param_index) {
+                // } else if self.func.accept_empty_str_at(real_param_index) {
+                // } else if self.func.accept_none_at(real_param_index) {
+                // } else {
+                // }
+            }
+        }
+
         // move to next char, skip the ")" or ","
         self.inner.move_char_index_to_next();
+
         Ok(())
     }
 
@@ -20,7 +67,7 @@ impl FuncParser<'_> {
         param_index: usize,
     ) -> StdR<()> {
         self.check_param_count_before_right_parenthesis(index_of_left_parenthesis, param_index)?;
-        self.end_param()
+        self.end_param(param_index)
     }
 
     /// it is not the last parameter of function, there is one more parameter will be parsed after comma.
@@ -30,7 +77,7 @@ impl FuncParser<'_> {
         param_index: usize,
     ) -> StdR<()> {
         self.check_param_count_before_comma(index_of_left_parenthesis, param_index)?;
-        self.end_param()
+        self.end_param(param_index)
     }
 
     fn finalize_content(&mut self) -> StdR<()> {
@@ -57,7 +104,7 @@ impl FuncParser<'_> {
     pub fn parse(&mut self) -> StdR<()> {
         let index_of_left_parenthesis = self.inner.char_index - 1;
 
-        // total parsed parameter count
+        // total parsed parameter count, include context if not with context currently
         let mut param_index: usize = 0;
         let mut whitespace_met = true;
         loop {

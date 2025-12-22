@@ -1,227 +1,447 @@
 use crate::{BaseDataModel, Parameter, ParameterKind, StdErrCode, StdErrorCode, StdR, Storable};
-use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
+use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VPF};
 
-#[derive(Display, Serde, StrEnum)]
+/// predefined functions for variable parameters.
+///
+/// each function has restrictions:
+/// - context: [context] refers to the execution context of a function.
+///   For example, if it is [a.&b], then [a] is the execution context of function [b].
+///   If a function allows a context, then when no execution context is provided,
+///   the first parameter of the function is considered to be the execution context.
+///   if false, the function is not allowed to have a `context`.
+/// - min_param_count: minimum number of parameters the function requires.
+/// - max_param_count: maximum number of parameters the function can accept, if 0, then no parameter allowed.
+///   if None, then no limit.
+#[derive(Display, Serde, StrEnum, VPF)]
 #[pattern = "ampersand-prefix"]
 pub enum VariablePredefineFunctions {
     // Sequence functions
-    /// get next sequence number, [only in-memory]
+    /// get next sequence number, [only in-memory]. \[&nextSeq], \[&nextSeq()]
+    #[restrict(context = false, max_param_count = 0)]
     NextSeq,
     // Aggregation functions
-    /// count of vec or map, [only in-memory]
+    /// count of vec or map, [only in-memory]. [x.&count], [x.&count()], \[&count(x)]
+    ///
+    /// - [context]: vec, map or none.
+    /// - [none context]: returns 0.
+    #[restrict(none_context = true, max_param_count = 0)]
     Count,
     // String functions
-    /// chars count of string or decimal (to string)
+    /// chars count of string or decimal (to string). [x.&length], [x.&length()], \[&length(x)]
+    ///
+    /// - [context]: string, decimal or none.
+    /// - [none context]: returns 0.
+    #[restrict(none_context = true, max_param_count = 0)]
     Length,
-    /// alias of [Length]
+    /// alias of [VariablePredefineFunctions::Length]. [x.&len], [x.&len()], [&len(x)]
+    #[restrict(none_context = true, max_param_count = 0)]
     Len,
+    /// get substring of string.
+    /// - from start (included) to end (excluded): [x.&slice(start, end)], [&slice(x, start, end)],
+    /// - from start (included) to end of string: [x.&slice(start)], [x.&slice(start, )], [&slice(x, start)], [&slice(x, start, )]
+    /// - from 0 to end (excluded): [x.&slice(, end)], [&slice(x, , end)],
+    ///
+    /// - [context]: string, none.
+    /// - [none context]: returns empty string.
+    /// - [start]: zero-based index, negative not allowed.
+    /// - [end]: zero-based index, negative not allowed.
+    ///   the maximum length of the string will be used as the limit when end is out of range.
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 2)]
     Slice,
-    /// alias of [Slice]
+    /// alias of [VariablePredefineFunctions::Slice].
+    /// - from start (included) to end (excluded): [x.&substr(start, end)], [&substr(x, start, end)],
+    /// - from start (included) to end of string: [x.&substr(start)], [x.&substr(start, )], [&substr(x, start)], [&substr(x, start, )]
+    /// - from 0 to end (excluded): [x.&substr(, end)], [&substr(x, , end)],
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 2)]
     Substr,
+    /// find substring in string, return the start index, -1 if not found.
+    /// [x.&find(substring)], [&find(x, substring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context]:
+    ///   - returns -1 when substring is not empty.
+    ///   - returns 0 when substring is empty or none.
+    /// - [substring]: string, none. if none, treat as empty string and returns 0.
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     Find,
-    /// alias of [Find]
+    /// alias of [VariablePredefineFunctions::Find].
+    /// [x.&index(substring)], [&index(x, substring)]
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     Index,
+    /// check if string starts with substring, return boolean.
+    /// [x.&startsWith(substring)], [&startsWith(x, substring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns true.
+    /// - [substring]: string, none. if none, treat as empty string and returns true.
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     StartsWith,
-    /// alias of [StartsWith]
+    /// alias of [VariablePredefineFunctions::StartsWith].
+    /// [x.&startswith(substring)], [&startswith(x, substring)]
     #[display = "&startswith"]
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     Startswith,
+    /// check if string ends with substring, return boolean.
+    /// [x.&endsWith(substring)], [&endsWith(x, substring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns true.
+    /// - [substring]: string, none. if none, treat as empty string and returns true.
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     EndsWith,
-    /// alias of [EndsWith]
+    /// alias of [VariablePredefineFunctions::EndsWith].
+    /// [x.&endswith(substring)], [&endswith(x, substring)]
     #[display = "&endswith"]
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     Endswith,
+    /// strip leading and trailing string (default whitespaces) from string.
+    /// - strip whitespaces: [x.&strip], [x.&strip()], [&strip(x)],
+    /// - strip given string: [x.&strip(stripString)], [&strip(x, stripString)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns empty string.
+    /// - [stripString]: string, none. if none, treat as whitespaces.
+    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
     Strip,
-    /// alias of [Strip]
+    /// alias of [VariablePredefineFunctions::Strip]
+    /// - trim whitespaces: [x.&trim], [x.&trim()], [&trim(x)],
+    /// - trim given string: [x.&trim(trimString)], [&trim(x, trimString)]
+    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
     Trim,
+    /// replace all occurrences of a substring with another substring in string.
+    /// [x.&replace(oldSubstring, newSubstring)], [&replace(x, oldSubstring, newSubstring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns empty string.
+    /// - [oldSubstring]: string, none. if none, treat as empty string.
+    /// - [newSubstring]: string, none. if none, treat as empty string.
+    #[restrict(none_context = true, min_param_count = 2, max_param_count = 2)]
     Replace,
+    /// replace first occurrence of a substring with another substring in string.
+    /// [x.&replaceFirst(oldSubstring, newSubstring)], [&replaceFirst(x, oldSubstring, newSubstring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns empty string.
+    /// - [oldSubstring]: string, none. if none, treat as empty string.
+    /// - [newSubstring]: string, none. if none, treat as empty string.
+    #[restrict(none_context = true, min_param_count = 2, max_param_count = 2)]
     ReplaceFirst,
+    /// convert string to upper case.
+    /// [x.&upper], [x.&upper()], [&upper(x)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns empty string.
+    #[restrict(none_context = true, max_param_count = 0)]
     Upper,
+    /// convert string to lower case.
+    /// [x.&lower], [x.&lower()], [&lower(x)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context] returns empty string.
+    #[restrict(none_context = true, max_param_count = 0)]
     Lower,
+    /// check if string contains substring, return boolean.
+    /// [x.&contains(substring)], [&contains(x, substring)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context]:
+    ///   - returns false when given substring is not empty.
+    ///   - returns true when given substring is empty,
+    /// - [substring]: string, none. if none, treat as empty string.
+    #[restrict(none_context = true, min_param_count = 1, max_param_count = 1)]
     Contains,
+    /// split string to vec by given separator string (default comma).
+    /// - split by comma: [x.&split], [x.&split()], [&split(x)],
+    /// - split by separator: [x.&split(separator)], [&split(x, separator)].
+    ///
+    /// - [context]: string, none.
+    /// - [none context]
+    ///   - returns vec with single empty string element when given separator is not empty.
+    ///   - returns empty vec when given separator is empty,
+    /// - [separator]: string, none. if none, treat as comma.
+    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
     Split,
-    // concat anything to string
+    /// concatenate multiple strings to one string.
+    /// - [x.&concat(y, ...)], [&concat(x, y, ...)]
+    ///
+    /// - [context]: string, none.
+    /// - [none context], simply ignore it.
+    /// - [y, ...]: strings or nones. none values are ignored.
+    ///
+    /// return empty string when values are all none.
+    #[restrict(none_context = true, min_param_count = 1)]
     Concat,
+    /// concatenate multiple strings in vec to one string with separator
+    /// - [x.&concatWith(separator, y, ...)], [&concatWith(x, separator, y, ...)].
+    ///
+    /// - [context]: string, none.
+    /// - [none context], simply ignore it.
+    /// - [y, ...]: strings or nones. none values are ignored.
+    ///
+    /// return empty string when values are all none.
+    #[restrict(none_context = true, min_param_count = 2)]
+    ConcatWith,
     /// join the elements of vec to a string, [only in-memory]
+    /// - join with comma: [x.join], [x.&join()], [&join(x)]
+    /// - join with separator: [x.&join(separator)], [&join(x, separator)].
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns empty string.
+    /// - [separator]: string, none. if none, treat as comma.
+    ///
+    /// none values in vec are ignored. return empty string when values are all none.
+    #[restrict(none_context = true, min_param_count = 0, max_param_count = 1)]
     Join,
     // Statistical functions
-    /// get a distinct vec, [only in-memory]
+    /// get a distinct vec, [only in-memory].
+    /// [x.&distinct], [x.&distinct()], [&distinct(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns empty vec.
+    #[restrict(none_context = true, max_param_count = 0)]
     Distinct,
-    /// sum of elements of vec, [only in-memory]
+    /// sum of elements of vec, [only in-memory].
+    /// [x.&sum], [x.&sum()], [&sum(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal, or can cast to decimal, or none which treated as 0,
+    /// otherwise error raised.
+    #[restrict(none_context = true, max_param_count = 0)]
     Sum,
-    /// avg of elements of vec, [only in-memory]
+    /// avg of elements of vec, [only in-memory].
+    /// [x.&avg], [x.&avg()], [&avg(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal, or can cast to decimal, or none which treated as 0,
+    /// otherwise error raised.
+    #[restrict(none_context = true, max_param_count = 0)]
     Avg,
-    /// max of elements of vec, [only in-memory]
+    /// max of elements of vec, [only in-memory].
+    /// [x.&max], [x.&max()], [&max(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal/date/datetime/time,
+    /// or can cast to decimal/date/datetime/tim, or none which ignored,
+    /// otherwise error raised.
+    /// and all values must be same type, except datetime will be automatically cast to date if there is date type existing,
+    /// if all values are none, returns none.
+    ///
+    /// e.g.
+    /// - ["1", "1980-01-02", None] -> error, incompatible types decimal and date.
+    /// - [1, 100, "204"] -> 204, string cast to decimal.
+    /// - ["1980-01-02 12:23:45", "1979-11-30", None] -> "1980-01-02", datetime downgrade to date.
+    /// - ["1979-11-30 12:23:45", "12:23:45"] -> error, incompatible types date/datetime and date.
+    #[restrict(none_context = true, max_param_count = 0)]
     Max,
-    /// max decimal elements of vec, [only in-memory]
+    /// max decimal elements of vec, [only in-memory].
+    /// [x.&maxNum], [x.&maxNum()], [&maxNum(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal, or can cast to decimal, or none which ignored,
+    /// otherwise error raised.
+    /// if all values are none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MaxNum,
-    /// max date of elements of vec, [only in-memory]
+    /// max date of elements of vec, [only in-memory].
+    /// [x.&maxDate], [x.&maxDate()], [&maxDate(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a date/datetime, or can cast to date/datetime, or none which ignored,
+    /// otherwise error raised.
+    /// if all values are none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MaxDate,
-    /// max date time of elements of vec, [only in-memory]
+    /// max date time of elements of vec, [only in-memory].
+    /// [x.&maxDatetime], [x.&maxDatetime()], [&maxDatetime(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a datetime, or can cast to datetime, or none which ignored,
+    /// otherwise error raised.
+    /// if all values are none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MaxDatetime,
-    /// alias of [MaxDatetime]
+    /// alias of [VariablePredefineFunctions::MaxDatetime].
+    /// [x.&maxDt], [x.&maxDt()], [&maxDt(x)]
+    #[restrict(none_context = true, max_param_count = 0)]
     MaxDt,
-    /// max time of elements of vec, [only in-memory]
+    /// max time of elements of vec, [only in-memory].
+    /// [x.&maxTime], [x.&maxTime()], [&maxTime(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a time, or can cast to time, or none which ignored,
+    /// otherwise error raised.
+    /// if all values are none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MaxTime,
-    /// min of elements of vec, [only in-memory]
+    /// min of elements of vec, [only in-memory].
+    /// [x.&min], [x.&min()], [&min(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal/date/datetime/time,
+    /// or can cast to decimal/date/datetime/tim, or none which treated as min value,
+    /// otherwise error raised.
+    /// and all values must be same type, except datetime will be automatically cast to date if there is date type existing,
+    /// if any value is none, returns none.
+    ///
+    /// e.g.
+    /// - ["1", "1980-01-02", None] -> error, incompatible types decimal and date.
+    /// - [1, 100, "204"] -> 1, string cast to decimal.
+    /// - ["1980-01-02", "1979-11-30 12:23:45", None] -> "1979-11-30", datetime downgrade to date.
+    /// - ["1979-11-30 12:23:45", "12:23:45"] -> error, incompatible types date/datetime and date.
+    #[restrict(none_context = true, max_param_count = 0)]
     Min,
-    /// min decimal elements of vec, [only in-memory]
+    /// min decimal elements of vec, [only in-memory].
+    /// [x.&minNum], [x.&minNum()], [&minNum(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a decimal, or can cast to decimal, or none which treated as min value,
+    /// otherwise error raised.
+    /// if any value is none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MinNum,
-    /// min date of elements of vec, [only in-memory]
+    /// min date of elements of vec, [only in-memory].
+    /// [x.&minDate], [x.&minDate()], [&minDate(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a date/datetime, or can cast to date/datetime, or none which treated as min value,
+    /// otherwise error raised.
+    /// if any value is none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MinDate,
-    /// min date time of elements of vec, [only in-memory]
+    /// min date time of elements of vec, [only in-memory].
+    /// [x.&minDatetime], [x.&minDatetime()], [&minDatetime(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a datetime, or can cast to datetime, or none which treated as min value,
+    /// otherwise error raised.
+    /// if any value is none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MinDatetime,
-    /// alias of [MinDatetime]
+    /// alias of [VariablePredefineFunctions::MinDatetime].
+    /// [x.&minDt], [x.&minDt()], [&minDt(x)]
+    #[restrict(none_context = true, max_param_count = 0)]
     MinDt,
-    /// min time of elements of vec, [only in-memory]
+    /// min time of elements of vec, [only in-memory].
+    /// [x.&minTime], [x.&minTime()], [&minTime(x)]
+    ///
+    /// - [context]: vec, none.
+    /// - [none context], returns 0.
+    ///
+    /// each value in vec should be a time, or can cast to time, or none which treated as min value,
+    /// otherwise error raised.
+    /// if any value is none, returns none.
+    #[restrict(none_context = true, max_param_count = 0)]
     MinTime,
-    // Retrieve value from current context, include variables and current trigger data
+    /// Retrieve value from current context, include variables and current trigger data
+    /// [&cur], [&cur()]
     #[display = "&cur"]
+    #[restrict(context = false, max_param_count = 0)]
     FromCurrentContext,
-    // Retrieve value from previous trigger data
+    /// Retrieve value from previous trigger data
+    /// [&old], [&old()]
     #[display = "&old"]
+    #[restrict(context = false, max_param_count = 0)]
     FromPreviousTriggerData,
     // Date related functions
+    /// get day difference between two dates.
+    /// [x.&dayDiff(otherDate)], [&dayDiff(x, otherDate)]
+    ///
+    /// - [context]: date/datetime, string can cast to date/datetime.
+    /// - [otherDate]: date/datetime, string can cast to date/datetime.
+    #[restrict(min_param_count = 1, max_param_count = 1)]
     DayDiff,
+    /// get month difference between two dates.
+    /// [x.&monthDiff(otherDate)], [&monthDiff(x, otherDate)]
+    ///
+    /// - [context]: date/datetime, string can cast to date/datetime.
+    /// - [otherDate]: date/datetime, string can cast to date/datetime.
+    #[restrict(min_param_count = 1, max_param_count = 1)]
     MonthDiff,
+    /// get year difference between two dates.
+    /// [x.&yearDiff(otherDate)], [&yearDiff(x, otherDate)]
+    ///
+    /// - [context]: date/datetime, string can cast to date/datetime.
+    /// - [otherDate]: date/datetime, string can cast to date/datetime.
+    #[restrict(min_param_count = 1, max_param_count = 1)]
     YearDiff,
+    /// move date by given days, months, years.
+    /// [x.&moveDate(movement)], [&moveDate(x, movement)]
+    ///
+    /// - [context]: date/datetime, string can cast to date/datetime.
+    /// - [movement]: string. format:
+    ///   - unit: YMDhms,
+    ///   - positive/negative: +/-, optional,
+    ///   - if 2nd part is +/-, any number value; or
+    ///     -year(Y): 4 digits year,
+    ///		- month(M): 1 - 12. any value not in [1, 12] will be normalized to [1, 12],
+    ///		- date(D): 1 - end of month (28/29/30/31). 99 means end of month,
+    ///       otherwise any value not in [1, end of month] will be normalized to [1, end of month],
+    ///		- hour(h): 0 - 23. any value not in [0, 23] will be normalized to [0, 23],
+    ///		- minute(m): 0 - 59. any value not in [0, 59] will be normalized to [0, 59],
+    ///		- second(s): 0 - 59. any value not in [0, 59] will be normalized to [0, 59],
+    ///   - whitespaces between 3 parts are allowed, and ignored.
+    /// if no time moved, then original date returned. otherwise automatically upgrade date to datetime.
+    ///
+    /// e.g. [date.&moveDate(Y2000M+1D-1h23m+5s-6)],
+    /// if date is 1999-11-30, then result is 2000-12-29 23:04:54:
+    /// - year set to 2000, now is 2000-11-30,
+    /// - month plus 1, to 12, now is 2000-12-30,
+    /// - day minus 1, to 29, now is 2000-12-29,
+    /// - hour set to 23, now is 2000-12-29 23:00:00 (original no time, default is 00:00:00),
+    /// - minute plus 5, to 5, now is 2000-12-29 23:05:00,
+    /// - second minus 6, to 54, and minute minus 1. result is 2000-12-29 23:04:54.
+    #[restrict(min_param_count = 1, max_param_count = 1)]
     MoveDate,
+    /// format date to string by given format.
+    /// [x.&dateFormat(format)], [&dateFormat(x, format)]
+    ///
+    /// - [context]: date/datetime, string can cast to date/datetime.
+    /// - [format]: string. date format.
+    ///   - 'Y': '%Y',  # 4 digits year
+    ///   - 'y': '%y',  # 2 digits year
+    ///   - 'M': '%m',  # 2 digits month
+    ///   - 'D': '%d',  # 2 digits day of month
+    ///   - 'h': '%H',  # 2 digits hour, 00 - 23
+    ///   - 'H': '%I',  # 2 digits hour, 01 - 12
+    ///   - 'm': '%M',  # 2 digits minute
+    ///   - 's': '%S',  # 2 digits second
+    ///   - 'W': '%A',  # Monday - Sunday
+    ///   - 'w': '%a',  # Mon - Sun
+    ///   - 'B': '%B',  # January - December
+    ///   - 'b': '%b',  # Jan - Dec
+    ///	  - 'p': '%p'  # AM/PM
+    ///
+    /// e.g. [date.&fmtDate(%Y-%M-%D)],
+    /// if date is 2000-12-29, then result is 2000-12-29 00:00:00.
     #[display = "&fmtDate"]
+    #[restrict(min_param_count = 1, max_param_count = 1)]
     DateFormat,
+    /// get current date time.
+    /// [&now], [&now()]
+    #[restrict(context = false, max_param_count = 0)]
     Now,
-}
-
-impl VariablePredefineFunctions {
-    /// function that context disallowed.
-    /// e.g. in [a.&length], [a] is the context.
-    /// current the following functions cannot have a context
-    /// - [&nextSeq],
-    /// - [&cur],
-    /// - [&old],
-    /// - [&now]
-    pub fn require_context(&self) -> bool {
-        match self {
-            VariablePredefineFunctions::NextSeq
-            | VariablePredefineFunctions::FromCurrentContext
-            | VariablePredefineFunctions::FromPreviousTriggerData
-            | VariablePredefineFunctions::Now => false,
-            _ => true,
-        }
-    }
-
-    /// get the minimum parameters count of function,
-    /// since the context can be the first parameter of function (unless function disallows context),
-    /// the returned count doesn't count in the context parameter.
-    /// e.g. [a.&length] is same as [&length(a)], the min params count is 0
-    pub fn min_param_count(&self) -> usize {
-        match self {
-            VariablePredefineFunctions::NextSeq => 0,
-            VariablePredefineFunctions::Count => 0,
-            VariablePredefineFunctions::Length => 0,
-            VariablePredefineFunctions::Len => 0,
-            // a.&slice(1), get sub str for a from index 1 (included)
-            VariablePredefineFunctions::Slice => 1,
-            VariablePredefineFunctions::Substr => 1,
-            VariablePredefineFunctions::Find => 1,
-            VariablePredefineFunctions::Index => 1,
-            VariablePredefineFunctions::StartsWith => 1,
-            VariablePredefineFunctions::Startswith => 1,
-            VariablePredefineFunctions::EndsWith => 1,
-            VariablePredefineFunctions::Endswith => 1,
-            VariablePredefineFunctions::Strip => 0,
-            VariablePredefineFunctions::Trim => 0,
-            VariablePredefineFunctions::Replace => 1,
-            VariablePredefineFunctions::ReplaceFirst => 1,
-            VariablePredefineFunctions::Upper => 0,
-            VariablePredefineFunctions::Lower => 0,
-            VariablePredefineFunctions::Contains => 1,
-            VariablePredefineFunctions::Split => 0,
-            // a.&concat(b): "{a}{b}"
-            // &concat(a): "{a}"
-            VariablePredefineFunctions::Concat => 1,
-            VariablePredefineFunctions::Join => 0,
-            VariablePredefineFunctions::Distinct => 0,
-            VariablePredefineFunctions::Sum => 0,
-            VariablePredefineFunctions::Avg => 0,
-            VariablePredefineFunctions::Max => 0,
-            VariablePredefineFunctions::MaxNum => 0,
-            VariablePredefineFunctions::MaxDate => 0,
-            VariablePredefineFunctions::MaxDatetime => 0,
-            VariablePredefineFunctions::MaxDt => 0,
-            VariablePredefineFunctions::MaxTime => 0,
-            VariablePredefineFunctions::Min => 0,
-            VariablePredefineFunctions::MinNum => 0,
-            VariablePredefineFunctions::MinDate => 0,
-            VariablePredefineFunctions::MinDatetime => 0,
-            VariablePredefineFunctions::MinDt => 0,
-            VariablePredefineFunctions::MinTime => 0,
-            VariablePredefineFunctions::FromCurrentContext => 0,
-            VariablePredefineFunctions::FromPreviousTriggerData => 0,
-            VariablePredefineFunctions::DayDiff => 1,
-            VariablePredefineFunctions::MonthDiff => 1,
-            VariablePredefineFunctions::YearDiff => 1,
-            VariablePredefineFunctions::MoveDate => 1,
-            VariablePredefineFunctions::DateFormat => 1,
-            VariablePredefineFunctions::Now => 0,
-        }
-    }
-
-    /// get the maximum parameters count of function, -1 means no limit.
-    /// since the context can be the first parameter of function (unless function disallows context),
-    /// the returned count doesn't count in the context parameter.
-    /// e.g. [a.&length] is same as [&length(a)], the max params count is 0,
-    /// e.g. [a.&minNum(b, c, ...)], [&minNum(a, b, c, ...)], any parameters are accepted.
-    pub fn max_param_count(&self) -> Option<usize> {
-        let count = match self {
-            VariablePredefineFunctions::NextSeq => 0,
-            VariablePredefineFunctions::Count => 0,
-            VariablePredefineFunctions::Length => 0,
-            VariablePredefineFunctions::Len => 0,
-            // a.&slice(1, 3), get sub str for a from index 1 (included) to index 3 (excluded)
-            VariablePredefineFunctions::Slice => 2,
-            VariablePredefineFunctions::Substr => 2,
-            VariablePredefineFunctions::Find => 1,
-            VariablePredefineFunctions::Index => 1,
-            VariablePredefineFunctions::StartsWith => 1,
-            VariablePredefineFunctions::Startswith => 1,
-            VariablePredefineFunctions::EndsWith => 1,
-            VariablePredefineFunctions::Endswith => 1,
-            VariablePredefineFunctions::Strip => 0,
-            VariablePredefineFunctions::Trim => 0,
-            VariablePredefineFunctions::Replace => 1,
-            VariablePredefineFunctions::ReplaceFirst => 1,
-            VariablePredefineFunctions::Upper => 0,
-            VariablePredefineFunctions::Lower => 0,
-            VariablePredefineFunctions::Contains => 1,
-            VariablePredefineFunctions::Split => 0,
-            // a.&concat(b): "{a}{b}"
-            // &concat(a): "{a}"
-            VariablePredefineFunctions::Concat => -1,
-            VariablePredefineFunctions::Join => 1,
-            VariablePredefineFunctions::Distinct => -1,
-            VariablePredefineFunctions::Sum => -1,
-            VariablePredefineFunctions::Avg => -1,
-            VariablePredefineFunctions::Max => -1,
-            VariablePredefineFunctions::MaxNum => -1,
-            VariablePredefineFunctions::MaxDate => -1,
-            VariablePredefineFunctions::MaxDatetime => -1,
-            VariablePredefineFunctions::MaxDt => -1,
-            VariablePredefineFunctions::MaxTime => -1,
-            VariablePredefineFunctions::Min => -1,
-            VariablePredefineFunctions::MinNum => -1,
-            VariablePredefineFunctions::MinDate => -1,
-            VariablePredefineFunctions::MinDatetime => -1,
-            VariablePredefineFunctions::MinDt => -1,
-            VariablePredefineFunctions::MinTime => -1,
-            VariablePredefineFunctions::FromCurrentContext => 0,
-            VariablePredefineFunctions::FromPreviousTriggerData => 0,
-            VariablePredefineFunctions::DayDiff => 1,
-            VariablePredefineFunctions::MonthDiff => 1,
-            VariablePredefineFunctions::YearDiff => 1,
-            VariablePredefineFunctions::MoveDate => 1,
-            VariablePredefineFunctions::DateFormat => 1,
-            VariablePredefineFunctions::Now => 0,
-        };
-        (count != -1).then_some(count as usize)
-    }
 }
 
 /// string stands for an expression to retrieve some value
