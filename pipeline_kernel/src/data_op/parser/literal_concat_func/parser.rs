@@ -16,7 +16,7 @@ use crate::{FuncDataPathParam, ParserInnerState};
 ///   - if [(] is encountered, a parsing error occurs, since [(] must follow the function name.
 ///   - if [{] is encountered, next parameter starts,
 ///   - otherwise, next plain part starts.
-pub struct LiteralConcatFuncParser<'a> {
-    pub inner: ParserInnerState<'a>,
+pub struct LiteralConcatFuncParser {
+    pub inner: ParserInnerState,
     pub params: Vec<FuncDataPathParam>,
 }

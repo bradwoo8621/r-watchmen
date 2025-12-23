@@ -2,24 +2,22 @@ use crate::{FuncDataPathParam, FuncParamValue, FuncParamValuePath, LiteralConcat
 use watchmen_model::StdR;
 
 /// consume str value
-impl LiteralConcatFuncParser<'_> {
+impl LiteralConcatFuncParser {
     /// create a str value, append to params. and clear current chars.
     /// empty is ignored
     /// will not move char index
     pub fn consume_in_memory_chars_as_str(&mut self) -> StdR<()> {
-        let inner = &mut self.inner;
-
-        if inner.in_memory_chars_is_empty() {
+        if self.inner.in_memory_chars_is_empty() {
             return Ok(());
         }
 
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: inner.clone_in_memory_chars(),
-                value: FuncParamValue::Str(inner.clone_in_memory_chars()),
+                path: self.inner.create_path_str_of_in_memory_chars(),
+                value: FuncParamValue::Str(self.inner.clone_in_memory_chars()),
             }));
 
-        inner.clear_in_memory_chars();
+        self.inner.clear_in_memory_chars();
 
         Ok(())
     }

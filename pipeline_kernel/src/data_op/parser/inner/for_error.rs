@@ -2,7 +2,7 @@ use crate::{ParserInnerState, PipelineKernelErrorCode};
 use watchmen_model::{StdErrCode, StdErrorCode, StdR};
 
 /// report error
-impl ParserInnerState<'_> {
+impl ParserInnerState {
     pub fn error<S, R>(&self, msg: S) -> StdR<R>
     where
         S: Into<String>,
@@ -13,16 +13,18 @@ impl ParserInnerState<'_> {
     pub fn incorrect_char_at_previous_index<R>(&self, char: &char) -> StdR<R> {
         self.error(format!(
             "Incorrect data path[{}], caused by incorrect {} at index[{}].",
-            self.full_path,
+            self.full_path(),
             char,
-            self.char_index - 1
+            self.previous_char_index()
         ))
     }
 
     fn incorrect_char_at_index<R>(&self, reason: &str) -> StdR<R> {
         self.error(format!(
             "Incorrect data path[{}], caused by incorrect {} at index[{}].",
-            self.full_path, reason, self.char_index
+            self.full_path(),
+            reason,
+            self.current_char_index()
         ))
     }
 

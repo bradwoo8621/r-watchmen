@@ -1,8 +1,8 @@
-use crate::{DataPathSegment, FuncDataPath, FuncParser, ParserInnerState, PathParser};
+use crate::{DataPathSegment, FuncDataPath, FuncParser, ParserInnerState, PathParser, PathStr};
 use watchmen_model::{StdR, VariablePredefineFunctions};
 
 /// consume function
-impl PathParser<'_> {
+impl PathParser {
     /// consume in-memory chars as a function name.
     /// the in-memory chars never be empty, at least a [&] in it.
     /// and clear in-memory chars if consumed, will not move char index
@@ -11,7 +11,7 @@ impl PathParser<'_> {
         if in_memory_chars_count <= 1 {
             self.incorrect_empty_function_name()
         } else if let Some(func) =
-            VariablePredefineFunctions::try_parse(&self.inner.in_memory_chars)
+            VariablePredefineFunctions::try_parse(self.inner.in_memory_chars())
         {
             self.inner.clear_in_memory_chars();
             Ok(func)
@@ -31,7 +31,8 @@ impl PathParser<'_> {
             return self.inner.incorrect_ampersand();
         }
 
-        let start_index_of_func = inner.char_index;
+        // index of `&`, which is start of function
+        let start_index_of_func = inner.current_char_index();
         inner.consume_char_into_memory_and_move_char_index_to_next('&');
 
         let mut whitespace_met = false;
@@ -77,7 +78,7 @@ impl PathParser<'_> {
 
         let func = self.consume_in_memory_chars_as_func_name()?;
         // check has context and allowable
-        let has_context = !self.segments.is_empty();
+        let has_context = self.has_segment();
         if !func.require_context() && has_context {
             return self.incorrect_function_has_context(start_index_of_func);
         }
@@ -85,25 +86,22 @@ impl PathParser<'_> {
         if will_start_params {
             // continue parsing function
             let mut func_parser = FuncParser {
-                inner: ParserInnerState {
-                    full_path: self.inner.full_path,
-                    all_chars: self.inner.all_chars,
-                    // skip the "("
-                    char_index: self.inner.char_index + 1,
-                    in_memory_chars: String::new(),
-                },
+                inner: ParserInnerState::new_at_next_char(&self.inner),
                 start_char_index_of_func: start_index_of_func,
                 func,
                 params: vec![],
-                with_context: !self.segments.is_empty(),
+                with_context: self.has_segment(),
             };
             func_parser.parse()?;
             // hand back
             // copy char index to current state
-            self.inner.char_index = func_parser.inner.char_index;
+            self.inner
+                .move_char_index_to(func_parser.inner.current_char_index());
             // create and append the function to segments
             self.append_segment(DataPathSegment::Func(FuncDataPath {
-                path: self.inner.full_path[start_index_of_func..self.inner.char_index].to_string(),
+                path: self
+                    .inner
+                    .create_path_str_exclude_current(start_index_of_func),
                 func: func_parser.func,
                 params: if func_parser.params.is_empty() {
                     None
@@ -121,7 +119,11 @@ impl PathParser<'_> {
             } else {
                 // func with has no param
                 self.append_segment(DataPathSegment::Func(FuncDataPath {
-                    path: func.to_string(),
+                    path: PathStr::part_of_chars(
+                        self.inner.all_chars().clone(),
+                        start_index_of_func,
+                        start_index_of_func + func.to_string().chars().count(),
+                    ),
                     func,
                     params: None,
                 }));

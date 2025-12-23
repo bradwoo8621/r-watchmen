@@ -1,12 +1,46 @@
-use crate::{FuncDataPathParam, FuncParamValue, FuncParamValuePath, FuncParser};
+use crate::{
+    AnyFuncParser, FuncDataPathParam, FuncParamValue, FuncParamValuePath, FuncParser,
+    ParserInnerState, PathParser,
+};
 use watchmen_model::StdR;
 
-impl FuncParser<'_> {
-    fn parse_param(&mut self) -> StdR<()> {
-        // TODO
+struct FuncParserDelegate<'a> {
+    parser: &'a mut FuncParser,
+    param_start_char_index: usize,
+}
+
+impl AnyFuncParser for FuncParserDelegate<'_> {
+    fn append_param(&mut self, param: FuncDataPathParam) {
+        self.parser.params.push(param);
+    }
+
+    fn start_char_index(&self) -> usize {
+        self.param_start_char_index
+    }
+
+    fn move_char_index_to(&mut self, char_index: usize) {
+        self.parser.inner.move_char_index_to(char_index);
+    }
+}
+
+impl FuncParser {
+    fn parse_param(&mut self, param_start_char_index: usize) -> StdR<()> {
+        let mut path_parser = PathParser {
+            inner: ParserInnerState::new_at_current_char_and_copy_in_memory_chars(&mut self.inner),
+            segments: vec![],
+        };
+        path_parser.parse_till_param_end()?;
+        let delegate = &mut FuncParserDelegate {
+            parser: self,
+            param_start_char_index,
+        };
+        path_parser.hand_over_to_func(delegate);
+
         Ok(())
     }
 
+    /// check if there are tailing whitespaces when parameter already parsed.
+    /// if there are, raise error.
     fn check_tailing_whitespaces_when_param_parsed(&self) -> StdR<()> {
         if self.inner.in_memory_chars_is_not_empty() {
             // never happens, all chars should be consumed in parse_param
@@ -21,7 +55,7 @@ impl FuncParser<'_> {
     fn append_blank_param(&mut self) -> StdR<()> {
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: self.inner.clone_in_memory_chars(),
+                path: self.inner.create_path_str_of_in_memory_chars(),
                 value: FuncParamValue::Str(self.inner.clone_in_memory_chars()),
             }));
 
@@ -37,7 +71,7 @@ impl FuncParser<'_> {
     fn append_none_param(&mut self) -> StdR<()> {
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: self.inner.clone_in_memory_chars(),
+                path: self.inner.create_path_str_of_in_memory_chars(),
                 value: FuncParamValue::None,
             }));
 
@@ -46,47 +80,123 @@ impl FuncParser<'_> {
         Ok(())
     }
 
+    /// append whitespaces in memory as context parameter
+    /// - if there are chars in memory,
+    ///   - if function allow blank context, append as blank string parameter,
+    ///   - else if function allow none context, append as none parameter,
+    ///   - else raise error,
+    /// - if no char in memory,
+    ///   - if function allow none context, append as none parameter,
+    ///   - else raise error.
+    fn append_whitespaces_as_context(&mut self) -> StdR<()> {
+        if self.inner.in_memory_chars_is_not_empty() {
+            // there are chars in memory
+            if self.func.allow_blank_context() {
+                // context allows string
+                self.append_blank_param()
+            } else if self.func.allow_none_context() {
+                self.append_none_param()
+            } else {
+                // context does not allow none, raise error
+                self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+            }
+        } else {
+            // no char in memory, check none is acceptable or not
+            if self.func.allow_none_context() {
+                self.append_none_param()
+            } else {
+                // context does not allow none, raise error
+                self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+            }
+        }
+    }
+
+    /// append whitespaces in memory as parameter at given index
+    /// - if there are chars in memory,
+    ///   - if function allow blank parameter at given index, append as blank string parameter,
+    ///   - else if function allow none parameter at given index, append as none parameter,
+    ///   - else raise error,
+    /// - if no char in memory,
+    ///   - if function allow none parameter at given index, append as none parameter,
+    ///   - else raise error.
+    fn append_whitespaces_as_parameter(&mut self, real_param_index: usize) -> StdR<()> {
+        if self.inner.in_memory_chars_is_not_empty() {
+            // there are chars in memory
+            if self.func.allow_blank_param(real_param_index) {
+                // context allows string
+                self.append_blank_param()
+            } else if self.func.allow_none_param(real_param_index) {
+                self.append_none_param()
+            } else {
+                // context does not allow none, raise error
+                self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+            }
+        } else {
+            // no char in memory, check none is acceptable or not
+            if self.func.allow_none_param(real_param_index) {
+                self.append_none_param()
+            } else {
+                // context does not allow none, raise error
+                self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
+            }
+        }
+    }
+
+    /// end parameter parsing when no parameter parsed yet.
+    /// - if parsed count is not 0, check tailing in-memory chars as error.,
+    /// - if no parameter parsed yet,
+    ///   - if not with context and function require context, try to append in-memory chars as context,
+    ///   - else try to append in-memory chars as first parameter.
     fn end_param_at_0(&mut self) -> StdR<()> {
         let parsed_count = self.params.len();
         if parsed_count != 0 {
             return self.check_tailing_whitespaces_when_param_parsed();
         }
 
-        if self.func.require_context() {
+        if !self.with_context && self.func.require_context() {
             // current is context
-            if self.inner.in_memory_chars_is_not_empty() {
-                // there are chars in memory
-                if self.func.allow_blank_context() {
-                    // context allows string
-                    self.append_blank_param()
-                } else if self.func.allow_none_context() {
-                    self.append_none_param()
-                } else {
-                    // context does not allow none, raise error
-                    self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
-                }
-            } else {
-                // no char in memory, check none is acceptable or not
-                if self.func.allow_none_context() {
-                    self.append_none_param()
-                } else {
-                    // context does not allow none, raise error
-                    self.incorrect_function_invalid_context(self.inner.in_memory_chars_count())
-                }
-            }
+            self.append_whitespaces_as_context()
         } else {
             // current is parameter
             let max_param_count = self.func.max_param_count();
             if let Some(max_count) = max_param_count {
                 if max_count == 0 {
-                    // no parameter allowed, simply ignore
+                    // no parameter allowed
+                    // simply ignore in-memory chars and clear it
+                    // they are just whitespaces between left/right parenthesis
+                    self.inner.clear_in_memory_chars();
                     return Ok(());
                 }
             }
 
-            // TODO at least one parameter required, or no limit
-            Ok(())
+            // at least one parameter required, or no limit
+            self.append_whitespaces_as_parameter(0)
         }
+    }
+
+    fn end_param_at_not_0(
+        &mut self,
+        index_of_left_parenthesis: usize,
+        param_index: usize,
+    ) -> StdR<()> {
+        let real_param_index = if !self.with_context {
+            // no context, so current param index is real param index
+            param_index
+        } else {
+            // with context, so need to minus 1 to get real param index
+            param_index - 1
+        };
+        let max_param_count = self.func.max_param_count();
+        if let Some(max_count) = max_param_count {
+            if max_count > real_param_index {
+                // current parameter is not allowed, over the max param count
+                // basically, never happens, checked already
+                return self
+                    .incorrect_function_param_over_max_count(index_of_left_parenthesis, max_count);
+            }
+        }
+
+        self.append_whitespaces_as_parameter(real_param_index)
     }
 
     /// end param parse when one of [,)] detected
@@ -103,12 +213,14 @@ impl FuncParser<'_> {
     ///   - check function accept empty string in current param index or not
     ///   - none of above accepted, raise error (since blank plain path is not accepted).
     /// move char index to next at last
-    fn end_param(&mut self, param_index: usize) -> StdR<()> {
+    fn end_param(&mut self, index_of_left_parenthesis: usize, param_index: usize) -> StdR<()> {
         let parsed_count = self.params.len();
         if param_index == 0 {
             // no parameter parsed, current is the first parameter.
             self.end_param_at_0()?
         } else if parsed_count < param_index {
+            // current parameter not parsed yet
+            self.end_param_at_not_0(index_of_left_parenthesis, param_index)?
         } else {
             // already parsed, do nothing
             self.check_tailing_whitespaces_when_param_parsed()?;
@@ -126,7 +238,7 @@ impl FuncParser<'_> {
         param_index: usize,
     ) -> StdR<()> {
         self.check_param_count_before_right_parenthesis(index_of_left_parenthesis, param_index)?;
-        self.end_param(param_index)
+        self.end_param(index_of_left_parenthesis, param_index)
     }
 
     /// it is not the last parameter of function, there is one more parameter will be parsed after comma.
@@ -136,7 +248,7 @@ impl FuncParser<'_> {
         param_index: usize,
     ) -> StdR<()> {
         self.check_param_count_before_comma(index_of_left_parenthesis, param_index)?;
-        self.end_param(param_index)
+        self.end_param(index_of_left_parenthesis, param_index)
     }
 
     fn finalize_content(&mut self) -> StdR<()> {
@@ -161,11 +273,12 @@ impl FuncParser<'_> {
     /// - if there is a [(] determined, raise error,
     /// - otherwise copy in-memory chars to path parser to continue.
     pub fn parse(&mut self) -> StdR<()> {
-        let index_of_left_parenthesis = self.inner.char_index - 1;
+        let index_of_left_parenthesis = self.inner.previous_char_index() as usize;
 
         // total parsed parameter count, include context if not with context currently
         let mut param_index: usize = 0;
         let mut whitespace_met = true;
+        let mut param_start_char_index = self.inner.current_char_index();
         loop {
             if let Some(char) = self.inner.current_char() {
                 match char {
@@ -175,7 +288,7 @@ impl FuncParser<'_> {
                         } else {
                             // ignore the whitespaces before function
                             self.inner.clear_in_memory_chars();
-                            self.parse_param()?;
+                            self.parse_param(param_start_char_index)?;
                             whitespace_met = false;
                         }
                     }
@@ -186,13 +299,15 @@ impl FuncParser<'_> {
                             index_of_left_parenthesis,
                             param_index,
                         )?;
-                        param_index += 1;
+                        // will break, no need to increase param_index
+                        // param_index += 1;
                         break;
                     }
                     // end of parameter
                     ',' => {
                         self.end_param_before_comma(index_of_left_parenthesis, param_index)?;
                         param_index += 1;
+                        param_start_char_index = self.inner.next_char_index();
                     }
                     // \s, ignore.
                     // in python version, whitespaces after function name is allowed, compatible logic here
@@ -203,7 +318,7 @@ impl FuncParser<'_> {
                     }
                     // other char
                     _ => {
-                        self.parse_param()?;
+                        self.parse_param(param_start_char_index)?;
                         whitespace_met = false;
                     }
                 };
@@ -214,7 +329,6 @@ impl FuncParser<'_> {
             }
         }
 
-        // TODO finalize parsed function
         self.finalize_content()?;
 
         Ok(())

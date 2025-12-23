@@ -46,7 +46,7 @@ impl DataVisitorBase for ArcTopicData {
         segment: &PlainDataPath,
         full_path: &String,
     ) -> StdR<Arc<ArcTopicDataValue>> {
-        let current_path = &segment.path;
+        let current_path = &segment.path.to_string();
         let current_is_vec = &segment.is_vec.unwrap_or(false);
 
         match data.deref() {
@@ -103,7 +103,7 @@ impl DataVisitorBase for ArcTopicData {
     }
 
     fn value_of_path(&self, parsed_path: &DataPath) -> StdR<Arc<ArcTopicDataValue>> {
-        let path = &parsed_path.path;
+        let path = &parsed_path.path.to_string();
         let mut data = Arc::new(ArcTopicDataValue::Map(self.clone()));
         for segment in &parsed_path.segments {
             let current_is_vec = match segment {

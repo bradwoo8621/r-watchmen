@@ -1,7 +1,7 @@
 use crate::FuncParser;
 use watchmen_model::StdR;
 
-impl FuncParser<'_> {
+impl FuncParser {
     /// - [param_index]: starts from 0,
     /// - [one_more_param_booked]:
     ///   - if [,] detected,

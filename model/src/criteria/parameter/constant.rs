@@ -43,16 +43,26 @@ pub enum VariablePredefineFunctions {
     ///
     /// - [context]: string, none.
     /// - [none context]: returns empty string.
-    /// - [start]: zero-based index, negative not allowed.
-    /// - [end]: zero-based index, negative not allowed.
+    /// - [start]: zero-based index, negative not allowed. none treat as 0.
+    /// - [end]: zero-based index, negative not allowed. none treat as maximum length of the string.
     ///   the maximum length of the string will be used as the limit when end is out of range.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 2)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 2
+    )]
     Slice,
     /// alias of [VariablePredefineFunctions::Slice].
     /// - from start (included) to end (excluded): [x.&substr(start, end)], [&substr(x, start, end)],
     /// - from start (included) to end of string: [x.&substr(start)], [x.&substr(start, )], [&substr(x, start)], [&substr(x, start, )]
     /// - from 0 to end (excluded): [x.&substr(, end)], [&substr(x, , end)],
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 2)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 2
+    )]
     Substr,
     /// find substring in string, return the start index, -1 if not found.
     /// [x.&find(substring)], [&find(x, substring)]
@@ -62,11 +72,21 @@ pub enum VariablePredefineFunctions {
     ///   - returns -1 when substring is not empty.
     ///   - returns 0 when substring is empty or none.
     /// - [substring]: string, none. if none, treat as empty string and returns 0.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     Find,
     /// alias of [VariablePredefineFunctions::Find].
     /// [x.&index(substring)], [&index(x, substring)]
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     Index,
     /// check if string starts with substring, return boolean.
     /// [x.&startsWith(substring)], [&startsWith(x, substring)]
@@ -74,12 +94,22 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns true.
     /// - [substring]: string, none. if none, treat as empty string and returns true.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     StartsWith,
     /// alias of [VariablePredefineFunctions::StartsWith].
     /// [x.&startswith(substring)], [&startswith(x, substring)]
     #[display = "&startswith"]
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     Startswith,
     /// check if string ends with substring, return boolean.
     /// [x.&endsWith(substring)], [&endsWith(x, substring)]
@@ -87,12 +117,22 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns true.
     /// - [substring]: string, none. if none, treat as empty string and returns true.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     EndsWith,
     /// alias of [VariablePredefineFunctions::EndsWith].
     /// [x.&endswith(substring)], [&endswith(x, substring)]
     #[display = "&endswith"]
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     Endswith,
     /// strip leading and trailing string (default whitespaces) from string.
     /// - strip whitespaces: [x.&strip], [x.&strip()], [&strip(x)],
@@ -101,12 +141,22 @@ pub enum VariablePredefineFunctions {
     /// - [context]: string, none.
     /// - [none context] returns empty string.
     /// - [stripString]: string, none. if none, treat as whitespaces.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 0,
+        max_param_count = 1
+    )]
     Strip,
     /// alias of [VariablePredefineFunctions::Strip]
     /// - trim whitespaces: [x.&trim], [x.&trim()], [&trim(x)],
     /// - trim given string: [x.&trim(trimString)], [&trim(x, trimString)]
-    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 0,
+        max_param_count = 1
+    )]
     Trim,
     /// replace all occurrences of a substring with another substring in string.
     /// [x.&replace(oldSubstring, newSubstring)], [&replace(x, oldSubstring, newSubstring)]
@@ -115,7 +165,12 @@ pub enum VariablePredefineFunctions {
     /// - [none context] returns empty string.
     /// - [oldSubstring]: string, none. if none, treat as empty string.
     /// - [newSubstring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 2, max_param_count = 2)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 2,
+        max_param_count = 2
+    )]
     Replace,
     /// replace first occurrence of a substring with another substring in string.
     /// [x.&replaceFirst(oldSubstring, newSubstring)], [&replaceFirst(x, oldSubstring, newSubstring)]
@@ -124,7 +179,12 @@ pub enum VariablePredefineFunctions {
     /// - [none context] returns empty string.
     /// - [oldSubstring]: string, none. if none, treat as empty string.
     /// - [newSubstring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 2, max_param_count = 2)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 2,
+        max_param_count = 2
+    )]
     ReplaceFirst,
     /// convert string to upper case.
     /// [x.&upper], [x.&upper()], [&upper(x)]
@@ -148,7 +208,12 @@ pub enum VariablePredefineFunctions {
     ///   - returns false when given substring is not empty.
     ///   - returns true when given substring is empty,
     /// - [substring]: string, none. if none, treat as empty string.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 1, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 1,
+        max_param_count = 1
+    )]
     Contains,
     /// split string to vec by given separator string (default comma).
     /// - split by comma: [x.&split], [x.&split()], [&split(x)],
@@ -159,7 +224,12 @@ pub enum VariablePredefineFunctions {
     ///   - returns vec with single empty string element when given separator is not empty.
     ///   - returns empty vec when given separator is empty,
     /// - [separator]: string, none. if none, treat as comma.
-    #[restrict(none_context = true, blank_context = true, min_param_count = 0, max_param_count = 1)]
+    #[restrict(
+        none_context = true,
+        blank_context = true,
+        min_param_count = 0,
+        max_param_count = 1
+    )]
     Split,
     /// concatenate multiple strings to one string.
     /// - [x.&concat(y, ...)], [&concat(x, y, ...)]
@@ -176,6 +246,7 @@ pub enum VariablePredefineFunctions {
     ///
     /// - [context]: string, none.
     /// - [none context], simply ignore it.
+    /// - [separator]: string or none. none value is treated as empty string.
     /// - [y, ...]: strings or nones. none values are ignored.
     ///
     /// return empty string when values are all none.
@@ -442,6 +513,156 @@ pub enum VariablePredefineFunctions {
     /// [&now], [&now()]
     #[restrict(context = false, max_param_count = 0)]
     Now,
+}
+
+impl VariablePredefineFunctions {
+    // noinspection DuplicatedCode
+    /// whether the function allow none as parameter.
+    /// returns false if the function given parameter index is not accepted (over max param count)
+    /// or the function does not accept none at given parameter index.
+    /// context parameter is not included.
+    pub fn allow_none_param(&self, param_index: usize) -> bool {
+        if let Some(max_param_count) = self.max_param_count() {
+            if param_index > max_param_count {
+                return false;
+            }
+        }
+
+        // function does not accept any parameter, false
+        let no_param_false = false;
+        // function does accept single parameter, but it cannot be blank/empty string, false
+        let single_param_false = false;
+        // function does accept single parameter, and it can be blank/empty string, true
+        let single_param_true = true;
+        // function does accept two parameters, and both can be blank/empty string, true
+        let both_params_true = true;
+        // function does accept multiple parameters, and any can be blank/empty string, true
+        let any_param_true = true;
+
+        match self {
+            VariablePredefineFunctions::NextSeq => no_param_false,
+            VariablePredefineFunctions::Count => no_param_false,
+            VariablePredefineFunctions::Length => no_param_false,
+            VariablePredefineFunctions::Len => no_param_false,
+            VariablePredefineFunctions::Slice => both_params_true,
+            VariablePredefineFunctions::Substr => both_params_true,
+            VariablePredefineFunctions::Find => single_param_true,
+            VariablePredefineFunctions::Index => single_param_true,
+            VariablePredefineFunctions::StartsWith => single_param_true,
+            VariablePredefineFunctions::Startswith => single_param_true,
+            VariablePredefineFunctions::EndsWith => single_param_true,
+            VariablePredefineFunctions::Endswith => single_param_true,
+            VariablePredefineFunctions::Strip => single_param_true,
+            VariablePredefineFunctions::Trim => single_param_true,
+            VariablePredefineFunctions::Replace => both_params_true,
+            VariablePredefineFunctions::ReplaceFirst => both_params_true,
+            VariablePredefineFunctions::Upper => no_param_false,
+            VariablePredefineFunctions::Lower => no_param_false,
+            VariablePredefineFunctions::Contains => single_param_true,
+            VariablePredefineFunctions::Split => single_param_true,
+            VariablePredefineFunctions::Concat => any_param_true,
+            VariablePredefineFunctions::ConcatWith => any_param_true,
+            VariablePredefineFunctions::Join => single_param_true,
+            VariablePredefineFunctions::Distinct => no_param_false,
+            VariablePredefineFunctions::Sum => no_param_false,
+            VariablePredefineFunctions::Avg => no_param_false,
+            VariablePredefineFunctions::Max => no_param_false,
+            VariablePredefineFunctions::MaxNum => no_param_false,
+            VariablePredefineFunctions::MaxDate => no_param_false,
+            VariablePredefineFunctions::MaxDatetime => no_param_false,
+            VariablePredefineFunctions::MaxDt => no_param_false,
+            VariablePredefineFunctions::MaxTime => no_param_false,
+            VariablePredefineFunctions::Min => no_param_false,
+            VariablePredefineFunctions::MinNum => no_param_false,
+            VariablePredefineFunctions::MinDate => no_param_false,
+            VariablePredefineFunctions::MinDatetime => no_param_false,
+            VariablePredefineFunctions::MinDt => no_param_false,
+            VariablePredefineFunctions::MinTime => no_param_false,
+            VariablePredefineFunctions::FromCurrentContext => no_param_false,
+            VariablePredefineFunctions::FromPreviousTriggerData => no_param_false,
+            VariablePredefineFunctions::DayDiff => single_param_false,
+            VariablePredefineFunctions::MonthDiff => single_param_false,
+            VariablePredefineFunctions::YearDiff => single_param_false,
+            VariablePredefineFunctions::MoveDate => single_param_false,
+            VariablePredefineFunctions::DateFormat => single_param_false,
+            VariablePredefineFunctions::Now => no_param_false,
+        }
+    }
+
+    // noinspection DuplicatedCode
+    /// whether the function allow blank or empty string as parameter.
+    /// returns false if the function given parameter index is not accepted (over max param count)
+    /// or the function does not accept string parameter at given parameter index.
+    /// context parameter is not included.
+    pub fn allow_blank_param(&self, param_index: usize) -> bool {
+        if let Some(max_param_count) = self.max_param_count() {
+            if param_index > max_param_count {
+                return false;
+            }
+        }
+
+        // function does not accept any parameter, false
+        let no_param_false = false;
+        // function does accept single parameter, but it cannot be blank/empty string, false
+        let single_param_false = false;
+        // function does accept single parameter, and it can be blank/empty string, true
+        let single_param_true = true;
+        // function does accept two parameters, but both cannot be blank/empty string, false
+        let both_params_false = false;
+        // function does accept two parameters, and both can be blank/empty string, true
+        let both_params_true = true;
+        // function does accept multiple parameters, and any can be blank/empty string, true
+        let any_param_true = true;
+
+        match self {
+            VariablePredefineFunctions::NextSeq => no_param_false,
+            VariablePredefineFunctions::Count => no_param_false,
+            VariablePredefineFunctions::Length => no_param_false,
+            VariablePredefineFunctions::Len => no_param_false,
+            VariablePredefineFunctions::Slice => both_params_false,
+            VariablePredefineFunctions::Substr => both_params_false,
+            VariablePredefineFunctions::Find => single_param_true,
+            VariablePredefineFunctions::Index => single_param_true,
+            VariablePredefineFunctions::StartsWith => single_param_true,
+            VariablePredefineFunctions::Startswith => single_param_true,
+            VariablePredefineFunctions::EndsWith => single_param_true,
+            VariablePredefineFunctions::Endswith => single_param_true,
+            VariablePredefineFunctions::Strip => single_param_true,
+            VariablePredefineFunctions::Trim => single_param_true,
+            VariablePredefineFunctions::Replace => both_params_true,
+            VariablePredefineFunctions::ReplaceFirst => both_params_true,
+            VariablePredefineFunctions::Upper => no_param_false,
+            VariablePredefineFunctions::Lower => no_param_false,
+            VariablePredefineFunctions::Contains => single_param_true,
+            VariablePredefineFunctions::Split => single_param_true,
+            VariablePredefineFunctions::Concat => any_param_true,
+            VariablePredefineFunctions::ConcatWith => any_param_true,
+            VariablePredefineFunctions::Join => single_param_true,
+            VariablePredefineFunctions::Distinct => no_param_false,
+            VariablePredefineFunctions::Sum => no_param_false,
+            VariablePredefineFunctions::Avg => no_param_false,
+            VariablePredefineFunctions::Max => no_param_false,
+            VariablePredefineFunctions::MaxNum => no_param_false,
+            VariablePredefineFunctions::MaxDate => no_param_false,
+            VariablePredefineFunctions::MaxDatetime => no_param_false,
+            VariablePredefineFunctions::MaxDt => no_param_false,
+            VariablePredefineFunctions::MaxTime => no_param_false,
+            VariablePredefineFunctions::Min => no_param_false,
+            VariablePredefineFunctions::MinNum => no_param_false,
+            VariablePredefineFunctions::MinDate => no_param_false,
+            VariablePredefineFunctions::MinDatetime => no_param_false,
+            VariablePredefineFunctions::MinDt => no_param_false,
+            VariablePredefineFunctions::MinTime => no_param_false,
+            VariablePredefineFunctions::FromCurrentContext => no_param_false,
+            VariablePredefineFunctions::FromPreviousTriggerData => no_param_false,
+            VariablePredefineFunctions::DayDiff => single_param_false,
+            VariablePredefineFunctions::MonthDiff => single_param_false,
+            VariablePredefineFunctions::YearDiff => single_param_false,
+            VariablePredefineFunctions::MoveDate => single_param_false,
+            VariablePredefineFunctions::DateFormat => single_param_false,
+            VariablePredefineFunctions::Now => no_param_false,
+        }
+    }
 }
 
 /// string stands for an expression to retrieve some value

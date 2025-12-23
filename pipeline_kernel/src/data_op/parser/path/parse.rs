@@ -2,7 +2,7 @@ use crate::PathParser;
 use watchmen_model::StdR;
 
 /// consume path
-impl PathParser<'_> {
+impl PathParser {
     /// try to consume in-memory chars when dot met.
     /// not allowed:
     /// - continuous dots,
@@ -136,7 +136,7 @@ impl PathParser<'_> {
     /// - parsing ends when a [}] is encountered.
     /// - if the string is completely consumed without encountering a [}], an error is reported.
     pub fn parse_till_right_brace(&mut self) -> StdR<()> {
-        let index_of_left_brace = self.inner.char_index - 1;
+        let index_of_left_brace = self.inner.previous_char_index();
 
         loop {
             if let Some(char) = self.inner.current_char() {
@@ -165,10 +165,17 @@ impl PathParser<'_> {
             } else {
                 // reach the end, no char anymore
                 // "}" not encountered, raise error
-                return self.incorrect_wrapped_path(index_of_left_brace);
+                return self.incorrect_wrapped_path(index_of_left_brace as usize);
             }
         }
 
+        Ok(())
+    }
+
+    /// basically very similar to the standard parse. The differences are as follows:
+    /// - parsing ends when one of [,)] is encountered.
+    /// - if the string is completely consumed without encountering one of [,)], an error is reported.
+    pub fn parse_till_param_end(&mut self) -> StdR<()> {
         Ok(())
     }
 }

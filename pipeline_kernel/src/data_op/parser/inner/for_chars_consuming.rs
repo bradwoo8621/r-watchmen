@@ -1,7 +1,7 @@
 use crate::ParserInnerState;
 
 /// consume chars
-impl ParserInnerState<'_> {
+impl ParserInnerState {
     /// append given char to in-memory chars
     /// and move char index to next
     pub fn consume_char_into_memory_and_keep_char_index(&mut self, char: char) {

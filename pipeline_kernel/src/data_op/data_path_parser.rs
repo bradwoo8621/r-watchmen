@@ -1,5 +1,7 @@
-use crate::{DataPath, DataPathSegment, PathParser, PipelineKernelErrorCode, PlainDataPath};
-use std::ops::Deref;
+use crate::{
+    DataPath, DataPathSegment, PathParser, PathStr, PipelineKernelErrorCode, PlainDataPath,
+};
+use std::sync::Arc;
 use watchmen_model::{FactorType, StdErrorCode, StdR};
 use watchmen_runtime_model_kernel::{ArcFactor, TopicSchema};
 
@@ -22,13 +24,13 @@ impl DataPath {
                 ));
             };
             segments.push(DataPathSegment::Plain(PlainDataPath {
-                path: segment_paths[index].to_string(),
+                path: PathStr::of_str(segment_paths[index]),
                 is_vec: Some(is_vec),
             }));
         }
 
         Ok(DataPath {
-            path: factor.name.deref().clone(),
+            path: PathStr::of_str(factor.name.as_str()),
             segments,
         })
     }
@@ -48,12 +50,12 @@ impl DataPath {
     ///
     /// and fail fast
     pub fn from_str(path: &str) -> StdR<DataPath> {
-        let all_chars = path.chars().collect();
-        let mut parser = PathParser::by_path(path, &all_chars);
+        let all_chars: Arc<Vec<char>> = Arc::new(path.chars().collect());
+        let mut parser = PathParser::by_path(all_chars.clone());
         parser.parse()?;
 
         Ok(DataPath {
-            path: path.to_string(),
+            path: PathStr::of_chars(all_chars),
             segments: parser.segments,
         })
     }
@@ -70,7 +72,7 @@ mod tests {
             assert!(matches!(segment, DataPathSegment::Plain(_)));
             match segment {
                 DataPathSegment::Plain(path) => {
-                    assert_eq!(path.path, value);
+                    assert_eq!(path.path.to_string(), value);
                     assert_eq!(path.is_vec, None);
                 }
                 _ => panic!(),
@@ -81,7 +83,7 @@ mod tests {
             assert!(matches!(param, FuncDataPathParam::Plain(_)));
             match param {
                 FuncDataPathParam::Plain(plain_path) => {
-                    assert_eq!(plain_path.path, value);
+                    assert_eq!(plain_path.path.to_string(), value);
                     assert_eq!(plain_path.is_vec, None);
                 }
                 _ => panic!(),
@@ -91,7 +93,7 @@ mod tests {
         pub fn assert_param_str(param: &FuncDataPathParam, value: &str) {
             match param {
                 FuncDataPathParam::Value(value_path) => {
-                    assert_eq!(value_path.path, value);
+                    assert_eq!(value_path.path.to_string(), value);
                     assert!(matches!(value_path.value, FuncParamValue::Str(_)));
                     match &value_path.value {
                         FuncParamValue::Str(s) => {
@@ -112,7 +114,7 @@ mod tests {
             assert!(matches!(segment, DataPathSegment::Func(_)));
             match segment {
                 DataPathSegment::Func(func_path) => {
-                    assert_eq!(func_path.path, path);
+                    assert_eq!(func_path.path.to_string(), path);
                     f1(&func_path.func);
                     assert!(func_path.params.is_some());
                     if let Some(params) = &func_path.params {
@@ -133,7 +135,7 @@ mod tests {
             println!("test__a");
 
             let path = DataPath::from_str("a").unwrap();
-            assert_eq!(path.path, "a");
+            assert_eq!(path.path.to_string(), "a");
             assert_eq!(path.segments.len(), 1);
             assert_plain_segment(&path.segments[0], "a");
         }
@@ -143,7 +145,7 @@ mod tests {
             println!("test__a_b");
 
             let path = DataPath::from_str("a.b").unwrap();
-            assert_eq!(path.path, "a.b");
+            assert_eq!(path.path.to_string(), "a.b");
             assert_eq!(path.segments.len(), 2);
             assert_plain_segment(&path.segments[0], "a");
             assert_plain_segment(&path.segments[1], "b");
@@ -154,7 +156,7 @@ mod tests {
             println!("test__a_b_c");
 
             let path = DataPath::from_str("a.b.c").unwrap();
-            assert_eq!(path.path, "a.b.c");
+            assert_eq!(path.path.to_string(), "a.b.c");
             assert_eq!(path.segments.len(), 3);
             assert_plain_segment(&path.segments[0], "a");
             assert_plain_segment(&path.segments[1], "b");
@@ -174,7 +176,7 @@ mod tests {
             println!("test__LBaRB");
 
             let path = DataPath::from_str("{a}").unwrap();
-            assert_eq!(path.path, "{a}");
+            assert_eq!(path.path.to_string(), "{a}");
             assert_eq!(path.segments.len(), 1);
             assert_func_segment(
                 &path.segments[0],
@@ -192,7 +194,7 @@ mod tests {
             println!("test__LBaRBb");
 
             let path = DataPath::from_str("{a}b").unwrap();
-            assert_eq!(path.path, "{a}b");
+            assert_eq!(path.path.to_string(), "{a}b");
             assert_eq!(path.segments.len(), 1);
             assert_func_segment(
                 &path.segments[0],
@@ -211,7 +213,7 @@ mod tests {
             println!("test__aLBbRB");
 
             let path = DataPath::from_str("a{b}").unwrap();
-            assert_eq!(path.path, "a{b}");
+            assert_eq!(path.path.to_string(), "a{b}");
             assert_eq!(path.segments.len(), 1);
             assert_func_segment(
                 &path.segments[0],
@@ -230,7 +232,7 @@ mod tests {
             println!("test__aLBbRBc");
 
             let path = DataPath::from_str("a{b}c").unwrap();
-            assert_eq!(path.path, "a{b}c");
+            assert_eq!(path.path.to_string(), "a{b}c");
             assert_eq!(path.segments.len(), 1);
             assert_func_segment(
                 &path.segments[0],
@@ -258,7 +260,7 @@ mod tests {
             println!("test__a_b_c_dLBeRBf_g");
 
             let path = DataPath::from_str("a.b.c.d{e}f.g").unwrap();
-            assert_eq!(path.path, "a.b.c.d{e}f.g");
+            assert_eq!(path.path.to_string(), "a.b.c.d{e}f.g");
             assert_eq!(path.segments.len(), 5);
             assert_plain_segment(&path.segments[0], "a");
             assert_plain_segment(&path.segments[1], "b");

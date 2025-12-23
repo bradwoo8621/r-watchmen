@@ -1,25 +1,24 @@
 use crate::{
     DataPathSegment, FuncDataPath, FuncDataPathParam, FuncParamValue, FuncParamValuePath,
-    LiteralConcatFuncParser, ParserInnerState, PathParser,
+    LiteralConcatFuncParser, ParserInnerState, PathParser, PathStr,
 };
 use watchmen_model::{StdR, VariablePredefineFunctions};
 
 /// for literal concat function
-impl PathParser<'_> {
+impl PathParser {
     /// get index of char before on-flying chars, when a literal concat function detected.
     /// current char is [{].
     ///
     /// if there is chars in in-memory chars, before it,
-    /// otherwise before current char index
+    /// otherwise previous char index
     fn get_index_of_char_before_literal_concat_function(&self) -> i64 {
-        let inner = &self.inner;
-
-        if inner.in_memory_chars_is_not_empty() {
+        if self.inner.in_memory_chars_is_not_empty() {
             // get char before in-memory chars
-            inner.char_index as i64 - inner.in_memory_chars_count() as i64 - 1
+            self.inner
+                .char_index_before_current(self.inner.in_memory_chars_count() + 1)
         } else {
             // get char before "{"
-            inner.char_index as i64 - 1
+            self.inner.previous_char_index()
         }
     }
 
@@ -54,7 +53,7 @@ impl PathParser<'_> {
         if should_create_concat_function {
             Ok(FuncDataPath {
                 // leave the path empty, will set it later
-                path: String::new(),
+                path: PathStr::of_str(""),
                 func: VariablePredefineFunctions::Concat,
                 params: Some(vec![]),
             })
@@ -106,32 +105,32 @@ impl PathParser<'_> {
 
         if self.inner.in_memory_chars_is_not_empty() {
             // create a value path
+            let value = FuncParamValue::Str(self.inner.clone_in_memory_chars());
+            let start_char_index = self
+                .inner
+                .char_index_before_current(self.inner.in_memory_chars_count())
+                as usize;
             params.push(FuncDataPathParam::Value(FuncParamValuePath {
-                path: self.inner.clone_in_memory_chars(),
-                value: FuncParamValue::Str(self.inner.clone_in_memory_chars()),
+                path: self.inner.create_path_str_exclude_current(start_char_index),
+                value,
             }));
             self.inner.clear_in_memory_chars();
         }
 
         // continue parsing literal concat function
         let mut literal_concat_func_parser = LiteralConcatFuncParser {
-            inner: ParserInnerState {
-                full_path: self.inner.full_path,
-                all_chars: self.inner.all_chars,
-                // skip the "{"
-                char_index: self.inner.char_index + 1,
-                in_memory_chars: String::new(),
-            },
+            inner: ParserInnerState::new_at_next_char(&self.inner),
             params,
         };
         literal_concat_func_parser.parse()?;
         // hand back
         // copy char index to current state
-        self.inner.char_index = literal_concat_func_parser.inner.char_index;
+        self.inner
+            .move_char_index_to(literal_concat_func_parser.inner.current_char_index());
         // reset the concat function path
-        concat.path = self.inner.full_path
-            [(index_of_char_before + 1) as usize..self.inner.char_index]
-            .to_string();
+        concat.path = self
+            .inner
+            .create_path_str_exclude_current((index_of_char_before + 1) as usize);
         // copy params to concat function
         concat.params = Some(literal_concat_func_parser.params);
 

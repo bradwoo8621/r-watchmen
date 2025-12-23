@@ -1,10 +1,66 @@
 use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use std::fmt::{Display, Formatter};
+use std::sync::Arc;
 use watchmen_model::VariablePredefineFunctions;
+
+/// path string with start and end index in the full string
+pub struct PathStr {
+    full_path: Arc<Vec<char>>,
+    start_index: usize,
+    end_index: usize,
+}
+
+impl PathStr {
+    /// init with given full path, start index is 0, end index is length of full path
+    pub fn of_str(full_path: &str) -> Self {
+        let path: Vec<char> = full_path.chars().collect();
+        let end_index = path.len();
+
+        PathStr {
+            full_path: Arc::new(path),
+            start_index: 0,
+            end_index,
+        }
+    }
+
+    /// init with given full path (chars), start index is 0, end index is length of full path
+    pub fn of_chars(full_path: Arc<Vec<char>>) -> Self {
+        let end_index = full_path.len();
+
+        PathStr {
+            full_path,
+            start_index: 0,
+            end_index,
+        }
+    }
+
+    /// init with given full path (chars), start index and end index
+    pub fn part_of_chars(full_path: Arc<Vec<char>>, start_index: usize, end_index: usize) -> Self {
+        PathStr {
+            full_path,
+            start_index,
+            end_index,
+        }
+    }
+
+    /// to string
+    pub fn to_string(&self) -> String {
+        self.full_path[self.start_index..self.end_index]
+            .iter()
+            .collect()
+    }
+}
+
+impl Display for PathStr {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
 
 /// plain path, a string which is property name
 pub struct PlainDataPath {
-    pub path: String,
+    pub path: PathStr,
     /// if this path refers to a factor, then should know that the factor is vec (array) or not
     /// otherwise, leave this none when don't know the type
     pub is_vec: Option<bool>,
@@ -23,7 +79,7 @@ pub enum FuncParamValue {
 /// value path, a definite value
 /// only param of func can be a value path
 pub struct FuncParamValuePath {
-    pub path: String,
+    pub path: PathStr,
     pub value: FuncParamValue,
 }
 
@@ -35,7 +91,7 @@ pub enum FuncDataPathParam {
 }
 
 pub struct FuncDataPath {
-    pub path: String,
+    pub path: PathStr,
     pub func: VariablePredefineFunctions,
     pub params: Option<Vec<FuncDataPathParam>>,
 }
@@ -71,7 +127,7 @@ pub enum DataPathSegment {
 /// - In functions related to string search and replacement,
 ///   additional character escaping is provided in the parameters. `[\r\n\t]` will be recognized as line breaks and tabs.
 pub struct DataPath {
-    pub path: String,
+    pub path: PathStr,
     /// at least one segment, which means no [.] included
     pub segments: Vec<DataPathSegment>,
 }
