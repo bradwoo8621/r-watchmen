@@ -246,7 +246,7 @@ impl FuncParser {
 
     /// - check min param count,
     /// - check max param count
-    fn final_param_count_check(&mut self) -> StdR<()> {
+    fn final_param_count_check(&mut self, index_of_left_parenthesis: usize) -> StdR<()> {
         let parsed_count = self.params.len();
         let parsed_count = if self.with_context || !self.func.require_context() {
             // with context or no context required
@@ -264,17 +264,16 @@ impl FuncParser {
         let min_param_count = self.func.min_param_count();
         if parsed_count < min_param_count {
             return self.incorrect_function_param_below_min_count(
-                self.start_char_index_of_func,
+                index_of_left_parenthesis,
                 min_param_count,
             );
         }
 
-        let max_param_count = self.func.max_param_count();
-        if let Some(max_count) = max_param_count {
-            if parsed_count > max_count {
+        if let Some(max_param_count) = self.func.max_param_count() {
+            if parsed_count > max_param_count {
                 return self.incorrect_function_param_over_max_count(
-                    self.start_char_index_of_func,
-                    max_count,
+                    index_of_left_parenthesis,
+                    max_param_count,
                 );
             }
         }
@@ -345,7 +344,7 @@ impl FuncParser {
             }
         }
 
-        self.final_param_count_check()?;
+        self.final_param_count_check(index_of_left_parenthesis)?;
 
         Ok(())
     }
