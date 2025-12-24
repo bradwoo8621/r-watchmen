@@ -15,6 +15,19 @@ impl FuncParser {
         ))
     }
 
+    /// report error at [index of ampersand, current char index)
+    pub fn incorrect_function_has_no_context<R>(&self) -> StdR<R> {
+        let start_char_index = self.start_char_index_of_func;
+        let end_char_index = self.inner.current_char_index();
+        self.inner.error(format!(
+            "Incorrect data path[{}], caused by function[{}] must have context at index[{}, {}].",
+            self.inner.full_path(),
+            self.inner.part_path(start_char_index, end_char_index),
+            start_char_index,
+            end_char_index
+        ))
+    }
+
     /// report error at [index of left parenthesis]
     pub fn incorrect_function_params_not_close<R>(
         &self,
@@ -37,6 +50,22 @@ impl FuncParser {
             self.inner.full_path(),
             self.func.to_string(),
             max_count,
+            index_of_left_parenthesis,
+            self.inner.current_char_index()
+        ))
+    }
+
+    /// report error at [index of left parenthesis, current char index)
+    pub fn incorrect_function_param_below_min_count<R>(
+        &self,
+        index_of_left_parenthesis: usize,
+        min_count: usize,
+    ) -> StdR<R> {
+        self.inner.error(format!(
+            "Incorrect data path[{}], caused by function[{}] can accept a minimum of {} parameters at index[{}, {}].",
+            self.inner.full_path(),
+            self.func.to_string(),
+            min_count,
             index_of_left_parenthesis,
             self.inner.current_char_index()
         ))

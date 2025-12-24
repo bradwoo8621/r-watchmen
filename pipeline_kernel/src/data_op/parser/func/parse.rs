@@ -245,10 +245,40 @@ impl FuncParser {
     }
 
     /// - check min param count,
-    /// - staticize parameter,
-    /// - simplify function.
-    fn finalize_content(&mut self) -> StdR<()> {
-        // TODO
+    /// - check max param count
+    fn final_param_count_check(&mut self) -> StdR<()> {
+        let parsed_count = self.params.len();
+        let parsed_count = if self.with_context || !self.func.require_context() {
+            // with context or no context required
+            // all parsed are parameters
+            parsed_count
+        } else if parsed_count == 0 {
+            // no context and no parameter parsed, but context required
+            return self.incorrect_function_has_no_context();
+        } else {
+            // no context, context required, at least one parameter parsed
+            // the first parsed is context, rest are parameters
+            parsed_count - 1
+        };
+
+        let min_param_count = self.func.min_param_count();
+        if parsed_count < min_param_count {
+            return self.incorrect_function_param_below_min_count(
+                self.start_char_index_of_func,
+                min_param_count,
+            );
+        }
+
+        let max_param_count = self.func.max_param_count();
+        if let Some(max_count) = max_param_count {
+            if parsed_count > max_count {
+                return self.incorrect_function_param_over_max_count(
+                    self.start_char_index_of_func,
+                    max_count,
+                );
+            }
+        }
+
         Ok(())
     }
 
@@ -315,7 +345,7 @@ impl FuncParser {
             }
         }
 
-        self.finalize_content()?;
+        self.final_param_count_check()?;
 
         Ok(())
     }
