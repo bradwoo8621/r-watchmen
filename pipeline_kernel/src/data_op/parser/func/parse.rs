@@ -251,6 +251,9 @@ impl FuncParser {
         self.end_param(index_of_left_parenthesis, param_index)
     }
 
+    /// - check min param count,
+    /// - staticize parameter,
+    /// - simplify function.
     fn finalize_content(&mut self) -> StdR<()> {
         // TODO
         Ok(())

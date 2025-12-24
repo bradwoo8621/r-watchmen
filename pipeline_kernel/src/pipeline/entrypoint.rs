@@ -207,14 +207,16 @@ impl PipelineEntrypoint {
 mod tests {
     use crate::PipelineEntrypoint;
     use watchmen_auth::Principal;
-    use watchmen_model::{PipelineTriggerData, PipelineTriggerType};
+    use watchmen_model::{PipelineTriggerData, PipelineTriggerType, TopicData};
 
     #[test]
     fn test() {
+        let topic_data = TopicData::new();
         let trigger_data = PipelineTriggerData::new()
             .code(String::from("topic-1"))
             .trigger_type(PipelineTriggerType::Insert)
-            .tenant_id(String::from("tenant-1"));
+            .tenant_id(String::from("tenant-1"))
+            .data(topic_data);
         let result = PipelineEntrypoint::with(Principal::fake_super_admin())
             .traced_with("123".to_string())
             .expect("trace id cannot be blank")

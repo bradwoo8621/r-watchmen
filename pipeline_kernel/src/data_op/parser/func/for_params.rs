@@ -15,22 +15,48 @@ impl FuncParser {
     ) -> StdR<()> {
         let max_param_count = self.func.max_param_count();
         if max_param_count.is_none() {
+            // no parameter limit, pass
             return Ok(());
         }
 
         if self.with_context && !self.func.require_context() {
-            // basically, never happen
+            // basically, never happen, already checked
             return self.incorrect_function_has_context();
         }
 
         let max_param_count = max_param_count.unwrap();
+        // parameter parsed so far
         let parsed_param_count = self.params.len();
-        let param_on_air_count = (param_index == parsed_param_count)
-            .then_some(1)
-            .unwrap_or(0);
+        // when the current parameter is not parsed yet.
+        // basically, no matter there is in-memory chars, or just empty,
+        // it can be treated as blank/empty string or none, unless function does not allow it.
+        // which means one more parameter to be counted.
+        // but still there is a special case, which is
+        // - param index is 0,
+        // - function does not allow context,
+        // - function's max param count is 0,
+        // in this case, the whitespaces in memory will be ignored.
+        // that is saying, in this case, parameter on air count is 0.
+        let mut param_on_air_count = 0;
+        if param_index == parsed_param_count {
+            // typically, there is one parameter on air
+            param_on_air_count = 1;
+            if param_index == 0 && max_param_count == 0 && !one_more_param_booked {
+                // current is the first parameter, and max param count is 0,
+                // and there is a right parenthesis (not a comma) detected,
+                if !self.func.require_context() || self.with_context {
+                    // - context disallowed,
+                    // - or context allowed, but already provided,
+                    // in this case, the whitespaces in memory will be ignored.
+                    param_on_air_count = 0;
+                }
+            }
+        }
+        // when the first parameter is context, not counted in user parameters
         let context_param_count = (!self.with_context && self.func.require_context())
             .then_some(1)
             .unwrap_or(0);
+        // when [,] detected, one more parameter to be parsed in the future
         let more_param_count = one_more_param_booked.then_some(1).unwrap_or(0);
         let at_least_param_count =
             parsed_param_count + param_on_air_count + more_param_count - context_param_count;

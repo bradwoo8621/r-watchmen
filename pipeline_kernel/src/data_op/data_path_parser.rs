@@ -5,6 +5,7 @@ use std::sync::Arc;
 use watchmen_model::{FactorType, StdErrorCode, StdR};
 use watchmen_runtime_model_kernel::{ArcFactor, TopicSchema};
 
+/// parser
 impl DataPath {
     /// factor name has no dot escape, no function
     pub fn from_factor(factor: &ArcFactor, topic_schema: &TopicSchema) -> StdR<DataPath> {
@@ -120,6 +121,21 @@ mod tests {
                     if let Some(params) = &func_path.params {
                         f2(params);
                     }
+                }
+                _ => {}
+            }
+        }
+
+        pub fn assert_func_no_param_segment<F1>(segment: &DataPathSegment, path: &str, f1: F1)
+        where
+            F1: FnOnce(&VariablePredefineFunctions),
+        {
+            assert!(matches!(segment, DataPathSegment::Func(_)));
+            match segment {
+                DataPathSegment::Func(func_path) => {
+                    assert_eq!(func_path.path.to_string(), path);
+                    f1(&func_path.func);
+                    assert!(func_path.params.is_none());
                 }
                 _ => {}
             }
@@ -277,6 +293,56 @@ mod tests {
                 },
             );
             assert_plain_segment(&path.segments[4], "g");
+        }
+    }
+
+    mod func {
+        use crate::data_op::data_path_parser::tests::helper::{assert_func_no_param_segment, assert_plain_segment};
+        use crate::DataPath;
+        use watchmen_model::VariablePredefineFunctions;
+
+        #[test]
+        fn test__now() {
+            println!("test__now");
+
+            let path = DataPath::from_str("&now").unwrap();
+            assert_eq!(path.path.to_string(), "&now");
+            assert_eq!(path.path.start_index(), 0);
+            assert_eq!(path.path.end_index(), 4);
+            assert_eq!(path.segments.len(), 1);
+            assert_func_no_param_segment(&path.segments[0], "&now", |f| {
+                assert!(matches!(f, VariablePredefineFunctions::Now))
+            });
+        }
+
+        #[test]
+        fn test__a_len() {
+            println!("test__a_len");
+
+            let path = DataPath::from_str("a.&len").unwrap();
+            assert_eq!(path.path.to_string(), "a.&len");
+            assert_eq!(path.path.start_index(), 0);
+            assert_eq!(path.path.end_index(), 6);
+            assert_eq!(path.segments.len(), 2);
+            assert_plain_segment(&path.segments[0], "a");
+            assert_func_no_param_segment(&path.segments[1], "&len", |f| {
+                assert!(matches!(f, VariablePredefineFunctions::Len))
+            });
+        }
+
+        #[test]
+        fn test__a_lenLPRP() {
+            println!("test__a_lenLPRP");
+
+            let path = DataPath::from_str("a.&len()").unwrap();
+            assert_eq!(path.path.to_string(), "a.&len()");
+            assert_eq!(path.path.start_index(), 0);
+            assert_eq!(path.path.end_index(), 8);
+            assert_eq!(path.segments.len(), 2);
+            assert_plain_segment(&path.segments[0], "a");
+            assert_func_no_param_segment(&path.segments[1], "&len()", |f| {
+                assert!(matches!(f, VariablePredefineFunctions::Len))
+            });
         }
     }
 }

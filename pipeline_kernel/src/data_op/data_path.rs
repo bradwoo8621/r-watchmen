@@ -50,6 +50,14 @@ impl PathStr {
             .iter()
             .collect()
     }
+
+    pub fn start_index(&self) -> usize {
+        self.start_index
+    }
+
+    pub fn end_index(&self) -> usize {
+        self.end_index
+    }
 }
 
 impl Display for PathStr {

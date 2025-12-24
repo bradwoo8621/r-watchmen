@@ -80,6 +80,7 @@ impl PathParser {
         // check has context and allowable
         let has_context = self.has_segment();
         if !func.require_context() && has_context {
+            // has context and context disallowed, error
             return self.incorrect_function_has_context(start_index_of_func);
         }
 
@@ -110,11 +111,12 @@ impl PathParser {
                 },
             }));
         } else {
-            // no params followed, then raise error when
-            // - if at least 1 parameter required,
-            // - has no context and not context disallowed, which means context
+            // no params followed
             let min_param_count = func.min_param_count();
-            if min_param_count > 0 || !has_context {
+            if min_param_count > 0 || (!has_context && func.require_context()) {
+                // at least 1 parameter required,
+                // or has no context and context required
+                // error
                 return self.incorrect_function_no_param(&func);
             } else {
                 // func with has no param
