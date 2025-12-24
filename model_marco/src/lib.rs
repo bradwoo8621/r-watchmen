@@ -20,7 +20,7 @@ use proc_macro::TokenStream;
 /// | user_based    | UserBasedTuple        | tenant_id, user_id                                |
 ///
 /// # Examples
-/// ```
+/// ```text
 /// #[adapt_model(opt_lock, tenant_based)]
 /// pub struct User {
 ///    pub user_id: Option<UserId>,
@@ -39,19 +39,19 @@ use proc_macro::TokenStream;
 /// ```
 ///
 /// If `Storable` implemented, struct will automatically add follow:
-/// ```rust
+/// ```text
 /// #[derive(serde::Serialize, serde::Deserialize)]
 /// #[serde(deny_unknown_fields, rename_all = "camelCase")]
 /// ```
 /// and add following to fields which type has `Option<>`:
-/// ```rust
+/// ```text
 /// #[serde(skip_serializing_if = "Option::is_none")]
 /// ```
 /// if `#[serde]` already defined on field, `skip_serializing_if = "Option::is_none"` will be added.
 ///
 /// All traits and return types are from [watchmen_model] module:
 /// So import them by yourself, such as:
-/// ```
+/// ```text
 /// use watchmen_model::{
 ///     BaseDataModel, Storable,
 ///     Auditable, OptimisticLock, LastVisit,

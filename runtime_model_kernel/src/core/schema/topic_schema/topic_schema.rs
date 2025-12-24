@@ -153,7 +153,8 @@ impl TopicSchema {
 
 #[cfg(test)]
 mod tests {
-    use watchmen_model::{Factor, Topic, TopicKind, TopicType};
+    use watchmen_model::{Factor, FactorType, Topic, TopicKind, TopicType};
+    use crate::TopicSchema;
 
     fn create_sample_topic() -> Topic {
         Topic::new()
@@ -163,19 +164,29 @@ mod tests {
             .kind(TopicKind::Business)
             .factors(vec![
                 Factor::new()
+                    .factor_id("f1".to_string())
                     .name(String::from("factor-1"))
+                    .r#type(FactorType::Text)
                     .default_value(String::from("a")),
                 Factor::new()
+                    .factor_id("f2".to_string())
                     .name(String::from("dv.factor-2"))
+                    .r#type(FactorType::Text)
                     .default_value(String::from("b")),
                 Factor::new()
+                    .factor_id("f3".to_string())
                     .name(String::from("dv.factor-3"))
+                    .r#type(FactorType::Text)
                     .default_value(String::from("c")),
                 Factor::new()
+                    .factor_id("f4".to_string())
                     .name(String::from("dv.sub-dv.factor-4"))
+                    .r#type(FactorType::Text)
                     .default_value(String::from("d")),
                 Factor::new()
+                    .factor_id("f5".to_string())
                     .name(String::from("dv.sub-dv.factor-5"))
+                    .r#type(FactorType::Text)
                     .default_value(String::from("e")),
             ])
             .tenant_id(String::from("Tenant-1"))
@@ -185,7 +196,7 @@ mod tests {
     #[test]
     fn test_topic_schema() {
         let topic = create_sample_topic();
-        let topic_schema = super::TopicSchema::new(topic).expect("failed to create topic schema");
+        let topic_schema = TopicSchema::new(topic).expect("failed to create topic schema");
 
         assert_eq!(topic_schema.topic().topic_id.as_str(), "topic-1");
         // assert!(topic_schema.default_value_factor_groups.is_none());

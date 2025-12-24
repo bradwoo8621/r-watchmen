@@ -4,27 +4,16 @@ use std::sync::Arc;
 use watchmen_model::{StdErr, StdR, StringUtils};
 
 trait MinmaxFinderBase {
+    /// returns
+    /// - none when the string value is empty or not blank,
+    /// - error when the string value is blank,
     fn with_string_value<NotSupport>(
         minmax: &mut MinmaxState,
         str: &Arc<String>,
         not_support: &NotSupport,
-    ) -> Option<StdR<Arc<ArcTopicDataValue>>>
+    ) -> StdR<()>
     where
         NotSupport: Fn() -> StdErr;
-
-    fn with_none_and_string_value<NotSupport>(
-        value: &Arc<ArcTopicDataValue>,
-        minmax: &mut MinmaxState,
-        not_support: &NotSupport,
-    ) -> Option<StdR<Arc<ArcTopicDataValue>>>
-    where
-        NotSupport: Fn() -> StdErr,
-    {
-        match value.deref() {
-            ArcTopicDataValue::Str(str) => Self::with_string_value(minmax, str, &not_support),
-            _ => None,
-        }
-    }
 
     fn find_value<NotSupport, HandleTyped, HandleStringElements>(
         self,
@@ -44,21 +33,21 @@ impl MinmaxFinderBase for &Arc<Vec<Arc<ArcTopicDataValue>>> {
         minmax: &mut MinmaxState,
         str: &Arc<String>,
         not_support: &NotSupport,
-    ) -> Option<StdR<Arc<ArcTopicDataValue>>>
+    ) -> StdR<()>
     where
         NotSupport: Fn() -> StdErr,
     {
         if str.is_empty() {
             // ignore empty string
-            None
+            Ok(())
         } else if str.is_blank() {
             // obviously that blank string cannot be cast to any comparable type
             // error
-            Some(Err(not_support()))
+            Err(not_support())
         } else {
             // postpone, detect types first
             minmax.string_elements.push(str.clone());
-            None
+            Ok(())
         }
     }
 
@@ -78,12 +67,15 @@ impl MinmaxFinderBase for &Arc<Vec<Arc<ArcTopicDataValue>>> {
             .then_some(Ok(Arc::new(ArcTopicDataValue::None)))
             .unwrap_or_else(|| {
                 for value in self.iter() {
-                    if let Some(ret) =
-                        Self::with_none_and_string_value(value, &mut minmax, &not_support)
-                    {
-                        return ret;
+                    match value.deref() {
+                        ArcTopicDataValue::Str(str) => {
+                            Self::with_string_value(&mut minmax, str, &not_support)?
+                        }
+                        ArcTopicDataValue::None => {}
+                        _ => {
+                            typed(value, &mut minmax, &not_support)?;
+                        }
                     }
-                    typed(value, &mut minmax, &not_support)?;
                 }
 
                 string_elements(&mut minmax, &not_support)?;
