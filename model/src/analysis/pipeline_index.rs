@@ -1,9 +1,9 @@
-use crate::serde::option_naive_datetime;
 use crate::{
     BaseDataModel, FactorId, ModelErrorCode, PipelineActionId, PipelineId, PipelineStageId,
     PipelineUnitId, Storable, TenantId, TopicId,
 };
 use chrono::NaiveDateTime;
+use watchmen_base::serde::option_naive_datetime;
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 

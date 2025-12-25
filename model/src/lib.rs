@@ -10,7 +10,6 @@ mod system;
 mod webhook;
 
 pub mod pipelines;
-pub mod serde;
 pub mod topics;
 
 pub use analysis::*;

@@ -1,6 +1,6 @@
 use crate::{
-    BaseDataModel, ComputedObjectiveParameter, IndicatorId, ModelErrorCode,
-    ObjectiveParameterJoint, Storable,
+	BaseDataModel, ComputedObjectiveParameter, IndicatorId, ModelErrorCode,
+	ObjectiveParameterJoint, Storable,
 };
 use serde::{Deserialize, Serialize};
 use watchmen_base::{ErrorCode, StdR};

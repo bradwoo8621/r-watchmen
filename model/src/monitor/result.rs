@@ -1,9 +1,9 @@
-use crate::serde::{naive_date, naive_datetime, naive_time};
 use crate::{BaseDataModel, Storable};
 use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use watchmen_base::serde::{naive_date, naive_datetime, naive_time};
 use watchmen_model_marco::{adapt_model, VariousValueTypes};
 
 #[derive(Serialize, Deserialize, Clone, Debug, VariousValueTypes)]

@@ -1,6 +1,6 @@
 use crate::{
-    BaseDataModel, ChartBorder, ChartColor, ChartTruncation, ChartType, EChartsGridPositionOnly,
-    EChartsTitle, ModelErrorCode, PredefinedChartColorSeries, Storable,
+	BaseDataModel, ChartBorder, ChartColor, ChartTruncation, ChartType, EChartsGridPositionOnly,
+	EChartsTitle, ModelErrorCode, PredefinedChartColorSeries, Storable,
 };
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};

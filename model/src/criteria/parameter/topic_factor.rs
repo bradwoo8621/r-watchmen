@@ -14,9 +14,7 @@ impl TopicFactorParameter {
     }
 
     pub fn of(topic_id: TopicId, factor_id: FactorId) -> Self {
-        Self::init()
-            .topic_id(topic_id)
-            .factor_id(factor_id)
+        Self::init().topic_id(topic_id).factor_id(factor_id)
     }
 
     pub fn to_parameter(self) -> Parameter {

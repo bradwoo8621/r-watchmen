@@ -1,6 +1,6 @@
 use crate::{
-    BaseDataModel, ModelErrorCode, Pageable, ParameterCondition, Storable, SubjectDatasetColumnId,
-    SubjectId,
+	BaseDataModel, ModelErrorCode, Pageable, ParameterCondition, Storable, SubjectDatasetColumnId,
+	SubjectId,
 };
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};

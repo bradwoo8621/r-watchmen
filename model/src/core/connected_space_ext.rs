@@ -1,8 +1,8 @@
-use crate::serde::option_naive_datetime;
 use crate::{
 	Auditable, BaseDataModel, ConnectedSpaceId, LastVisit, SpaceId, Storable, SubjectWithReports,
 	TenantId, UserBasedTuple, UserId,
 };
+use watchmen_base::serde::option_naive_datetime;
 use watchmen_model_marco::adapt_model;
 
 /// extend a [subjects] field from [ConnectedSpace]

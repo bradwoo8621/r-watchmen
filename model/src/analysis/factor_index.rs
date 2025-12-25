@@ -1,6 +1,6 @@
-use crate::serde::option_naive_datetime;
 use crate::{BaseDataModel, FactorId, FactorType, Storable, TenantId, TopicId};
 use chrono::NaiveDateTime;
+use watchmen_base::serde::option_naive_datetime;
 use watchmen_model_marco::adapt_model;
 
 pub type FactorIndexId = String;

@@ -1,6 +1,6 @@
-use crate::serde::option_naive_date;
 use crate::{BaseDataModel, FactorId, MonitorRuleCode, MonitorRuleSeverity, Storable, TopicId};
 use chrono::NaiveDate;
+use watchmen_base::serde::option_naive_date;
 use watchmen_model_marco::adapt_model;
 
 #[adapt_model(storable)]

@@ -1,5 +1,5 @@
 use crate::{
-    BaseDataModel, ComputedObjectiveParameter, ModelErrorCode, ObjectiveFactorId, Storable,
+	BaseDataModel, ComputedObjectiveParameter, ModelErrorCode, ObjectiveFactorId, Storable,
 };
 use serde::{Deserialize, Serialize};
 use watchmen_base::{ErrorCode, StdR};

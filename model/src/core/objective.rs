@@ -1,9 +1,9 @@
-use crate::serde::option_naive_datetime;
 use crate::{
     Auditable, BaseDataModel, ObjectiveFactor, ObjectiveTarget, ObjectiveTimeframe,
     ObjectiveVariable, OptimisticLock, Storable, TenantBasedTuple, TenantId, Tuple, UserGroupId,
     UserId,
 };
+use watchmen_base::serde::option_naive_datetime;
 use watchmen_model_marco::adapt_model;
 
 pub type ObjectiveId = String;
