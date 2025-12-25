@@ -1,9 +1,10 @@
 use crate::{
     BaseDataModel, ChartBorder, ChartColor, ChartFont, ChartTruncation, ChartType,
     EChartsGridPositionOnly, EChartsHorizontalAlignment, EChartsLegend, EChartsTitle,
-    EChartsVerticalAlignment, PredefinedChartColorSeries, StdErrCode, StdErrorCode, StdR, Storable,
+    EChartsVerticalAlignment, ModelErrorCode, PredefinedChartColorSeries, Storable,
 };
 use bigdecimal::BigDecimal;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, StrEnum)]

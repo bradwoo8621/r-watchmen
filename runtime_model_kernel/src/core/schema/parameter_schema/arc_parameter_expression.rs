@@ -4,7 +4,8 @@ use crate::{
     ArcNotEmptyExpression, ArcNotEqualsExpression, ArcNotInExpression,
 };
 use std::sync::Arc;
-use watchmen_model::{ParameterExpression, StdR};
+use watchmen_base::StdR;
+use watchmen_model::{ParameterExpression,};
 
 #[derive(Debug)]
 pub enum ArcParameterExpression {

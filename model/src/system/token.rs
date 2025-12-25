@@ -1,5 +1,6 @@
-use crate::{BaseDataModel, StdErrCode, StdErrorCode, StdR, Storable, TenantId, UserRole};
+use crate::{BaseDataModel, ModelErrorCode, Storable, TenantId, UserRole};
 use serde::Deserialize;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
 #[derive(Display, Serde, StrEnum)]

@@ -4,7 +4,7 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
 
 pub trait DataVisitorBase {
     fn value_of_plain_segment(

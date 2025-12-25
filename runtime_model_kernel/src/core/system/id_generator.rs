@@ -1,6 +1,6 @@
 use crate::RuntimeModelKernelErrorCode;
 use std::sync::{OnceLock, RwLock};
-use watchmen_model::{StdErrorCode, StdR, VoidR};
+use watchmen_base::{ErrorCode, StdR, VoidR};
 
 /// max to 20 digits numbers
 pub trait IdGenerator: Send + Sync {

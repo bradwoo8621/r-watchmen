@@ -1,7 +1,8 @@
 use crate::{CompiledParameterCondition, InMemoryParameterCondition, PipelineExecutionVariables};
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{ParameterJointType, StdR, TenantId};
+use watchmen_base::StdR;
+use watchmen_model::{ParameterJointType, TenantId};
 use watchmen_runtime_model_kernel::ArcParameterJoint;
 
 /// in-memory check

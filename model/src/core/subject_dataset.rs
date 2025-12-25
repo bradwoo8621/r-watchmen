@@ -1,7 +1,8 @@
 use crate::{
-    BaseDataModel, Pageable, ParameterCondition, StdErrCode, StdErrorCode, StdR, Storable,
-    SubjectDatasetColumnId, SubjectId,
+    BaseDataModel, ModelErrorCode, Pageable, ParameterCondition, Storable, SubjectDatasetColumnId,
+    SubjectId,
 };
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, StrEnum)]

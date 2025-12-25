@@ -1,7 +1,7 @@
 use crate::{IdGenerator, RuntimeModelKernelErrorCode};
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
-use watchmen_model::{StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
 
 // const TIMESTAMP_BITS: u8 = 43;
 const NODE_ID_BITS: u8 = 12;

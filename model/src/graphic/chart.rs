@@ -1,12 +1,11 @@
-use crate::graphic::map_chart::MapChart;
-use crate::graphic::sunburst_chart::SunburstChart;
 use crate::{
     BarChart, BaseDataModel, CountChart, CustomizedChart, DoughnutChart, EChartsSettings,
-    LineChart, NightingaleChart, PieChart, ScatterChart, StdErrCode, StdErrorCode, StdR, Storable,
-    TreeChart, TreemapChart,
+    LineChart, MapChart, ModelErrorCode, NightingaleChart, PieChart, ScatterChart, Storable,
+    SunburstChart, TreeChart, TreemapChart,
 };
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
 #[derive(Display, Serde, StrEnum)]

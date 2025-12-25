@@ -1,6 +1,6 @@
 use crate::{PipelineExecutionRunner, PipelineRunContext};
 use tokio;
-use watchmen_model::VoidR;
+use watchmen_base::VoidR;
 
 pub struct PipelineRunner {}
 

@@ -2,7 +2,8 @@ use crate::{
     DataPath, DataPathSegment, PathParser, PathStr, PipelineKernelErrorCode, PlainDataPath,
 };
 use std::sync::Arc;
-use watchmen_model::{FactorType, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::FactorType;
 use watchmen_runtime_model_kernel::{ArcFactor, TopicSchema};
 
 /// parser
@@ -207,7 +208,10 @@ mod tests {
     }
 
     mod literal_concat {
-        use crate::data_op::data_path_parser::tests::helper::{assert_func_segment, assert_param_path, assert_param_plain, assert_param_str, assert_plain_segment};
+        use crate::data_op::data_path_parser::tests::helper::{
+            assert_func_segment, assert_param_path, assert_param_plain, assert_param_str,
+            assert_plain_segment,
+        };
         use crate::{DataPath, FuncDataPathParam};
         use watchmen_model::VariablePredefineFunctions;
 

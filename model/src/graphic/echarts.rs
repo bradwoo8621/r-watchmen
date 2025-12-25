@@ -1,9 +1,10 @@
 use crate::{
     BaseDataModel, ChartBorder, ChartBorderStyle, ChartColor, ChartFont, ChartTruncation,
-    PredefinedChartColorSeries, StdErrCode, StdErrorCode, StdR, Storable,
+    ModelErrorCode, PredefinedChartColorSeries, Storable,
 };
 use bigdecimal::BigDecimal;
 use std::collections::HashMap;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[adapt_model(storable)]

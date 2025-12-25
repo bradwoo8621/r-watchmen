@@ -4,7 +4,8 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId};
+use watchmen_base::StdR;
+use watchmen_model::TenantId;
 use watchmen_runtime_model_kernel::ArcParameterCondition;
 
 pub enum CompiledParameterCondition {

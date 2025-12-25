@@ -1,8 +1,8 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    Auditable, BaseDataModel, OptimisticLock, StdErrCode, StdErrorCode, StdR, Storable, Tuple,
-    UserId, UserRole,
+    Auditable, BaseDataModel, ModelErrorCode, OptimisticLock, Storable, Tuple, UserId, UserRole,
 };
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, StrEnum)]

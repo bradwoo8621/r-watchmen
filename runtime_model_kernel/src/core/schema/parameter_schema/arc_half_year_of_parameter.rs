@@ -1,8 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{
-    HalfYearOfParameter, ParameterComputeType, ParameterKind, StdErrorCode, StdR,
-};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{HalfYearOfParameter, ParameterComputeType, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcHalfYearOfParameter {
@@ -15,14 +14,11 @@ impl ArcHelper for ArcHalfYearOfParameter {}
 
 impl ArcHalfYearOfParameter {
     pub fn new(parameter: HalfYearOfParameter) -> StdR<Arc<Self>> {
-        let parameter = Self::must_then(
-            parameter.parameter.map(|p| *p),
-            ArcParameter::new,
-            || {
+        let parameter =
+            Self::must_then(parameter.parameter.map(|p| *p), ArcParameter::new, || {
                 RuntimeModelKernelErrorCode::ComputedParametersMissed
                     .msg("Computed parameter[half-year-of] must have sub parameter.")
-            },
-        )?;
+            })?;
 
         Ok(Arc::new(Self {
             kind: Arc::new(ParameterKind::Computed),

@@ -1,5 +1,6 @@
 use crate::{DataPathSegment, FuncDataPath, FuncParser, ParserInnerState, PathParser, PathStr};
-use watchmen_model::{StdR, VariablePredefineFunctions};
+use watchmen_base::{StdR, VoidR};
+use watchmen_model::VariablePredefineFunctions;
 
 /// consume function
 impl PathParser {
@@ -24,7 +25,7 @@ impl PathParser {
     /// - if function has no param and no parenthesis, it stops at end of full path or any char not [a-zA-Z0-9_],
     ///   then return
     /// > any chars before function is not allowed.
-    pub fn consume_func_path(&mut self) -> StdR<()> {
+    pub fn consume_func_path(&mut self) -> VoidR {
         let inner = &mut self.inner;
 
         if inner.in_memory_chars_is_not_empty() {

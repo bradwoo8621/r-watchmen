@@ -1,6 +1,7 @@
 use crate::{ArcHelper, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{ConstantParameter, ParameterKind, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{ConstantParameter, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcConstantParameter {

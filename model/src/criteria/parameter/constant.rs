@@ -1,4 +1,5 @@
-use crate::{BaseDataModel, Parameter, ParameterKind, StdErrCode, StdErrorCode, StdR, Storable};
+use crate::{BaseDataModel, ModelErrorCode, Parameter, ParameterKind, Storable};
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VPF};
 
 /// predefined functions for variable parameters.

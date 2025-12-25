@@ -1,8 +1,8 @@
 use crate::{ArcHelper, ArcParameter, ArcParameterJoint, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{
-    CaseThenParameter, CaseThenParameterRoute, ParameterComputeType, ParameterKind, StdErrorCode,
-    StdR,
+    CaseThenParameter, CaseThenParameterRoute, ParameterComputeType, ParameterKind,
 };
 
 #[derive(Debug)]

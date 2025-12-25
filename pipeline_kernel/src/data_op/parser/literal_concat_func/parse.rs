@@ -1,9 +1,9 @@
 use crate::{LiteralConcatFuncParser, ParserInnerState, PathParser};
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 impl LiteralConcatFuncParser {
     /// now a [{] encountered, so sub path will end with a [}].
-    pub fn parse(&mut self) -> StdR<()> {
+    pub fn parse(&mut self) -> VoidR {
         let mut path_parser = PathParser {
             inner: ParserInnerState::new_at_current_char(&self.inner),
             segments: vec![],

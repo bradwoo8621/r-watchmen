@@ -2,7 +2,7 @@ use crate::{ArcTopicDataValue, MinmaxComparator};
 use bigdecimal::BigDecimal;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use std::sync::Arc;
-use watchmen_model::{DateTimeUtils, NumericUtils, StdErr, StdR};
+use watchmen_base::{DateTimeUtils, NumericUtils, StdErr, StdR};
 
 #[derive(Debug)]
 pub enum MinmaxCompare {

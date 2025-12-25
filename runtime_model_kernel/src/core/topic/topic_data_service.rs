@@ -1,6 +1,7 @@
 use crate::{TopicMetaProvider, TopicSchema};
 use std::sync::Arc;
-use watchmen_model::{StdR, TopicData};
+use watchmen_base::StdR;
+use watchmen_model::TopicData;
 
 pub struct TopicDataService {}
 

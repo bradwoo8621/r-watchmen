@@ -1,8 +1,7 @@
 use crate::{ArcHelper, ArcParameterJoint};
 use std::sync::Arc;
-use watchmen_model::{
-    AlarmAction, AlarmActionSeverity, PipelineActionId, PipelineActionType, StdR,
-};
+use watchmen_base::StdR;
+use watchmen_model::{AlarmAction, AlarmActionSeverity, PipelineActionId, PipelineActionType};
 
 #[derive(Debug)]
 pub struct ArcAlarmAction {

@@ -1,4 +1,5 @@
-use crate::{BaseDataModel, StdErrCode, StdErrorCode, StdR, Storable};
+use crate::{BaseDataModel, ModelErrorCode, Storable};
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, StrEnum)]

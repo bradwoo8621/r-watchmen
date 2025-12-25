@@ -1,5 +1,5 @@
 use crate::PathParser;
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 /// consume path
 impl PathParser {
@@ -12,7 +12,7 @@ impl PathParser {
     ///   - after ampersand,
     ///   - after comma,
     ///   - not content before.
-    fn consume_in_memory_chars_before_dot(&mut self) -> StdR<()> {
+    fn consume_in_memory_chars_before_dot(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             // check the previous char
             if let Some(previous_char) = self.inner.previous_char() {
@@ -42,7 +42,7 @@ impl PathParser {
     /// - after ampersand,
     /// - after comma,
     /// - no content before
-    fn consume_in_memory_chars_before_end(&mut self) -> StdR<()> {
+    fn consume_in_memory_chars_before_end(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             // check the previous char
             if let Some(previous_char) = self.inner.previous_char() {
@@ -75,7 +75,7 @@ impl PathParser {
     /// - after last [.], cannot be blank,
     /// - for the literal concat function, functions that are not wrapped in `{}` are not allowed to appear.
     ///   e.g. [a.&len {b.len}] is not allowed.
-    pub fn parse(&mut self) -> StdR<()> {
+    pub fn parse(&mut self) -> VoidR {
         loop {
             if let Some(char) = self.inner.current_char() {
                 match char {
@@ -110,7 +110,7 @@ impl PathParser {
     }
 
     /// called by [parse_till_right_brace] only.
-    fn consume_in_memory_chars_before_right_brace(&mut self) -> StdR<()> {
+    fn consume_in_memory_chars_before_right_brace(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             // check the previous char
             if let Some(previous_char) = self.inner.previous_char() {
@@ -137,7 +137,7 @@ impl PathParser {
     /// basically very similar to the standard parse. The differences are as follows:
     /// - parsing ends when a [}] is encountered.
     /// - if the string is completely consumed without encountering a [}], an error is reported.
-    pub fn parse_till_right_brace(&mut self) -> StdR<()> {
+    pub fn parse_till_right_brace(&mut self) -> VoidR {
         let index_of_left_brace = self.inner.previous_char_index();
 
         loop {
@@ -175,7 +175,7 @@ impl PathParser {
     }
 
     /// called by [parse_till_param_end] only.
-    fn consume_in_memory_chars_before_comma(&mut self) -> StdR<()> {
+    fn consume_in_memory_chars_before_comma(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             // check the previous char
             if let Some(previous_char) = self.inner.previous_char() {
@@ -198,7 +198,7 @@ impl PathParser {
     }
 
     /// called by [parse_till_param_end] only.
-    fn consume_in_memory_chars_before_right_parenthesis(&mut self) -> StdR<()> {
+    fn consume_in_memory_chars_before_right_parenthesis(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             // check the previous char
             if let Some(previous_char) = self.inner.previous_char() {
@@ -227,7 +227,7 @@ impl PathParser {
     ///
     /// note this function is trigger when a [&] or a char is needed to be appended into in-memory chars,
     /// which means there must be a param needs to be parsed.
-    pub fn parse_till_param_end(&mut self, param_start_char_index: usize) -> StdR<()> {
+    pub fn parse_till_param_end(&mut self, param_start_char_index: usize) -> VoidR {
         loop {
             if let Some(char) = self.inner.current_char() {
                 match char {

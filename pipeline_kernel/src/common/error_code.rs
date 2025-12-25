@@ -1,4 +1,4 @@
-use watchmen_model::StdErrorCode;
+use watchmen_base::ErrorCode;
 
 pub enum PipelineKernelErrorCode {
     // trigger
@@ -28,7 +28,7 @@ pub enum PipelineKernelErrorCode {
     TopicDataPropertySegmentMissed,
 }
 
-impl StdErrorCode for PipelineKernelErrorCode {
+impl ErrorCode for PipelineKernelErrorCode {
     fn code(&self) -> &'static str {
         match self {
             PipelineKernelErrorCode::TriggerCodeMissed => "PLKN-00001",

@@ -337,8 +337,18 @@ name = "watchmen_auth"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "watchmen_base",
  "watchmen_model",
  "watchmen_model_marco",
+]
+
+[[package]]
+name = "watchmen_base"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "chrono",
+ "serde",
 ]
 
 [[package]]
@@ -349,6 +359,7 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "watchmen_base",
  "watchmen_model_marco",
 ]
 
@@ -369,6 +380,7 @@ dependencies = [
  "chrono",
  "tokio",
  "watchmen_auth",
+ "watchmen_base",
  "watchmen_model",
  "watchmen_runtime_model_kernel",
 ]
@@ -379,7 +391,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "serde",
- "watchmen_auth",
+ "watchmen_base",
  "watchmen_model",
 ]
 

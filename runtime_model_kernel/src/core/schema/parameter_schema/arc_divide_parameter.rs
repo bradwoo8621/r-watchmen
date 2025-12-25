@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{DivideParameter, ParameterComputeType, ParameterKind, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{DivideParameter, ParameterComputeType, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcDivideParameter {

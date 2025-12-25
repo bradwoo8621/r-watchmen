@@ -1,8 +1,7 @@
 use crate::{ArcHelper, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{
-    EnumId, Factor, FactorEncryptMethod, FactorId, FactorType, StdErrorCode, StdR,
-};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{EnumId, Factor, FactorEncryptMethod, FactorId, FactorType};
 
 /// An Arc-wrapped Factor structure with optional fields.
 /// This struct uses Arc pointers for each field to allow efficient sharing

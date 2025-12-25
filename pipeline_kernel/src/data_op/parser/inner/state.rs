@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use watchmen_model::StringUtils;
+use watchmen_base::StringUtils;
 
 pub struct ParserInnerState {
     /// all chars of full path

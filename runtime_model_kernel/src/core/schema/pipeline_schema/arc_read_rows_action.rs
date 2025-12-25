@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameterJoint};
 use std::sync::Arc;
-use watchmen_model::{PipelineActionId, PipelineActionType, ReadRowsAction, StdR, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{PipelineActionId, PipelineActionType, ReadRowsAction, TopicId};
 
 #[derive(Debug)]
 pub struct ArcReadRowsAction {

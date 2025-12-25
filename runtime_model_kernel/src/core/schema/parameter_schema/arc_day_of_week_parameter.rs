@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{DayOfWeekParameter, ParameterComputeType, ParameterKind, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{DayOfWeekParameter, ParameterComputeType, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcDayOfWeekParameter {
@@ -13,14 +14,11 @@ impl ArcHelper for ArcDayOfWeekParameter {}
 
 impl ArcDayOfWeekParameter {
     pub fn new(parameter: DayOfWeekParameter) -> StdR<Arc<Self>> {
-        let parameter = Self::must_then(
-            parameter.parameter.map(|p| *p),
-            ArcParameter::new,
-            || {
+        let parameter =
+            Self::must_then(parameter.parameter.map(|p| *p), ArcParameter::new, || {
                 RuntimeModelKernelErrorCode::ComputedParametersMissed
                     .msg("Computed parameter[day-of-week] must have sub parameter.")
-            },
-        )?;
+            })?;
 
         Ok(Arc::new(Self {
             kind: Arc::new(ParameterKind::Computed),

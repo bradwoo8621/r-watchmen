@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{ParameterComputeType, ParameterKind, QuarterOfParameter, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{ParameterComputeType, ParameterKind, QuarterOfParameter};
 
 #[derive(Debug)]
 pub struct ArcQuarterOfParameter {
@@ -13,14 +14,11 @@ impl ArcHelper for ArcQuarterOfParameter {}
 
 impl ArcQuarterOfParameter {
     pub fn new(parameter: QuarterOfParameter) -> StdR<Arc<Self>> {
-        let parameter = Self::must_then(
-            parameter.parameter.map(|p| *p),
-            ArcParameter::new,
-            || {
+        let parameter =
+            Self::must_then(parameter.parameter.map(|p| *p), ArcParameter::new, || {
                 RuntimeModelKernelErrorCode::ComputedParametersMissed
                     .msg("Computed parameter[quarter-of] must have sub parameter.")
-            },
-        )?;
+            })?;
 
         Ok(Arc::new(Self {
             kind: Arc::new(ParameterKind::Computed),

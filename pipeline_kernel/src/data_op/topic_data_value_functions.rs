@@ -3,7 +3,7 @@ use bigdecimal::{BigDecimal, FromPrimitive, Zero};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErr, StdR, StringConverter};
+use watchmen_base::{StdErr, StdR, StringConverter};
 
 impl ArcTopicDataValue {
     /// try to count, can only apply to vec or map

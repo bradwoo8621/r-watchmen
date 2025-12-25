@@ -1,8 +1,8 @@
 use crate::{ArcHelper, ArcParameterJoint};
 use std::sync::Arc;
+use watchmen_base::StdR;
 use watchmen_model::{
-    AggregateArithmetic, FactorId, PipelineActionId, PipelineActionType, ReadFactorAction, StdR,
-    TopicId,
+    AggregateArithmetic, FactorId, PipelineActionId, PipelineActionType, ReadFactorAction, TopicId,
 };
 
 #[derive(Debug)]

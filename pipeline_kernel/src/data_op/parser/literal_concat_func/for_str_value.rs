@@ -1,12 +1,12 @@
 use crate::{FuncDataPathParam, FuncParamValue, FuncParamValuePath, LiteralConcatFuncParser};
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 /// consume str value
 impl LiteralConcatFuncParser {
     /// create a str value, append to params. and clear current chars.
     /// empty is ignored
     /// will not move char index
-    pub fn consume_in_memory_chars_as_str(&mut self) -> StdR<()> {
+    pub fn consume_in_memory_chars_as_str(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_empty() {
             return Ok(());
         }

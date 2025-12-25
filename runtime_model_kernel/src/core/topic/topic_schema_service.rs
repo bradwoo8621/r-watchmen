@@ -1,6 +1,7 @@
 use crate::{TopicMetaProvider, TopicSchema};
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId, TopicCode, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{TenantId, TopicCode, TopicId};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out topic meta.

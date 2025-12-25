@@ -1,5 +1,5 @@
 use crate::FuncParser;
-use watchmen_model::StdR;
+use watchmen_base::StdR;
 
 impl FuncParser {
     /// report error at [index of ampersand, current char index)

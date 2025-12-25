@@ -4,7 +4,8 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{BooleanUtils, FactorTypeCategory, NumericUtils, TopicData, TopicDataValue};
+use watchmen_base::{BooleanUtils, NumericUtils};
+use watchmen_model::{FactorTypeCategory, TopicData, TopicDataValue};
 
 #[derive(Debug)]
 pub struct TopicSchemaDefaultValueFactor {

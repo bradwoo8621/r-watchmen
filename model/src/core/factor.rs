@@ -1,5 +1,6 @@
-use crate::{BaseDataModel, EnumId, StdErrCode, StdErrorCode, StdR, Storable};
+use crate::{BaseDataModel, EnumId, ModelErrorCode, Storable};
 use std::cmp::PartialEq;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, PartialEq, Debug, StrEnum)]

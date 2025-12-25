@@ -5,7 +5,8 @@ use crate::{
     ArcWriteFactorAction, ArcWriteToExternalAction,
 };
 use std::sync::Arc;
-use watchmen_model::{PipelineAction, StdR};
+use watchmen_base::StdR;
+use watchmen_model::PipelineAction;
 
 #[derive(Debug)]
 pub enum ArcPipelineAction {

@@ -41,7 +41,7 @@ pub fn impl_str_enum(item: TokenStream) -> TokenStream {
                 {
                     match str.into().as_str() {
                         #(#variants1)*
-                        s => StdErrCode::StrEnumParse.msg(format!("Cannot parse string[{}] to {}.", s, stringify!(#name))),
+                        s => ModelErrorCode::StrEnumParse.msg(format!("Cannot parse string[{}] to {}.", s, stringify!(#name))),
                     }
                 }
 

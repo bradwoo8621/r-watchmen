@@ -1,5 +1,6 @@
 use crate::{AuthErrorCode, AuthenticationManager, AuthenticationScheme};
-use watchmen_model::{StdErrorCode, StdR, User, UserRole};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{User, UserRole};
 
 pub struct Authorization {
     // TODO where to get the authenticator?

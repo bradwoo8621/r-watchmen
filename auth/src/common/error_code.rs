@@ -1,4 +1,4 @@
-use watchmen_model::StdErrorCode;
+use watchmen_base::ErrorCode;
 
 pub enum AuthErrorCode {
     AuthenticationFailed,
@@ -11,7 +11,7 @@ pub enum AuthErrorCode {
     RoleMissedInUser,
 }
 
-impl StdErrorCode for AuthErrorCode {
+impl ErrorCode for AuthErrorCode {
     fn code(&self) -> &'static str {
         match self {
             AuthErrorCode::AuthenticationFailed => "AUTH-00001",

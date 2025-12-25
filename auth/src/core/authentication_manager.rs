@@ -1,5 +1,6 @@
 use crate::{AuthErrorCode, AuthenticationDetails, AuthenticationProvider, AuthenticationScheme};
-use watchmen_model::{StdErrorCode, StdR, User};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::User;
 
 pub struct AuthenticationManager {
     providers: Vec<Box<dyn AuthenticationProvider>>,

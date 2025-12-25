@@ -1,4 +1,4 @@
-use watchmen_model::StdErrorCode;
+use watchmen_base::ErrorCode;
 
 pub enum RuntimeModelKernelErrorCode {
     SnowflakeNodeIdTooBig,
@@ -48,7 +48,7 @@ pub enum RuntimeModelKernelErrorCode {
     CaseThenRouteParameterMissed,
 }
 
-impl StdErrorCode for RuntimeModelKernelErrorCode {
+impl ErrorCode for RuntimeModelKernelErrorCode {
     fn code(&self) -> &'static str {
         match self {
             RuntimeModelKernelErrorCode::SnowflakeNodeIdTooBig => "RTMK-00001",

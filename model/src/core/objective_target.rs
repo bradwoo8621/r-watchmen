@@ -1,8 +1,8 @@
 use crate::{
-    BaseDataModel, ComputedObjectiveParameter, ObjectiveFactorId, StdErrCode, StdErrorCode, StdR,
-    Storable,
+    BaseDataModel, ComputedObjectiveParameter, ModelErrorCode, ObjectiveFactorId, Storable,
 };
 use serde::{Deserialize, Serialize};
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousStructTypes};
 
 #[derive(Display, Serde, StrEnum)]

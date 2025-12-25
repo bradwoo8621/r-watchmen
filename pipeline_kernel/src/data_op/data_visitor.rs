@@ -1,6 +1,6 @@
 use crate::{ArcTopicData, ArcTopicDataValue, DataPath, DataVisitorBase};
 use std::sync::Arc;
-use watchmen_model::StdR;
+use watchmen_base::StdR;
 
 pub trait DataVisitor {
     fn value_of(&self, path: &DataPath) -> StdR<Arc<ArcTopicDataValue>>;

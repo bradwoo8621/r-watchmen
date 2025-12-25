@@ -1,8 +1,8 @@
 use crate::{ArcHelper, ArcMappingFactor, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{
-    AccumulateMode, InsertRowAction, PipelineActionId, PipelineActionType, StdErrorCode, StdR,
-    TopicId,
+    AccumulateMode, InsertRowAction, PipelineActionId, PipelineActionType, TopicId,
 };
 
 #[derive(Debug)]

@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{NoneParameter, ParameterComputeType, ParameterKind, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{NoneParameter, ParameterComputeType, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcNoneParameter {

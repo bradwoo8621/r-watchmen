@@ -1,6 +1,7 @@
 use crate::{ArcParameterExpression, ArcParameterJoint};
 use std::sync::Arc;
-use watchmen_model::{ParameterCondition, StdR};
+use watchmen_base::StdR;
+use watchmen_model::ParameterCondition;
 
 #[derive(Debug)]
 pub enum ArcParameterCondition {

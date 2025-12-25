@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter};
 use std::sync::Arc;
-use watchmen_model::{AggregateArithmetic, FactorId, MappingFactor, StdR};
+use watchmen_base::StdR;
+use watchmen_model::{AggregateArithmetic, FactorId, MappingFactor};
 
 #[derive(Debug)]
 pub struct ArcMappingFactor {

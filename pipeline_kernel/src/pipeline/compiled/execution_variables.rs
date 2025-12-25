@@ -1,6 +1,7 @@
 use crate::{ArcTopicData, PipelineKernelErrorCode};
 use std::collections::HashMap;
-use watchmen_model::{StdErrorCode, StdR, TopicData};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::TopicData;
 
 pub struct PipelineExecutionVariables {
     pub previous_data: Option<ArcTopicData>,

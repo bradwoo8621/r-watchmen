@@ -1,5 +1,6 @@
 use crate::PathParser;
-use watchmen_model::{StdR, VariablePredefineFunctions};
+use watchmen_base::StdR;
+use watchmen_model::VariablePredefineFunctions;
 
 impl PathParser {
     /// path is empty

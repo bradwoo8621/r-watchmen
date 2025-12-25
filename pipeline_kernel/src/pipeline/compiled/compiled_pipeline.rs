@@ -1,6 +1,6 @@
 use crate::{CompiledConditional, PipelineExecutable, PipelineExecution};
 use std::sync::Arc;
-use watchmen_model::StdR;
+use watchmen_base::StdR;
 use watchmen_runtime_model_kernel::{PipelineSchema, TopicSchema};
 
 pub struct CompiledPipeline {

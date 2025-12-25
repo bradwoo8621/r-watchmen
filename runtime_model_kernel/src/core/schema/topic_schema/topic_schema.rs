@@ -7,7 +7,8 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{FactorId, StdR, TenantId, Topic, TopicCode, TopicData, TopicId, VoidR};
+use watchmen_base::{StdR, VoidR};
+use watchmen_model::{FactorId, TenantId, Topic, TopicCode, TopicData, TopicId};
 
 /// The schema of a topic, including various factor groups.
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
@@ -153,8 +154,8 @@ impl TopicSchema {
 
 #[cfg(test)]
 mod tests {
-    use watchmen_model::{Factor, FactorType, Topic, TopicKind, TopicType};
     use crate::TopicSchema;
+    use watchmen_model::{Factor, FactorType, Topic, TopicKind, TopicType};
 
     fn create_sample_topic() -> Topic {
         Topic::new()

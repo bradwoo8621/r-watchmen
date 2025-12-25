@@ -1,6 +1,7 @@
-use crate::{BaseDataModel, ChartColor, StdErrCode, StdErrorCode, StdR, Storable};
+use crate::{BaseDataModel, ChartColor, ModelErrorCode, Storable};
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{
     adapt_model, Display, Serde, StrEnum, VariousStructTypes, VariousValueTypes,
 };

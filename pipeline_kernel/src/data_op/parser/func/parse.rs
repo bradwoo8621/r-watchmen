@@ -2,7 +2,7 @@ use crate::{
     AnyFuncParser, FuncDataPathParam, FuncParamValue, FuncParamValuePath, FuncParser,
     ParserInnerState, PathParser,
 };
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 struct FuncParserDelegate<'a> {
     parser: &'a mut FuncParser,
@@ -29,7 +29,7 @@ impl FuncParser {
     /// - & encountered,
     /// - char not whitespaces, and not one of [,()],
     /// which means there is at least one segment will be parsed from path parser.
-    fn parse_param(&mut self, param_start_char_index: usize) -> StdR<()> {
+    fn parse_param(&mut self, param_start_char_index: usize) -> VoidR {
         let mut path_parser = PathParser {
             inner: ParserInnerState::new_at_current_char_and_copy_in_memory_chars(&mut self.inner),
             segments: vec![],
@@ -46,7 +46,7 @@ impl FuncParser {
 
     /// check if there are tailing whitespaces when parameter already parsed.
     /// if there are, raise error.
-    fn check_tailing_whitespaces_when_param_parsed(&self) -> StdR<()> {
+    fn check_tailing_whitespaces_when_param_parsed(&self) -> VoidR {
         if self.inner.in_memory_chars_is_not_empty() {
             // never happens, all chars should be consumed in parse_param
             self.incorrect_function_param_tailing_whitespaces(self.inner.in_memory_chars_count())
@@ -57,7 +57,7 @@ impl FuncParser {
 
     /// consume in-memory chars as blank string parameter.
     /// and clear in-memory chars
-    fn append_blank_param(&mut self) -> StdR<()> {
+    fn append_blank_param(&mut self) -> VoidR {
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
                 path: self.inner.create_path_str_of_in_memory_chars(),
@@ -73,7 +73,7 @@ impl FuncParser {
     /// and clear in-memory chars
     ///
     /// note the in-memory chars might not empty, it is treated as none here.
-    fn append_none_param(&mut self) -> StdR<()> {
+    fn append_none_param(&mut self) -> VoidR {
         self.params
             .push(FuncDataPathParam::Value(FuncParamValuePath {
                 path: self.inner.create_path_str_of_in_memory_chars(),
@@ -93,7 +93,7 @@ impl FuncParser {
     /// - if no char in memory,
     ///   - if function allow none context, append as none parameter,
     ///   - else raise error.
-    fn append_whitespaces_as_context(&mut self) -> StdR<()> {
+    fn append_whitespaces_as_context(&mut self) -> VoidR {
         if self.inner.in_memory_chars_is_not_empty() {
             // there are chars in memory
             if self.func.allow_blank_context() {
@@ -124,7 +124,7 @@ impl FuncParser {
     /// - if no char in memory,
     ///   - if function allow none parameter at given index, append as none parameter,
     ///   - else raise error.
-    fn append_whitespaces_as_parameter(&mut self, real_param_index: usize) -> StdR<()> {
+    fn append_whitespaces_as_parameter(&mut self, real_param_index: usize) -> VoidR {
         if self.inner.in_memory_chars_is_not_empty() {
             // there are chars in memory
             if self.func.allow_blank_param(real_param_index) {
@@ -152,7 +152,7 @@ impl FuncParser {
     /// - if no parameter parsed yet,
     ///   - if not with context and function require context, try to append in-memory chars as context,
     ///   - else try to append in-memory chars as first parameter.
-    fn end_param_at_0(&mut self) -> StdR<()> {
+    fn end_param_at_0(&mut self) -> VoidR {
         let parsed_count = self.params.len();
         if parsed_count != 0 {
             return self.check_tailing_whitespaces_when_param_parsed();
@@ -183,7 +183,7 @@ impl FuncParser {
         &mut self,
         index_of_left_parenthesis: usize,
         param_index: usize,
-    ) -> StdR<()> {
+    ) -> VoidR {
         let real_param_index = self.real_param_index(param_index);
         let max_param_count = self.func.max_param_count();
         if let Some(max_count) = max_param_count {
@@ -211,7 +211,7 @@ impl FuncParser {
     ///   - check function accept empty string in current param index or not
     ///   - none of above accepted, raise error (since blank plain path is not accepted).
     /// move char index to next at last
-    fn end_param(&mut self, index_of_left_parenthesis: usize, param_index: usize) -> StdR<()> {
+    fn end_param(&mut self, index_of_left_parenthesis: usize, param_index: usize) -> VoidR {
         let parsed_count = self.params.len();
         if param_index == 0 && parsed_count != 1 {
             // no parameter parsed, current is the first parameter.
@@ -234,7 +234,7 @@ impl FuncParser {
         &mut self,
         index_of_left_parenthesis: usize,
         param_index: usize,
-    ) -> StdR<()> {
+    ) -> VoidR {
         self.check_param_count_before_right_parenthesis(index_of_left_parenthesis, param_index)?;
         self.end_param(index_of_left_parenthesis, param_index)
     }
@@ -244,14 +244,14 @@ impl FuncParser {
         &mut self,
         index_of_left_parenthesis: usize,
         param_index: usize,
-    ) -> StdR<()> {
+    ) -> VoidR {
         self.check_param_count_before_comma(index_of_left_parenthesis, param_index)?;
         self.end_param(index_of_left_parenthesis, param_index)
     }
 
     /// - check min param count,
     /// - check max param count
-    fn final_param_count_check(&mut self, index_of_left_parenthesis: usize) -> StdR<()> {
+    fn final_param_count_check(&mut self, index_of_left_parenthesis: usize) -> VoidR {
         let parsed_count = self.params.len();
         let parsed_count = if self.with_context || !self.func.require_context() {
             // with context or no context required
@@ -302,7 +302,7 @@ impl FuncParser {
     /// - if there is one of [,)] determined, means no parameter lacked, raise error,
     /// - if there is a [(] determined, raise error,
     /// - otherwise copy in-memory chars to path parser to continue.
-    pub fn parse(&mut self) -> StdR<()> {
+    pub fn parse(&mut self) -> VoidR {
         let index_of_left_parenthesis = self.inner.previous_char_index() as usize;
 
         // total parsed parameter count, include context if not with context currently

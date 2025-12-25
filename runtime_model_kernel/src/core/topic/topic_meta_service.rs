@@ -1,5 +1,6 @@
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId, Topic, TopicCode, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{TenantId, Topic, TopicCode, TopicId};
 
 /// TODO topic meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out topic meta.

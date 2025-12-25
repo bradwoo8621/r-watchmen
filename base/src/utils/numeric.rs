@@ -1,4 +1,4 @@
-use crate::{StdErrCode, StdErrorCode, StdR};
+use crate::{StdErrCode, ErrorCode, StdR};
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 

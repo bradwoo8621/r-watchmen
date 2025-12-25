@@ -1,6 +1,7 @@
 use crate::{ArcTopicDataMap, ArcTopicDataValue, FuncDataPath, PipelineKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{StdErr, StdErrCode, StdErrorCode, StdR, VariablePredefineFunctions};
+use watchmen_base::{ErrorCode, StdErr, StdErrCode, StdR};
+use watchmen_model::VariablePredefineFunctions;
 
 pub struct VariablePredefineFunctionCaller<'a> {
     root: &'a ArcTopicDataMap,
@@ -74,7 +75,9 @@ impl<'a> VariablePredefineFunctionCaller<'a> {
             VariablePredefineFunctions::Contains => todo!("variable predefine function[&contains]"),
             VariablePredefineFunctions::Split => todo!("variable predefine function[&split]"),
             VariablePredefineFunctions::Concat => todo!("variable predefine function[&concat]"),
-            VariablePredefineFunctions::ConcatWith => todo!("variable predefine function[&concatWith]"),
+            VariablePredefineFunctions::ConcatWith => {
+                todo!("variable predefine function[&concatWith]")
+            }
             VariablePredefineFunctions::Join => value.join(",", not_support),
             VariablePredefineFunctions::Distinct => value.distinct(not_support),
             VariablePredefineFunctions::Sum => value.sum(not_support),

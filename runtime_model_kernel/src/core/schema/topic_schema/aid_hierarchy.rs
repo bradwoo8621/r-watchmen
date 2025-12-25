@@ -2,7 +2,8 @@ use crate::IdGen;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::rc::Rc;
-use watchmen_model::{TopicData, TopicDataValue, VoidR};
+use watchmen_base::VoidR;
+use watchmen_model::{TopicData, TopicDataValue};
 
 const MY_AID_ID: &'static str = "aid_me";
 const AID_ROOT: &'static str = "aid_root";

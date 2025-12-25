@@ -1,8 +1,8 @@
 use crate::{ArcHelper, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{
-    ExternalWriterId, PipelineActionId, PipelineActionType, StdErrorCode, StdR,
-    WriteToExternalAction,
+    ExternalWriterId, PipelineActionId, PipelineActionType, WriteToExternalAction,
 };
 
 #[derive(Debug)]

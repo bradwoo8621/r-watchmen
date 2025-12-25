@@ -1,9 +1,10 @@
-use std::ops::Deref;
 use crate::{
     CompiledParameter, InMemoryParameter, InMemoryParameterCondition, PipelineExecutionVariables,
 };
+use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdR, TenantId};
+use watchmen_base::StdR;
+use watchmen_model::TenantId;
 use watchmen_runtime_model_kernel::ArcMoreThanOrEqualsExpression;
 
 pub struct CompiledMoreThanOrEqualsExpression {

@@ -1,8 +1,7 @@
 use crate::{ArcHelper, ArcParameter};
 use std::sync::Arc;
-use watchmen_model::{
-    CopyToMemoryAction, PipelineActionId, PipelineActionType, StdR,
-};
+use watchmen_base::StdR;
+use watchmen_model::{CopyToMemoryAction, PipelineActionId, PipelineActionType};
 
 #[derive(Debug)]
 pub struct ArcCopyToMemoryAction {

@@ -4,7 +4,8 @@ use crate::{
 };
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErrorCode, StdR, TenantId};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::TenantId;
 use watchmen_runtime_model_kernel::{ArcTopicFactorParameter, TopicSchemaProvider, TopicService};
 
 pub struct CompiledTopicFactorParameter {

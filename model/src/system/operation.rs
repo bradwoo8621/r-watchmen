@@ -1,11 +1,11 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    Auditable, BaseDataModel, StdErrCode, StdErrorCode, StdR, Storable, TenantBasedTuple, TenantId,
-    Tuple, UserId,
+    Auditable, BaseDataModel, ModelErrorCode, Storable, TenantBasedTuple, TenantId, Tuple, UserId,
 };
 use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum, VariousValueTypes};
 
 #[derive(Display, Serde, StrEnum)]

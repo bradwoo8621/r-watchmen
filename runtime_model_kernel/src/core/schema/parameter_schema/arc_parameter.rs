@@ -1,6 +1,7 @@
 use crate::{ArcComputedParameter, ArcConstantParameter, ArcTopicFactorParameter};
 use std::sync::Arc;
-use watchmen_model::{Parameter, StdR};
+use watchmen_base::StdR;
+use watchmen_model::Parameter;
 
 #[derive(Debug)]
 pub enum ArcParameter {

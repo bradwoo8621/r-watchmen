@@ -5,7 +5,8 @@ use crate::{
     ArcWeekOfMonthParameter, ArcWeekOfYearParameter, ArcYearOfParameter,
 };
 use std::sync::Arc;
-use watchmen_model::{ComputedParameter, StdR};
+use watchmen_base::StdR;
+use watchmen_model::ComputedParameter;
 
 #[derive(Debug)]
 pub enum ArcComputedParameter {

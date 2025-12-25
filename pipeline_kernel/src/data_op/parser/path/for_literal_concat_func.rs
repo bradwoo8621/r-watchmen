@@ -2,7 +2,8 @@ use crate::{
     DataPathSegment, FuncDataPath, FuncDataPathParam, FuncParamValue, FuncParamValuePath,
     LiteralConcatFuncParser, ParserInnerState, PathParser, PathStr,
 };
-use watchmen_model::{StdR, VariablePredefineFunctions};
+use watchmen_base::{StdR, VoidR};
+use watchmen_model::VariablePredefineFunctions;
 
 /// for literal concat function
 impl PathParser {
@@ -93,7 +94,7 @@ impl PathParser {
     ///   - is a concat function, use it,
     ///   - is not a concat function, raise error (logically never happens)
     /// - the char before [{] not one of [.,(}], raise error
-    pub fn consume_literal_concat_function(&mut self) -> StdR<()> {
+    pub fn consume_literal_concat_function(&mut self) -> VoidR {
         let index_of_char_before = self.get_index_of_char_before_literal_concat_function();
         let should_create_concat_function =
             self.should_create_concat_function(index_of_char_before)?;

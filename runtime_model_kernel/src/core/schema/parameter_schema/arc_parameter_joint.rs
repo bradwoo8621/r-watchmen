@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameterCondition, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{ParameterJoint, ParameterJointType, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{ParameterJoint, ParameterJointType};
 
 #[derive(Debug)]
 pub struct ArcParameterJoint {

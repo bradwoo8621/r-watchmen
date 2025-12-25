@@ -1,8 +1,7 @@
 use crate::{ArcHelper, ArcParameterJoint, ArcPipelineStage, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{
-    Pipeline, PipelineId, PipelineTriggerType, StdErrorCode, StdR, TenantId, TopicId,
-};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{Pipeline, PipelineId, PipelineTriggerType, TenantId, TopicId};
 
 #[derive(Debug)]
 pub struct ArcPipeline {

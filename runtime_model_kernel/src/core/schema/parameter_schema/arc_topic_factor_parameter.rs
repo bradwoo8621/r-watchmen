@@ -1,6 +1,7 @@
 use crate::ArcHelper;
 use std::sync::Arc;
-use watchmen_model::{FactorId, ParameterKind, StdR, TopicFactorParameter, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{FactorId, ParameterKind, TopicFactorParameter, TopicId};
 
 #[derive(Debug)]
 pub struct ArcTopicFactorParameter {

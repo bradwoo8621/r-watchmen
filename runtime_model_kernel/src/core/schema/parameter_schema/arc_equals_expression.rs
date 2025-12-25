@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter};
 use std::sync::Arc;
-use watchmen_model::{EqualsExpression, ParameterExpressionOperator, StdR};
+use watchmen_base::StdR;
+use watchmen_model::{EqualsExpression, ParameterExpressionOperator};
 
 #[derive(Debug)]
 pub struct ArcEqualsExpression {

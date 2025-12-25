@@ -4,8 +4,8 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use std::ops::Deref;
 use std::str::FromStr;
 use std::sync::Arc;
-use watchmen_model::{
-    DateTimeUtils, NumericUtils, StdErrCode, StdErrorCode, StdR, StringConverter, StringUtils,
+use watchmen_base::{
+    DateTimeUtils, ErrorCode, NumericUtils, StdErrCode, StdR, StringConverter, StringUtils,
 };
 
 impl ArcTopicDataValue {

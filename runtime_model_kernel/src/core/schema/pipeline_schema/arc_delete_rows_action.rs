@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameterJoint};
 use std::sync::Arc;
-use watchmen_model::{DeleteRowsAction, PipelineActionId, PipelineActionType, StdR, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{DeleteRowsAction, PipelineActionId, PipelineActionType, TopicId};
 
 #[derive(Debug)]
 pub struct ArcDeleteRowsAction {

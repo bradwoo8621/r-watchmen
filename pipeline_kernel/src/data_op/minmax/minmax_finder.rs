@@ -1,7 +1,7 @@
 use crate::{ArcTopicDataValue, MinmaxState};
 use std::ops::Deref;
 use std::sync::Arc;
-use watchmen_model::{StdErr, StdR, StringUtils};
+use watchmen_base::{StdErr, StdR, StringUtils, VoidR};
 
 trait MinmaxFinderBase {
     /// returns
@@ -11,7 +11,7 @@ trait MinmaxFinderBase {
         minmax: &mut MinmaxState,
         str: &Arc<String>,
         not_support: &NotSupport,
-    ) -> StdR<()>
+    ) -> VoidR
     where
         NotSupport: Fn() -> StdErr;
 
@@ -33,7 +33,7 @@ impl MinmaxFinderBase for &Arc<Vec<Arc<ArcTopicDataValue>>> {
         minmax: &mut MinmaxState,
         str: &Arc<String>,
         not_support: &NotSupport,
-    ) -> StdR<()>
+    ) -> VoidR
     where
         NotSupport: Fn() -> StdErr,
     {

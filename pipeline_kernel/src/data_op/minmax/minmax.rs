@@ -1,6 +1,6 @@
 use crate::{ArcTopicDataValue, MinmaxCompare, MinmaxFinder, MinmaxState};
 use std::sync::Arc;
-use watchmen_model::{StdErr, StdR};
+use watchmen_base::{StdErr, StdR};
 
 pub trait Minmax {
     fn max_value<NotSupport>(self, not_support: NotSupport) -> StdR<Arc<ArcTopicDataValue>>
@@ -130,7 +130,7 @@ mod tests {
     use std::ops::Deref;
     use std::str::FromStr;
     use std::sync::Arc;
-    use watchmen_model::StdErrorCode;
+    use watchmen_base::ErrorCode;
 
     #[test]
     fn test() {

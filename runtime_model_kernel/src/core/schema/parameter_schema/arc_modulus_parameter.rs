@@ -1,6 +1,7 @@
 use crate::{ArcHelper, ArcParameter, RuntimeModelKernelErrorCode};
 use std::sync::Arc;
-use watchmen_model::{ModulusParameter, ParameterComputeType, ParameterKind, StdErrorCode, StdR};
+use watchmen_base::{ErrorCode, StdR};
+use watchmen_model::{ModulusParameter, ParameterComputeType, ParameterKind};
 
 #[derive(Debug)]
 pub struct ArcModulusParameter {

@@ -1,5 +1,6 @@
 use std::sync::Arc;
-use watchmen_model::{Pipeline, PipelineId, StdR, TenantId, TopicId};
+use watchmen_base::StdR;
+use watchmen_model::{Pipeline, PipelineId, TenantId, TopicId};
 
 /// TODO pipeline meta service using tenant and it's meta datasource (or the global meta datasource)
 ///  to find out pipeline meta.

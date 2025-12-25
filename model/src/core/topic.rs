@@ -1,9 +1,10 @@
 use crate::serde::option_naive_datetime;
 use crate::{
-    Auditable, BaseDataModel, DataSourceId, Factor, OptimisticLock, StdErrCode, StdErrorCode, StdR,
-    Storable, TenantBasedTuple, TenantId, Tuple, UserId,
+    Auditable, BaseDataModel, DataSourceId, Factor, ModelErrorCode, OptimisticLock, Storable,
+    TenantBasedTuple, TenantId, Tuple, UserId,
 };
 use std::cmp::PartialEq;
+use watchmen_base::{ErrorCode, StdR};
 use watchmen_model_marco::{adapt_model, Display, Serde, StrEnum};
 
 #[derive(Display, Serde, PartialEq, Debug, StrEnum)]

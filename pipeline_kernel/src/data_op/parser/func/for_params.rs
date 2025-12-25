@@ -1,5 +1,5 @@
 use crate::FuncParser;
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 impl FuncParser {
     /// get real param index in function definition
@@ -35,7 +35,7 @@ impl FuncParser {
         index_of_left_parenthesis: usize,
         param_index: usize,
         one_more_param_booked: bool,
-    ) -> StdR<()> {
+    ) -> VoidR {
         let max_param_count = self.func.max_param_count();
         if max_param_count.is_none() {
             // no parameter limit, pass
@@ -109,7 +109,7 @@ impl FuncParser {
         &mut self,
         index_of_left_parenthesis: usize,
         param_index: usize,
-    ) -> StdR<()> {
+    ) -> VoidR {
         self.check_param_count(index_of_left_parenthesis, param_index, false)
     }
 
@@ -130,7 +130,7 @@ impl FuncParser {
         &mut self,
         index_of_left_parenthesis: usize,
         param_index: usize,
-    ) -> StdR<()> {
+    ) -> VoidR {
         self.check_param_count(index_of_left_parenthesis, param_index, true)
     }
 }

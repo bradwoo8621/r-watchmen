@@ -1,5 +1,5 @@
 use crate::PipelineExecutionVariables;
-use watchmen_model::StdR;
+use watchmen_base::StdR;
 
 pub trait InMemoryParameterCondition {
     fn is_true(&self, variables: &PipelineExecutionVariables) -> StdR<bool>;

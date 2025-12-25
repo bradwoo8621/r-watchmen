@@ -1,5 +1,5 @@
 use crate::{DataPathSegment, PathParser, PlainDataPath};
-use watchmen_model::StdR;
+use watchmen_base::VoidR;
 
 /// consume plain path
 impl PathParser {
@@ -10,7 +10,7 @@ impl PathParser {
     pub fn consume_in_memory_chars_as_plain_path(
         &mut self,
         move_char_index_to_next: bool,
-    ) -> StdR<()> {
+    ) -> VoidR {
         if self.inner.in_memory_chars_is_blank() {
             return self.incorrect_blank_segment();
         }
