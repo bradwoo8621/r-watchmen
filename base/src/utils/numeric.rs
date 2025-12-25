@@ -1,4 +1,4 @@
-use crate::{StdErrCode, ErrorCode, StdR};
+use crate::{ErrorCode, StdErrCode, StdR};
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 
@@ -10,7 +10,7 @@ pub trait NumericUtils {
 impl NumericUtils for String {
     /// radix 10
     fn is_numeric(&self) -> bool {
-        self.chars().all(|c| c.is_digit(10))
+        BigDecimal::from_str(&self).is_ok()
     }
 
     fn to_decimal(&self) -> StdR<BigDecimal> {
