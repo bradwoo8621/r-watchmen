@@ -14,7 +14,7 @@ impl AnyFuncParser for FuncParserDelegate<'_> {
         self.parser.params.push(param);
     }
 
-    fn start_char_index(&self) -> usize {
+    fn param_start_char_index(&self) -> usize {
         self.param_start_char_index
     }
 
@@ -24,6 +24,11 @@ impl AnyFuncParser for FuncParserDelegate<'_> {
 }
 
 impl FuncParser {
+    /// start parsing parameter.
+    /// the function parameter parsing starts when
+    /// - & encountered,
+    /// - char not whitespaces, and not one of [,()],
+    /// which means there is at least one segment will be parsed from path parser.
     fn parse_param(&mut self, param_start_char_index: usize) -> StdR<()> {
         let mut path_parser = PathParser {
             inner: ParserInnerState::new_at_current_char_and_copy_in_memory_chars(&mut self.inner),
@@ -34,7 +39,7 @@ impl FuncParser {
             parser: self,
             param_start_char_index,
         };
-        path_parser.hand_over_to_func(delegate);
+        path_parser.hand_back_to_func(delegate);
 
         Ok(())
     }

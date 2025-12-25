@@ -207,10 +207,8 @@ mod tests {
     }
 
     mod literal_concat {
-        use crate::data_op::data_path_parser::tests::helper::{
-            assert_func_segment, assert_param_plain, assert_param_str,
-        };
-        use crate::DataPath;
+        use crate::data_op::data_path_parser::tests::helper::{assert_func_segment, assert_param_path, assert_param_plain, assert_param_str, assert_plain_segment};
+        use crate::{DataPath, FuncDataPathParam};
         use watchmen_model::VariablePredefineFunctions;
 
         #[test]
@@ -295,6 +293,52 @@ mod tests {
             );
 
             println!("[a{{b}}c] parse to {}", path)
+        }
+
+        #[test]
+        fn test__a_LBRB() {
+            println!("test__a_LBRB");
+
+            let path = DataPath::from_str("a{}").unwrap();
+            assert_eq!(path.path.to_string(), "a{}");
+            assert_eq!(path.segments.len(), 1);
+            assert_func_segment(
+                &path.segments[0],
+                "a{}",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 2);
+                    assert_param_str(&params[0], "a");
+                    assert_param_str(&params[1], "");
+                },
+            );
+
+            println!("[a{{}}] parse to {}", path);
+        }
+
+        #[test]
+        fn test__a_LBb_cRB() {
+            println!("test__a_LBb_cRB");
+
+            let path = DataPath::from_str("a{b.c}").unwrap();
+            assert_eq!(path.path.to_string(), "a{b.c}");
+            assert_eq!(path.segments.len(), 1);
+            assert_func_segment(
+                &path.segments[0],
+                "a{b.c}",
+                |f| assert!(matches!(f, VariablePredefineFunctions::Concat)),
+                |params| {
+                    assert_eq!(params.len(), 2);
+                    assert_param_str(&params[0], "a");
+                    assert_param_path(&params[1], "b.c");
+                    if let FuncDataPathParam::Path(path) = &params[1] {
+                        assert_plain_segment(&path.segments[0], "b");
+                        assert_plain_segment(&path.segments[1], "c");
+                    }
+                },
+            );
+
+            println!("[a{{b.c}}] parse to {}", path);
         }
     }
 
@@ -621,7 +665,10 @@ mod tests {
     }
 
     mod complex {
-        use crate::data_op::data_path_parser::tests::helper::{assert_func_no_param_segment, assert_func_segment, assert_param_none, assert_param_path, assert_param_plain, assert_param_str, assert_plain_segment};
+        use crate::data_op::data_path_parser::tests::helper::{
+            assert_func_no_param_segment, assert_func_segment, assert_param_none,
+            assert_param_path, assert_param_plain, assert_param_str, assert_plain_segment,
+        };
         use crate::{DataPath, FuncDataPathParam};
         use watchmen_model::VariablePredefineFunctions;
 

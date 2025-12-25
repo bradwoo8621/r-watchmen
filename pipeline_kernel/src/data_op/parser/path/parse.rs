@@ -104,6 +104,8 @@ impl PathParser {
             }
         }
 
+        // TODO staticize and simplify data path
+
         Ok(())
     }
 

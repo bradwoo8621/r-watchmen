@@ -17,4 +17,8 @@ impl ParserInnerState {
             self.char_index_before_current(self.in_memory_chars_count()) as usize,
         )
     }
+
+    pub fn create_path_str(&self, start_char_index: usize, end_char_index: usize) -> PathStr {
+        PathStr::part_of_chars(self.all_chars().clone(), start_char_index, end_char_index)
+    }
 }

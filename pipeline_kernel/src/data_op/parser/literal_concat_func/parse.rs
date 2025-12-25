@@ -9,7 +9,7 @@ impl LiteralConcatFuncParser {
             segments: vec![],
         };
         path_parser.parse_till_right_brace()?;
-        path_parser.hand_over_to_func(self);
+        path_parser.hand_back_to_literal_concat(self);
 
         // then check the current char, which is after the enclosing "}"
         loop {

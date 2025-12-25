@@ -6,7 +6,7 @@ impl AnyFuncParser for LiteralConcatFuncParser {
         self.params.push(param);
     }
 
-    fn start_char_index(&self) -> usize {
+    fn param_start_char_index(&self) -> usize {
         self.inner.current_char_index()
     }
 
