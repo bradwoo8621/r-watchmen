@@ -34,6 +34,9 @@ pub trait ErrorCode {
 
 pub enum StdErrCode {
     DecimalParse,
+    /// config
+    ConfigInit,
+    ConfigGlobalInstanceLock,
     /// with multiple sub errors
     Multiple,
     Unknown,
@@ -43,6 +46,9 @@ impl ErrorCode for StdErrCode {
     fn code(&self) -> &'static str {
         match self {
             StdErrCode::DecimalParse => "STDE-00001",
+
+            StdErrCode::ConfigInit => "STDE-00100",
+            StdErrCode::ConfigGlobalInstanceLock => "STDE-00101",
 
             StdErrCode::Multiple => "STDE-99998",
             StdErrCode::Unknown => "STDE-99999",
