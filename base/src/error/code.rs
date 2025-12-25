@@ -37,6 +37,7 @@ pub enum StdErrCode {
     /// config
     ConfigInit,
     ConfigGlobalInstanceLock,
+    ConfigFileFormatNotSupported,
     /// with multiple sub errors
     Multiple,
     Unknown,
@@ -49,6 +50,7 @@ impl ErrorCode for StdErrCode {
 
             StdErrCode::ConfigInit => "STDE-00100",
             StdErrCode::ConfigGlobalInstanceLock => "STDE-00101",
+            StdErrCode::ConfigFileFormatNotSupported => "STDE-00102",
 
             StdErrCode::Multiple => "STDE-99998",
             StdErrCode::Unknown => "STDE-99999",
