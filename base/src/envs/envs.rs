@@ -1,4 +1,5 @@
 use crate::{EnvConfig, EnvFile, ErrorCode, OsEnv, StdErrCode, StdR, Values, VoidR};
+use bigdecimal::BigDecimal;
 use config::{Config, File, FileFormat};
 use std::path::Path;
 use std::sync::{OnceLock, RwLock};
@@ -98,8 +99,36 @@ impl Envs {
         })
     }
 
-    pub fn get_str(key: &str) -> Option<String> {
+    pub fn bool(key: &str) -> Option<bool> {
+        Self::env_config().get_bool(key)
+    }
+
+    pub fn bool_or(key: &str, default_value: bool) -> bool {
+        Self::env_config().get_bool_or_default(key, default_value)
+    }
+
+    pub fn str(key: &str) -> Option<String> {
         Self::env_config().get_str(key)
+    }
+
+    pub fn str_or(key: &str, default_value: String) -> String {
+        Self::env_config().get_str_or_default(key, default_value)
+    }
+
+    pub fn int(key: &str) -> Option<i64> {
+        Self::env_config().get_int(key)
+    }
+
+    pub fn int_or(key: &str, default_value: i64) -> i64 {
+        Self::env_config().get_int_or_default(key, default_value)
+    }
+
+    pub fn decimal(key: &str) -> Option< BigDecimal> {
+        Self::env_config().get_decimal(key)
+    }
+
+    pub fn decimal_or(key: &str, default_value: BigDecimal) -> BigDecimal {
+        Self::env_config().get_decimal_or_default(key, default_value)
     }
 }
 
@@ -115,7 +144,7 @@ mod tests {
         }
 
         Envs::with_files(vec!["test/.env".to_string()]).expect("Failed to init environment");
-        assert_eq!(Envs::get_str("TEST_KEY").unwrap(), "test value");
+        assert_eq!(Envs::str("TEST_KEY").unwrap(), "test value");
 
         unsafe {
             remove_var("TEST_KEY");
@@ -126,12 +155,12 @@ mod tests {
     fn test_priority_files() {
         Envs::with_files(vec!["test/.env".to_string(), "test/2.env".to_string()])
             .expect("Failed to init environment");
-        assert_eq!(Envs::get_str("TEST_KEY").unwrap(), "test value");
+        assert_eq!(Envs::str("TEST_KEY").unwrap(), "test value");
     }
 
     #[test]
     fn test_json() {
         Envs::with_files(vec!["test/test.json".to_string()]).expect("Failed to init environment");
-        assert_eq!(Envs::get_str("test.key").unwrap(), "test value json");
+        assert_eq!(Envs::str("test.key").unwrap(), "test value json");
     }
 }
