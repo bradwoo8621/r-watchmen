@@ -17,7 +17,7 @@ impl NumericUtils for String {
         if let Ok(v) = BigDecimal::from_str(&self) {
             Ok(v)
         } else {
-            StdErrCode::DecimalParse.msg(format!("Cannot parse '{}' to decimal", self))
+            StdErrCode::DecimalParse.msg(format!("Cannot parse '{}' to decimal.", self))
         }
     }
 }

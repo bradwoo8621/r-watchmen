@@ -65,19 +65,19 @@ impl ArcTopicDataValue {
         match self {
             ArcTopicDataValue::Num(decimal) => Ok(decimal.clone()),
             ArcTopicDataValue::None => {
-                StdErrCode::DecimalParse.msg("Cannot convert none to decimal")
+                StdErrCode::DecimalParse.msg("Cannot convert none to decimal.")
             }
             ArcTopicDataValue::Str(str) => {
                 if str.is_blank() {
-                    StdErrCode::DecimalParse.msg("Cannot convert blank string to decimal")
+                    StdErrCode::DecimalParse.msg("Cannot convert blank string to decimal.")
                 } else if let Ok(decimal) = str.to_decimal() {
                     Ok(Arc::new(decimal))
                 } else {
-                    StdErrCode::DecimalParse.msg(format!("Cannot convert [{}] to decimal", str))
+                    StdErrCode::DecimalParse.msg(format!("Cannot convert [{}] to decimal.", str))
                 }
             }
             other => {
-                StdErrCode::DecimalParse.msg(format!("Cannot convert [{:?}] to decimal", other))
+                StdErrCode::DecimalParse.msg(format!("Cannot convert [{:?}] to decimal.", other))
             }
         }
     }

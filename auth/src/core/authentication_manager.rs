@@ -33,7 +33,7 @@ impl AuthenticationManager {
                 }
             }
         }
-        AuthErrorCode::AuthenticationFailed.msg("Authentication failed")
+        AuthErrorCode::AuthenticationFailed.msg("Authentication failed.")
     }
 
     pub fn authenticate(&self, scheme: AuthenticationScheme, token: String) -> StdR<User> {

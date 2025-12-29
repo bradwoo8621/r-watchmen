@@ -37,7 +37,7 @@ impl PipelineEntrypoint {
     pub fn pipeline(mut self, pipeline_id: PipelineId) -> StdR<Self> {
         if pipeline_id.is_blank() {
             PipelineKernelErrorCode::TriggerPipelineIdIsBlank
-                .msg("Given pipeline id cannot be blank")
+                .msg("Given pipeline id cannot be blank.")
         } else {
             self.pipeline_id = Some(pipeline_id);
             Ok(self)
@@ -46,7 +46,7 @@ impl PipelineEntrypoint {
 
     pub fn traced_with(mut self, trace_id: PipelineTriggerTraceId) -> StdR<Self> {
         if trace_id.is_blank() {
-            PipelineKernelErrorCode::TriggerTraceIdIsBlank.msg("Given pipeline id cannot be blank")
+            PipelineKernelErrorCode::TriggerTraceIdIsBlank.msg("Given pipeline id cannot be blank.")
         } else {
             self.trace_id = Some(trace_id);
             Ok(self)

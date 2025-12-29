@@ -34,6 +34,10 @@ pub trait ErrorCode {
 
 pub enum StdErrCode {
     DecimalParse,
+    FullDateTimeParse,
+    DateTimeParse,
+    DateParse,
+    TimeParse,
     /// environment variables
     EnvInit,
     EnvFileFormatNotSupported,
@@ -48,6 +52,10 @@ impl ErrorCode for StdErrCode {
     fn code(&self) -> &'static str {
         match self {
             StdErrCode::DecimalParse => "STDE-00001",
+            StdErrCode::FullDateTimeParse => "STDE-00002",
+            StdErrCode::DateTimeParse => "STDE-00003",
+            StdErrCode::DateParse => "STDE-00004",
+            StdErrCode::TimeParse => "STDE-00005",
 
             StdErrCode::EnvInit => "STDE-00100",
             StdErrCode::EnvFileFormatNotSupported => "STDE-00101",

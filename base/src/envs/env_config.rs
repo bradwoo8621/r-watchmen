@@ -3,15 +3,15 @@ use bigdecimal::BigDecimal;
 use config::Config;
 use std::collections::HashMap;
 use std::str::FromStr;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 pub enum EnvValue {
     None,
     Bool(bool),
-    Str(String),
+    Str(Arc<String>),
     Int(i64),
-    Decimal(BigDecimal),
-    StrVec(Vec<String>),
+    Decimal(Arc<BigDecimal>),
+    StrVec(Arc<Vec<Arc<String>>>),
 }
 
 pub struct EnvConfig {
@@ -71,7 +71,7 @@ pub trait Values {
         self.get_bool(key).unwrap_or(default_value)
     }
 
-    fn get_str(&self, key: &str) -> Option<String> {
+    fn get_str(&self, key: &str) -> Option<Arc<String>> {
         self.get(
             key,
             |value| {
@@ -82,17 +82,19 @@ pub trait Values {
                     _ => None,
                 }
             },
-            |config, key| {
-                config
-                    .get_string(key)
-                    .or_else(|e| StdErrCode::EnvValueGet.msg(e.to_string()))
+            |config, key| match config.get_string(key) {
+                Ok(s) => Ok(Arc::new(s)),
+                Err(e) => StdErrCode::EnvValueGet.msg(e.to_string()),
             },
             |value| EnvValue::Str(value.clone()),
         )
     }
 
-    fn get_str_or_default(&self, key: &str, default_value: String) -> String {
-        self.get_str(key).unwrap_or(default_value)
+    fn get_str_or_default(&self, key: &str, default_value: String) -> Arc<String> {
+        match self.get_str(key) {
+            Some(v) => v,
+            _ => Arc::new(default_value),
+        }
     }
 
     fn get_int(&self, key: &str) -> Option<i64> {
@@ -115,7 +117,7 @@ pub trait Values {
         self.get_int(key).unwrap_or(default_value)
     }
 
-    fn get_vec(&self, key: &str) -> Option<Vec<String>> {
+    fn get_vec(&self, key: &str) -> Option<Arc<Vec<Arc<String>>>> {
         self.get(
             key,
             |value| match value {
@@ -132,18 +134,25 @@ pub trait Values {
                         key, value
                     ))
                 } else {
-                    Ok(value.split(',').map(|s| s.to_string()).collect())
+                    Ok(Arc::new(value.split(',').map(|s| Arc::new(s.to_string())).collect()))
                 }
             },
             |value| EnvValue::StrVec(value.clone()),
         )
     }
 
-    fn get_vec_or_default(&self, key: &str, default_value: Vec<String>) -> Vec<String> {
-        self.get_vec(key).unwrap_or(default_value)
+    fn get_vec_or_default(
+        &self,
+        key: &str,
+        default_value: &Arc<Vec<Arc<String>>>,
+    ) -> Arc<Vec<Arc<String>>> {
+        match self.get_vec(key) {
+            Some(v) => v,
+            _ => default_value.clone(),
+        }
     }
 
-    fn get_decimal(&self, key: &str) -> Option<BigDecimal> {
+    fn get_decimal(&self, key: &str) -> Option<Arc<BigDecimal>> {
         self.get(
             key,
             |value| match value {
@@ -159,14 +168,17 @@ pub trait Values {
                         "Invalid value[{}={}] from environment, cannot be parsed to decimal, caused by {}.",
                         key, value, e
                     ))
-                })
+                }).map(|d| Arc::new(d))
             },
             |value| EnvValue::Decimal(value.clone()),
         )
     }
 
-    fn get_decimal_or_default(&self, key: &str, default_value: BigDecimal) -> BigDecimal {
-        self.get_decimal(key).unwrap_or(default_value)
+    fn get_decimal_or_default(&self, key: &str, default_value: BigDecimal) -> Arc<BigDecimal> {
+        match self.get_decimal(key) {
+            Some(v) => v,
+            _ => Arc::new(default_value),
+        }
     }
 }
 
@@ -190,7 +202,7 @@ impl Values for RwLock<EnvConfig> {
                 return match value {
                     EnvValue::None => None,
                     _ => on_map_value(value),
-                }
+                };
             } else {
                 from_config(&ec.config, key)
             }
