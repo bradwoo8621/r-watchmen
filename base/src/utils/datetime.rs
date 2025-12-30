@@ -42,3 +42,24 @@ impl DateTimeUtils for String {
         LooseDateFormatter::parse_datetime(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use chrono::Timelike;
+    use crate::DateTimeUtils;
+
+    #[test]
+    fn test_time() {
+        let time = "01:02:03".to_string().to_time().expect("Failed to convert to time.");
+        assert_eq!(time.hour(), 1);
+        assert_eq!(time.minute(), 2);
+        assert_eq!(time.second(), 3);
+        assert_eq!(time.nanosecond(), 0);
+
+        let time = "233445".to_string().to_time().expect("Failed to convert to time.");
+        assert_eq!(time.hour(), 23);
+        assert_eq!(time.minute(), 34);
+        assert_eq!(time.second(), 45);
+        assert_eq!(time.nanosecond(), 0);
+    }
+}

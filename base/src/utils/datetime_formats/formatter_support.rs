@@ -24,7 +24,7 @@ impl DateTimeFormatterSupport {
                     parsed_format.push('%');
                     parsed_format.push('Y')
                 }
-                "m" | "d" | "H" | "M" | "S" => {
+                "y" | "m" | "d" | "H" | "M" | "S" => {
                     len += 2;
                     parsed_format.push('%');
                     parsed_format.push(parts.chars().nth(0).unwrap());
@@ -42,8 +42,13 @@ impl DateTimeFormatterSupport {
                     parsed_format.push('%');
                     parsed_format.push('z')
                 }
-                // not supported, ignored, just make the length to 100
-                _ => len += 100,
+                // not supported format, ignored, just make the length to 100
+                "C" | "q" | "B" | "b" | "h" | "e" | "A" | "a" | "w" | "u" | "U" | "W" | "G"
+                | "g" | "V" | "j" | "D" | "x" | "F" | "v" | "k" | "I" | "l" | "P" | "p" | ".f"
+                | ".3f" | ".6f" | ".9f" | "6f" | "9f" | "R" | "T" | "X" | "r" | "Z" | ":z"
+                | "::z" | ":::z" | "#z" | "c" | "+" | "s" => len += 100,
+                // other chars, ignore
+                _ => {}
             }
         }
 
