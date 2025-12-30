@@ -82,50 +82,72 @@ impl LooseDateFormatter {
             .get(&len)
     }
 
-    fn format_not_found<R>(str: &String, target_type: &str) -> StdR<R> {
-        StdErrCode::TimeParse.msg(format!(
+    fn format_not_found<R, EC>(str: &String, error_code: EC, target_type: &str) -> StdR<R>
+    where
+        EC: ErrorCode,
+    {
+        error_code.msg(format!(
             "No suitable format for parsing the given string[{}] into a {}.",
             str, target_type
         ))
     }
 
-    fn parse_failed<R>(str: &String, target_type: &str) -> StdR<R> {
-        StdErrCode::TimeParse.msg(format!(
+    fn parse_failed<R, EC>(str: &String, error_code: EC, target_type: &str) -> StdR<R>
+    where
+        EC: ErrorCode,
+    {
+        error_code.msg(format!(
             "The given string[{}] cannot be parsed into a {}.",
             str, target_type
         ))
     }
 
-    fn parse<T, TryParse>(str: &String, target_type: &str, try_parse: TryParse) -> StdR<T>
+    fn parse<T, EC, TryParse>(
+        str: &String,
+        error_code: EC,
+        target_type: &str,
+        try_parse: TryParse,
+    ) -> StdR<T>
     where
+        EC: ErrorCode,
         TryParse: Fn(&String, &DateTimeFormatterSupport) -> Option<T>,
     {
         let (valid_part, len) = DateTimeFormatterSupport::valid_part(str);
         if let Some(supports) = Self::get_formats(&len) {
             if supports.len() == 0 {
-                Self::format_not_found(str, target_type)
+                Self::format_not_found(str, error_code, target_type)
             } else {
                 for support in supports {
                     if let Some(date_or_datetime) = try_parse(&valid_part, support) {
                         return Ok(date_or_datetime);
                     }
                 }
-                Self::parse_failed(str, target_type)
+                Self::parse_failed(str, error_code, target_type)
             }
         } else {
-            Self::format_not_found(str, target_type)
+            Self::format_not_found(str, error_code, target_type)
         }
     }
 
     pub fn parse_date(str: &String) -> StdR<NaiveDate> {
-        Self::parse(str, "date", DateFormatter::try_parse)
+        Self::parse(str, StdErrCode::DateParse, "date", DateFormatter::try_parse)
     }
 
     pub fn parse_datetime(str: &String) -> StdR<NaiveDateTime> {
-        Self::parse(str, "datetime", DateTimeFormatter::try_parse)
+        Self::parse(
+            str,
+            StdErrCode::DateTimeParse,
+            "datetime",
+            DateTimeFormatter::try_parse,
+        )
     }
 
     pub fn parse_full_datetime(str: &String) -> StdR<NaiveDateTime> {
-        Self::parse(str, "datetime", FullDateTimeFormatter::try_parse)
+        Self::parse(
+            str,
+            StdErrCode::FullDateTimeParse,
+            "datetime",
+            FullDateTimeFormatter::try_parse,
+        )
     }
 }
