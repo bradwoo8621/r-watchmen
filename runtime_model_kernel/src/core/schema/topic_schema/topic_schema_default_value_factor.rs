@@ -1,7 +1,9 @@
 use crate::{
     ArcFactor, TopicSchemaFactor, TopicSchemaFactorGroup, TopicSchemaFactorGroupInner,
-    TopicSchemaFactorGroups, TopicSchemaFactorInner, TopicSchemaGroupFactor,
+    TopicSchemaFactorGroupInnerOp, TopicSchemaFactorGroups, TopicSchemaFactorInner,
+    TopicSchemaGroupFactor,
 };
+use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_base::{BooleanUtils, NumericUtils};
@@ -95,8 +97,71 @@ impl TopicSchemaDefaultValueFactorGroup {
         Self { inner }
     }
 
-    pub fn init_default_value(&self, _data: &mut TopicData) {
-        todo!("implement init_default_value for TopicSchemaDefaultValueFactorGroup")
+    fn init_default_value_for_vec(&self, vec: &mut Vec<TopicDataValue>) {
+        for value in vec {
+            match value {
+                TopicDataValue::Map(map) => {
+                    self.init_default_value_for_map(map);
+                }
+                _ => {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    fn init_default_value_for_map(&self, map: &mut HashMap<String, TopicDataValue>) {
+        let groups = self.inner.groups();
+        match groups {
+            Some(groups) => {
+                for group in groups.deref() {
+                    group.init_default_value(map);
+                }
+            }
+            _ => {
+                // do nothing
+            }
+        }
+    }
+
+    pub fn init_default_value(&self, data: &mut TopicData) {
+        let name = self.name().deref();
+        let value = data.get_mut(name);
+        match value {
+            Some(TopicDataValue::Vec(vec)) => {
+                self.init_default_value_for_vec(vec);
+            }
+            Some(TopicDataValue::Map(map)) => {
+                self.init_default_value_for_map(map);
+            }
+            Some(TopicDataValue::None) | None => {
+                let factors = self.inner.factors();
+                match factors {
+                    Some(factors) => {
+                        if factors.len() == 1 {
+                            let default_value = &factors[0].default_value;
+                            match default_value {
+                                Some(default_value) => {
+                                    // set as default value
+                                    data.insert(name.clone(), default_value.deref().clone());
+                                }
+                                _ => {
+                                    // set as none
+                                    data.insert(name.clone(), TopicDataValue::None);
+                                }
+                            }
+                        }
+                    }
+                    _ => {
+                        // set as none
+                        data.insert(name.clone(), TopicDataValue::None);
+                    }
+                }
+            }
+            _ => {
+                // value presents, do nothing
+            }
+        }
     }
 }
 
