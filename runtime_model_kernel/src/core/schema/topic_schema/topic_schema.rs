@@ -1,10 +1,4 @@
-use crate::{
-    ArcFactor, ArcTopic, HierarchyAid, TopicSchemaDateOrTimeFactorGroup,
-    TopicSchemaDateOrTimeFactorGroups, TopicSchemaDefaultValueFactorGroup,
-    TopicSchemaDefaultValueFactorGroups, TopicSchemaEncryptFactorGroup,
-    TopicSchemaEncryptFactorGroups, TopicSchemaFactorGroups, TopicSchemaFlattenFactorGroup,
-    TopicSchemaFlattenFactorGroups,
-};
+use crate::{ArcFactor, ArcTopic, HierarchyAid};
 use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_base::{StdR, VoidR};
@@ -14,20 +8,20 @@ use watchmen_model::{FactorId, TenantId, Topic, TopicCode, TopicData, TopicId};
 /// all factor fields are optional, depending on whether the topic has the corresponding factors.
 pub struct TopicSchema {
     inner: Arc<ArcTopic>,
-    flatten_factors: Option<Arc<Vec<Arc<TopicSchemaFlattenFactorGroup>>>>,
-    date_or_time_factors: Option<Arc<Vec<Arc<TopicSchemaDateOrTimeFactorGroup>>>>,
-    encrypt_factor_groups: Option<Arc<Vec<Arc<TopicSchemaEncryptFactorGroup>>>>,
-    default_value_factor_groups: Option<Arc<Vec<Arc<TopicSchemaDefaultValueFactorGroup>>>>,
+    // flatten_factors: Option<Arc<Vec<Arc<TopicSchemaFlattenFactor>>>>,
+    // date_or_time_factors: Option<Arc<Vec<Arc<TopicSchemaDateOrTimeFactorGroup>>>>,
+    // encrypt_factor_groups: Option<Arc<Vec<Arc<TopicSchemaEncryptFactorGroup>>>>,
+    // default_value_factor_groups: Option<Arc<Vec<Arc<TopicSchemaDefaultValueFactorGroup>>>>,
 }
 
 impl TopicSchema {
     pub fn new(topic: Topic) -> StdR<Self> {
         let arc_topic = ArcTopic::new(topic)?;
         Ok(Self {
-            flatten_factors: TopicSchemaFlattenFactorGroups::create(&arc_topic),
-            date_or_time_factors: TopicSchemaDateOrTimeFactorGroups::create(&arc_topic),
-            encrypt_factor_groups: TopicSchemaEncryptFactorGroups::create(&arc_topic),
-            default_value_factor_groups: TopicSchemaDefaultValueFactorGroups::create(&arc_topic),
+            // flatten_factors: TopicSchemaFlattenFactor::of_topic(&arc_topic),
+            // date_or_time_factors: TopicSchemaDateOrTimeFactorGroups::create(&arc_topic),
+            // encrypt_factor_groups: TopicSchemaEncryptFactorGroups::create(&arc_topic),
+            // default_value_factor_groups: TopicSchemaDefaultValueFactorGroups::create(&arc_topic),
             inner: arc_topic,
         })
     }
@@ -71,11 +65,11 @@ impl TopicSchema {
     /// given data might be changed
     fn initialize_default_values(&self, data: &mut TopicData) {
         if self.should_init_default_values() {
-            self.default_value_factor_groups.as_deref().map(|groups| {
-                for group in groups.iter() {
-                    group.init_default_value(data);
-                }
-            });
+            // self.default_value_factor_groups.as_deref().map(|groups| {
+            //     for group in groups.iter() {
+            //         group.init_default_value(data);
+            //     }
+            // });
         }
     }
 
@@ -86,32 +80,32 @@ impl TopicSchema {
     /// given data might be changed
     fn encrypt(&self, data: &mut TopicData) {
         if self.should_encrypt() {
-            self.encrypt_factor_groups.as_deref().map(|groups| {
-                for group in groups.iter() {
-                    group.encrypt(data);
-                }
-            });
+            // self.encrypt_factor_groups.as_deref().map(|groups| {
+            //     for group in groups.iter() {
+            //         group.encrypt(data);
+            //     }
+            // });
         }
     }
 
     /// given data might be changed
     pub fn decrypt(&self, data: &mut TopicData) {
         if self.should_encrypt() {
-            self.encrypt_factor_groups.as_deref().map(|groups| {
-                for group in groups.iter() {
-                    group.decrypt(data);
-                }
-            });
+            // self.encrypt_factor_groups.as_deref().map(|groups| {
+            //     for group in groups.iter() {
+            //         group.decrypt(data);
+            //     }
+            // });
         }
     }
 
     /// given data might be changed
     fn try_cast_to_datetime(&self, data: &mut TopicData) {
-        self.date_or_time_factors.as_deref().map(|groups| {
-            for group in groups.iter() {
-                group.try_cast_to_datetime(data);
-            }
-        });
+        // self.date_or_time_factors.as_deref().map(|groups| {
+        //     for group in groups.iter() {
+        //         group.try_cast_to_datetime(data);
+        //     }
+        // });
     }
 
     /// given data might be changed
@@ -120,11 +114,11 @@ impl TopicSchema {
             return;
         }
 
-        self.flatten_factors.as_deref().map(|groups| {
-            for group in groups.iter() {
-                group.flatten(data);
-            }
-        });
+        // self.flatten_factors.as_deref().map(|groups| {
+        //     for group in groups.iter() {
+        //         group.flatten(data);
+        //     }
+        // });
     }
 
     fn should_aid_hierarchy(&self) -> bool {

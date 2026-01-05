@@ -1,204 +1,204 @@
-use crate::{
-    ArcFactor, TopicSchemaFactor, TopicSchemaFactorGroup, TopicSchemaFactorGroupInner,
-    TopicSchemaFactorGroupInnerOp, TopicSchemaFactorGroups, TopicSchemaFactorInner,
-    TopicSchemaGroupFactor,
-};
-use std::collections::HashMap;
-use std::ops::Deref;
-use std::sync::Arc;
-use watchmen_base::{BooleanUtils, NumericUtils};
-use watchmen_model::{FactorTypeCategory, TopicData, TopicDataValue};
-
-#[derive(Debug)]
-pub struct TopicSchemaDefaultValueFactor {
-    inner: TopicSchemaFactorInner,
-    default_value: Option<Arc<TopicDataValue>>,
-}
-
-impl TopicSchemaDefaultValueFactor {
-    pub fn new(inner: TopicSchemaFactorInner) -> Self {
-        let mut factor = Self {
-            inner,
-            default_value: None,
-        };
-        factor.compute_default_value();
-        factor
-    }
-
-    fn compute_default_value(&mut self) {
-        let factor = &self.factor();
-        let defined_default_value = &factor.default_value;
-        if defined_default_value.is_none() {
-            // no default value defined
-            self.default_value = None;
-            return;
-        }
-
-        let defined_default_value = defined_default_value.as_ref().unwrap();
-
-        let computed_default_value = match factor.r#type.category() {
-            FactorTypeCategory::Text
-            | FactorTypeCategory::TextLike
-            | FactorTypeCategory::EnumText => {
-                TopicDataValue::Str(defined_default_value.deref().clone())
-            }
-            // date time related types
-            FactorTypeCategory::FullDatetime => todo!("handle FullDatetime default value"),
-            FactorTypeCategory::Datetime => todo!("handle Datetime default value"),
-            FactorTypeCategory::Date => todo!("handle Date default value"),
-            FactorTypeCategory::Time => todo!("handle Time default value"),
-            // date time related types, no check, take as number
-            FactorTypeCategory::DatetimeNumeric | FactorTypeCategory::Numeric => {
-                if let Ok(v) = defined_default_value.deref().to_decimal() {
-                    TopicDataValue::Num(v)
-                } else {
-                    // TODO output some warning info: string cannot be casted to decimal
-                    TopicDataValue::None
-                }
-            }
-            FactorTypeCategory::Boolean => {
-                TopicDataValue::Bool(defined_default_value.deref().to_bool())
-            }
-            FactorTypeCategory::Complex => TopicDataValue::None,
-        };
-        self.default_value = Some(Arc::new(computed_default_value));
-    }
-
-    pub fn default_value(&self) -> &Option<Arc<TopicDataValue>> {
-        &self.default_value
-    }
-}
-
-impl TopicSchemaFactor for TopicSchemaDefaultValueFactor {
-    fn get_inner(&self) -> &TopicSchemaFactorInner {
-        &self.inner
-    }
-}
-
-impl TopicSchemaGroupFactor<TopicSchemaDefaultValueFactor> for TopicSchemaDefaultValueFactor {
-    fn replace_names(&self, names: Arc<Vec<String>>) -> TopicSchemaDefaultValueFactor {
-        TopicSchemaDefaultValueFactor {
-            inner: self.get_inner().replace_names(names),
-            default_value: self.default_value.clone(),
-        }
-    }
-}
-
-pub type TopicSchemaDefaultValueFactorGroupInner =
-    TopicSchemaFactorGroupInner<TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>;
-
-#[derive(Debug)]
-pub struct TopicSchemaDefaultValueFactorGroup {
-    inner: TopicSchemaDefaultValueFactorGroupInner,
-}
-
-impl TopicSchemaDefaultValueFactorGroup {
-    pub fn new(inner: TopicSchemaDefaultValueFactorGroupInner) -> Self {
-        Self { inner }
-    }
-
-    fn init_default_value_for_vec(&self, vec: &mut Vec<TopicDataValue>) {
-        for value in vec {
-            match value {
-                TopicDataValue::Map(map) => {
-                    self.init_default_value_for_map(map);
-                }
-                _ => {
-                    // do nothing
-                }
-            }
-        }
-    }
-
-    fn init_default_value_for_map(&self, map: &mut HashMap<String, TopicDataValue>) {
-        let groups = self.inner.groups();
-        match groups {
-            Some(groups) => {
-                for group in groups.deref() {
-                    group.init_default_value(map);
-                }
-            }
-            _ => {
-                // do nothing
-            }
-        }
-    }
-
-    pub fn init_default_value(&self, data: &mut TopicData) {
-        let name = self.name().deref();
-        let value = data.get_mut(name);
-        match value {
-            Some(TopicDataValue::Vec(vec)) => {
-                self.init_default_value_for_vec(vec);
-            }
-            Some(TopicDataValue::Map(map)) => {
-                self.init_default_value_for_map(map);
-            }
-            Some(TopicDataValue::None) | None => {
-                let factors = self.inner.factors();
-                match factors {
-                    Some(factors) => {
-                        if factors.len() == 1 {
-                            let default_value = &factors[0].default_value;
-                            match default_value {
-                                Some(default_value) => {
-                                    // set as default value
-                                    data.insert(name.clone(), default_value.deref().clone());
-                                }
-                                _ => {
-                                    // set as none
-                                    data.insert(name.clone(), TopicDataValue::None);
-                                }
-                            }
-                        }
-                    }
-                    _ => {
-                        // set as none
-                        data.insert(name.clone(), TopicDataValue::None);
-                    }
-                }
-            }
-            _ => {
-                // value presents, do nothing
-            }
-        }
-    }
-}
-
-impl TopicSchemaFactorGroup<'_, TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>
-    for TopicSchemaDefaultValueFactorGroup
-{
-    type Inner = TopicSchemaDefaultValueFactorGroupInner;
-
-    fn new(name: Arc<String>, factors: Arc<Vec<Arc<TopicSchemaDefaultValueFactor>>>) -> Self {
-        Self::new(TopicSchemaFactorGroupInner::new(name, factors))
-    }
-
-    fn get_inner(&self) -> &TopicSchemaDefaultValueFactorGroupInner {
-        &self.inner
-    }
-}
-
-pub struct TopicSchemaDefaultValueFactorGroups;
-
-impl TopicSchemaFactorGroups<TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>
-    for TopicSchemaDefaultValueFactorGroups
-{
-    fn accept_factor(factor: &Arc<ArcFactor>) -> bool {
-        factor.has_default_value()
-    }
-
-    fn create_schema_factor(factor: &Arc<ArcFactor>) -> TopicSchemaDefaultValueFactor {
-        TopicSchemaDefaultValueFactor::new(TopicSchemaFactorInner::new(factor.clone()))
-    }
-
-    fn create_schema_group(
-        name: String,
-        factors: Arc<Vec<Arc<TopicSchemaDefaultValueFactor>>>,
-    ) -> TopicSchemaDefaultValueFactorGroup {
-        TopicSchemaDefaultValueFactorGroup::new(TopicSchemaDefaultValueFactorGroupInner::new(
-            Arc::new(name),
-            factors,
-        ))
-    }
-}
+// use crate::{
+//     ArcFactor, TopicSchemaFactor, TopicSchemaFactorGroup, TopicSchemaFactorGroupInner,
+//     TopicSchemaFactorGroupInnerOp, TopicSchemaFactorGroups, TopicSchemaFactor,
+//     TopicSchemaGroupFactor,
+// };
+// use std::collections::HashMap;
+// use std::ops::Deref;
+// use std::sync::Arc;
+// use watchmen_base::{BooleanUtils, NumericUtils};
+// use watchmen_model::{FactorTypeCategory, TopicData, TopicDataValue};
+//
+// #[derive(Debug)]
+// pub struct TopicSchemaDefaultValueFactor {
+//     inner: TopicSchemaFactor,
+//     default_value: Option<Arc<TopicDataValue>>,
+// }
+//
+// impl TopicSchemaDefaultValueFactor {
+//     pub fn new(inner: TopicSchemaFactor) -> Self {
+//         let mut factor = Self {
+//             inner,
+//             default_value: None,
+//         };
+//         factor.compute_default_value();
+//         factor
+//     }
+//
+//     fn compute_default_value(&mut self) {
+//         let factor = &self.factor();
+//         let defined_default_value = &factor.default_value;
+//         if defined_default_value.is_none() {
+//             // no default value defined
+//             self.default_value = None;
+//             return;
+//         }
+//
+//         let defined_default_value = defined_default_value.as_ref().unwrap();
+//
+//         let computed_default_value = match factor.r#type.category() {
+//             FactorTypeCategory::Text
+//             | FactorTypeCategory::TextLike
+//             | FactorTypeCategory::EnumText => {
+//                 TopicDataValue::Str(defined_default_value.deref().clone())
+//             }
+//             // date time related types
+//             FactorTypeCategory::FullDatetime => todo!("handle FullDatetime default value"),
+//             FactorTypeCategory::Datetime => todo!("handle Datetime default value"),
+//             FactorTypeCategory::Date => todo!("handle Date default value"),
+//             FactorTypeCategory::Time => todo!("handle Time default value"),
+//             // date time related types, no check, take as number
+//             FactorTypeCategory::DatetimeNumeric | FactorTypeCategory::Numeric => {
+//                 if let Ok(v) = defined_default_value.deref().to_decimal() {
+//                     TopicDataValue::Num(v)
+//                 } else {
+//                     // TODO output some warning info: string cannot be casted to decimal
+//                     TopicDataValue::None
+//                 }
+//             }
+//             FactorTypeCategory::Boolean => {
+//                 TopicDataValue::Bool(defined_default_value.deref().to_bool())
+//             }
+//             FactorTypeCategory::Complex => TopicDataValue::None,
+//         };
+//         self.default_value = Some(Arc::new(computed_default_value));
+//     }
+//
+//     pub fn default_value(&self) -> &Option<Arc<TopicDataValue>> {
+//         &self.default_value
+//     }
+// }
+//
+// impl TopicSchemaFactor for TopicSchemaDefaultValueFactor {
+//     fn get_inner(&self) -> &TopicSchemaFactor {
+//         &self.inner
+//     }
+// }
+//
+// impl TopicSchemaGroupFactor<TopicSchemaDefaultValueFactor> for TopicSchemaDefaultValueFactor {
+//     fn replace_names(&self, names: Arc<Vec<String>>) -> TopicSchemaDefaultValueFactor {
+//         TopicSchemaDefaultValueFactor {
+//             inner: self.get_inner().replace_names(names),
+//             default_value: self.default_value.clone(),
+//         }
+//     }
+// }
+//
+// pub type TopicSchemaDefaultValueFactorGroupInner =
+//     TopicSchemaFactorGroupInner<TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>;
+//
+// #[derive(Debug)]
+// pub struct TopicSchemaDefaultValueFactorGroup {
+//     inner: TopicSchemaDefaultValueFactorGroupInner,
+// }
+//
+// impl TopicSchemaDefaultValueFactorGroup {
+//     pub fn new(inner: TopicSchemaDefaultValueFactorGroupInner) -> Self {
+//         Self { inner }
+//     }
+//
+//     fn init_default_value_for_vec(&self, vec: &mut Vec<TopicDataValue>) {
+//         for value in vec {
+//             match value {
+//                 TopicDataValue::Map(map) => {
+//                     self.init_default_value_for_map(map);
+//                 }
+//                 _ => {
+//                     // do nothing
+//                 }
+//             }
+//         }
+//     }
+//
+//     fn init_default_value_for_map(&self, map: &mut HashMap<String, TopicDataValue>) {
+//         let groups = self.inner.groups();
+//         match groups {
+//             Some(groups) => {
+//                 for group in groups.deref() {
+//                     group.init_default_value(map);
+//                 }
+//             }
+//             _ => {
+//                 // do nothing
+//             }
+//         }
+//     }
+//
+//     pub fn init_default_value(&self, data: &mut TopicData) {
+//         let name = self.name().deref();
+//         let value = data.get_mut(name);
+//         match value {
+//             Some(TopicDataValue::Vec(vec)) => {
+//                 self.init_default_value_for_vec(vec);
+//             }
+//             Some(TopicDataValue::Map(map)) => {
+//                 self.init_default_value_for_map(map);
+//             }
+//             Some(TopicDataValue::None) | None => {
+//                 let factors = self.inner.factors();
+//                 match factors {
+//                     Some(factors) => {
+//                         if factors.len() == 1 {
+//                             let default_value = &factors[0].default_value;
+//                             match default_value {
+//                                 Some(default_value) => {
+//                                     // set as default value
+//                                     data.insert(name.clone(), default_value.deref().clone());
+//                                 }
+//                                 _ => {
+//                                     // set as none
+//                                     data.insert(name.clone(), TopicDataValue::None);
+//                                 }
+//                             }
+//                         }
+//                     }
+//                     _ => {
+//                         // set as none
+//                         data.insert(name.clone(), TopicDataValue::None);
+//                     }
+//                 }
+//             }
+//             _ => {
+//                 // value presents, do nothing
+//             }
+//         }
+//     }
+// }
+//
+// impl TopicSchemaFactorGroup<'_, TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>
+//     for TopicSchemaDefaultValueFactorGroup
+// {
+//     type Inner = TopicSchemaDefaultValueFactorGroupInner;
+//
+//     fn new(name: Arc<String>, factors: Arc<Vec<Arc<TopicSchemaDefaultValueFactor>>>) -> Self {
+//         Self::new(TopicSchemaFactorGroupInner::new(name, factors))
+//     }
+//
+//     fn get_inner(&self) -> &TopicSchemaDefaultValueFactorGroupInner {
+//         &self.inner
+//     }
+// }
+//
+// pub struct TopicSchemaDefaultValueFactorGroups;
+//
+// impl TopicSchemaFactorGroups<TopicSchemaDefaultValueFactor, TopicSchemaDefaultValueFactorGroup>
+//     for TopicSchemaDefaultValueFactorGroups
+// {
+//     fn accept_factor(factor: &Arc<ArcFactor>) -> bool {
+//         factor.has_default_value()
+//     }
+//
+//     fn create_schema_factor(factor: &Arc<ArcFactor>) -> TopicSchemaDefaultValueFactor {
+//         TopicSchemaDefaultValueFactor::new(TopicSchemaFactor::new(factor.clone()))
+//     }
+//
+//     fn create_schema_group(
+//         name: String,
+//         factors: Arc<Vec<Arc<TopicSchemaDefaultValueFactor>>>,
+//     ) -> TopicSchemaDefaultValueFactorGroup {
+//         TopicSchemaDefaultValueFactorGroup::new(TopicSchemaDefaultValueFactorGroupInner::new(
+//             Arc::new(name),
+//             factors,
+//         ))
+//     }
+// }

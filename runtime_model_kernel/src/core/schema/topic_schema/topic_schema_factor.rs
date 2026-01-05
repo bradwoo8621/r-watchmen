@@ -1,57 +1,392 @@
-use crate::ArcFactor;
+use crate::{ArcFactor, ArcTopic, RuntimeModelKernelErrorCode};
+use std::collections::{BTreeSet, HashMap};
+use std::fmt::{Display, Formatter};
+use std::ops::Deref;
 use std::sync::Arc;
+use watchmen_base::{DisplayLines, ErrorCode, StdR, VoidR};
+use watchmen_model::FactorType;
 
-#[derive(Debug)]
-pub struct TopicSchemaFactorInner {
+fn factors_to_str(factors: &Vec<TopicSchemaFactor>) -> String {
+    factors
+        .iter()
+        .map(|f| format!("{}", f))
+        .map(DisplayLines::indent)
+        .collect::<Vec<String>>()
+        .join(",\n")
+}
+
+pub struct SimpleTopicSchemaFactor {
     factor: Arc<ArcFactor>,
-    factor_name: Arc<String>,
-    names: Arc<Vec<String>>,
+    name: String,
 }
 
-impl TopicSchemaFactorInner {
-    pub fn new(factor: Arc<ArcFactor>) -> Self {
-        let factor_name = factor.name.clone();
-        let names = Arc::new(factor_name.split('.').map(String::from).collect());
+impl Display for SimpleTopicSchemaFactor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "SimpleTopicSchemaFactor[name={}, factor_name={}, factor_id={}]",
+            self.name, self.factor.name, self.factor.factor_id
+        )
+    }
+}
 
+pub struct VecOrMapTopicSchemaFactor {
+    factor: Arc<ArcFactor>,
+    name: String,
+    children: Vec<TopicSchemaFactor>,
+}
+
+impl Display for VecOrMapTopicSchemaFactor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "VecOrMapTopicSchemaFactor[name={}, factor_name={}, factor_id={}, factors=[\n{}\n]]",
+            self.name,
+            self.factor.name,
+            self.factor.factor_id,
+            factors_to_str(&self.children)
+        )
+    }
+}
+
+pub struct FakeTopicSchemaFactor {
+    name: String,
+    children: Vec<TopicSchemaFactor>,
+}
+
+impl Display for FakeTopicSchemaFactor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "FakeTopicSchemaFactor[name={}, factors=[\n{}\n]]",
+            self.name,
+            factors_to_str(&self.children)
+        )
+    }
+}
+
+pub enum TopicSchemaFactor {
+    Simple(SimpleTopicSchemaFactor),
+    VecOrMap(VecOrMapTopicSchemaFactor),
+    Fake(FakeTopicSchemaFactor),
+}
+
+impl Display for TopicSchemaFactor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TopicSchemaFactor::Simple(v) => write!(f, "{}", v),
+            TopicSchemaFactor::VecOrMap(v) => write!(f, "{}", v),
+            TopicSchemaFactor::Fake(v) => write!(f, "{}", v),
+        }
+    }
+}
+
+struct TopicSchemaFactorsContext {
+    topic: Arc<ArcTopic>,
+    factors: HashMap<String, Arc<ArcFactor>>,
+    sorted_factor_names: Vec<String>,
+
+    top_level_names: BTreeSet<String>,
+    schema_factors: HashMap<String, TopicSchemaFactor>,
+    /// hierarchy of factors
+    /// for example:
+    /// - a -> [a.b, a.c],
+    /// - a.b -> [a.b.d],
+    /// - a.c -> [a.c.e, a.c.f]
+    hierarchy: HashMap<String, BTreeSet<String>>,
+}
+
+impl TopicSchemaFactorsContext {
+    fn new(topic: &Arc<ArcTopic>) -> Self {
+        // create a factor map, easy to locate factor by full qualified factor name
+        let (factor_map, mut sorted_factor_names) = topic.factors.iter().fold(
+            (HashMap::new(), vec![]),
+            |mut acc: (HashMap<_, _>, Vec<_>), factor| {
+                acc.0.insert(factor.name.deref().clone(), factor.clone());
+                acc.1.push(factor.name.deref().clone());
+                acc
+            },
+        );
+        sorted_factor_names.sort_by(|n1, n2| n1.cmp(n2));
         Self {
-            factor,
-            factor_name,
-            names,
+            topic: topic.clone(),
+            factors: factor_map,
+            sorted_factor_names,
+
+            top_level_names: BTreeSet::new(),
+            schema_factors: HashMap::new(),
+            hierarchy: HashMap::new(),
+        }
+    }
+}
+
+struct TopicSchemaFactorsBuilder;
+
+impl TopicSchemaFactorsBuilder {
+    fn create_schema_factor(factor: Option<Arc<ArcFactor>>, name: &String) -> TopicSchemaFactor {
+        match factor {
+            Some(factor) => match factor.r#type.deref() {
+                FactorType::Object | FactorType::Array => {
+                    TopicSchemaFactor::VecOrMap(VecOrMapTopicSchemaFactor {
+                        factor: factor.clone(),
+                        name: name.clone(),
+                        children: vec![],
+                    })
+                }
+                _ => TopicSchemaFactor::Simple(SimpleTopicSchemaFactor {
+                    factor: factor.clone(),
+                    name: name.clone(),
+                }),
+            },
+            _ => TopicSchemaFactor::Fake(FakeTopicSchemaFactor {
+                name: name.clone(),
+                children: vec![],
+            }),
         }
     }
 
-    pub fn replace_names(&self, names: Arc<Vec<String>>) -> Self {
-        Self {
-            factor: self.factor.clone(),
-            factor_name: self.factor_name.clone(),
-            names,
+    fn find_factor_by_name(
+        factor_name: &String,
+        context: &mut TopicSchemaFactorsContext,
+    ) -> StdR<Arc<ArcFactor>> {
+        if let Some(found) = context.factors.get(factor_name) {
+            Ok(found.clone())
+        } else {
+            RuntimeModelKernelErrorCode::TopicSchemaGenerate
+                .msg(format!("Factor not found by name[{}].", factor_name))
         }
     }
+
+    fn collect_factor(
+        factor: Option<Arc<ArcFactor>>,
+        names: &Vec<String>,
+        end_exclusive: usize,
+        context: &mut TopicSchemaFactorsContext,
+    ) -> VoidR {
+        match end_exclusive {
+            // only occurs when no names split by factor name, which never happens
+            0 => RuntimeModelKernelErrorCode::TopicSchemaGenerate.msg(format!(
+                "Incorrect factor name[topic_id={}, factor_id={}, factor_name={}].",
+                context.topic.topic_id,
+                factor
+                    .as_ref()
+                    .map(|f| f.factor_id.deref().as_str())
+                    .unwrap_or(""),
+                factor
+                    .as_ref()
+                    .map(|f| f.name.deref().as_str())
+                    .unwrap_or(""),
+            )),
+            1 => {
+                // the first part of names (names might have only one part)
+                // no need to attach to parent, it is top level
+                let name = &names[0];
+                let schema_factor = Self::create_schema_factor(factor, name);
+                // collect to schema factors
+                context.schema_factors.insert(name.clone(), schema_factor);
+                // collect to top level names
+                context.top_level_names.insert(name.clone());
+                // collect to hierarchy
+                context
+                    .hierarchy
+                    .entry(name.clone())
+                    .or_insert_with(BTreeSet::new);
+                Ok(())
+            }
+            _ => {
+                // not the first part of name
+                // handle parent first
+                let parent_factor_name = names[0..end_exclusive - 1].join(".");
+                let parent_factor = Self::find_factor_by_name(&parent_factor_name, context).ok();
+                Self::collect_factor(parent_factor, names, end_exclusive - 1, context)?;
+                // and itself
+                let name = &names[end_exclusive - 1];
+                let schema_factor = Self::create_schema_factor(factor, name);
+                // collect to schema factors
+                let factor_name = names[0..end_exclusive].join(".");
+                context
+                    .schema_factors
+                    .insert(factor_name.clone(), schema_factor);
+                if let Some(children_of_parent) = context.hierarchy.get_mut(&parent_factor_name) {
+                    // collect to hierarchy, as child of parent
+                    children_of_parent.insert(factor_name.clone());
+                    // collect to hierarchy
+                    context
+                        .hierarchy
+                        .entry(factor_name)
+                        .or_insert_with(BTreeSet::new);
+                    Ok(())
+                } else {
+                    RuntimeModelKernelErrorCode::TopicSchemaGenerate.msg(format!(
+                        "Parent factor[topic_id={}, factor_name={}] not found.",
+                        context.topic.topic_id, parent_factor_name
+                    ))
+                }
+            }
+        }
+    }
+
+    fn collect_by_factor_name(
+        factor_name: &String,
+        context: &mut TopicSchemaFactorsContext,
+    ) -> VoidR {
+        let factor = Self::find_factor_by_name(factor_name, context)?;
+        let names: Vec<String> = factor_name.split(".").map(String::from).collect();
+        Self::collect_factor(Some(factor), &names, names.len(), context)
+    }
+
+    fn collect_factors(context: &mut TopicSchemaFactorsContext) -> VoidR {
+        for factor_name in context.sorted_factor_names.clone() {
+            Self::collect_by_factor_name(&factor_name, context)?;
+        }
+
+        Ok(())
+    }
+
+    fn build_factor_hierarchy(
+        factor: &mut TopicSchemaFactor,
+        factor_name: &String,
+        hierarchy: &HashMap<String, BTreeSet<String>>,
+        schema_factors: &mut HashMap<String, TopicSchemaFactor>,
+    ) -> VoidR {
+        if let Some(child_names) = hierarchy.get(factor_name) {
+            for child_name in child_names {
+                if let Some(mut child_factor) = schema_factors.remove(child_name) {
+                    match factor {
+                        TopicSchemaFactor::Simple(_) => {
+                            return RuntimeModelKernelErrorCode::TopicSchemaGenerate
+                                .msg(format!("Parent factor[{}] cannot be simple.", factor_name));
+                        }
+                        TopicSchemaFactor::VecOrMap(vec_or_map) => {
+                            Self::build_factor_hierarchy(
+                                &mut child_factor,
+                                &child_name,
+                                hierarchy,
+                                schema_factors,
+                            )?;
+                            vec_or_map.children.push(child_factor);
+                        }
+                        TopicSchemaFactor::Fake(fake) => {
+                            Self::build_factor_hierarchy(
+                                &mut child_factor,
+                                &child_name,
+                                hierarchy,
+                                schema_factors,
+                            )?;
+                            fake.children.push(child_factor);
+                        }
+                    }
+                } else {
+                    return RuntimeModelKernelErrorCode::TopicSchemaGenerate
+                        .msg(format!("Factor not found by name[{}].", child_name));
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn create_factors(context: &mut TopicSchemaFactorsContext) -> StdR<TopicSchemaFactors> {
+        let mut factors = vec![];
+        for top_level_name in context.top_level_names.iter() {
+            if let Some(mut factor) = context.schema_factors.remove(top_level_name) {
+                Self::build_factor_hierarchy(
+                    &mut factor,
+                    &top_level_name,
+                    &context.hierarchy,
+                    &mut context.schema_factors,
+                )?;
+                factors.push(factor);
+            } else {
+                return RuntimeModelKernelErrorCode::TopicSchemaGenerate
+                    .msg(format!("Factor not found by name[{}].", top_level_name));
+            }
+        }
+
+        Ok(TopicSchemaFactors { factors })
+    }
 }
 
-pub trait TopicSchemaFactor {
-    fn get_inner(&self) -> &TopicSchemaFactorInner;
+pub struct TopicSchemaFactors {
+    pub factors: Vec<TopicSchemaFactor>,
+}
 
-    fn factor(&self) -> &Arc<ArcFactor> {
-        &self.get_inner().factor
-    }
-
-    fn factor_name(&self) -> &Arc<String> {
-        &self.get_inner().factor_name
-    }
-
-    fn names(&self) -> &Arc<Vec<String>> {
-        &self.get_inner().names
+impl Display for TopicSchemaFactors {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "TopicSchemaFactors[\n{}\n]",
+            factors_to_str(&self.factors)
+        )
     }
 }
 
-pub trait TopicSchemaGroupFactor<F>: TopicSchemaFactor {
-    fn replace_names(&self, names: Arc<Vec<String>>) -> F;
+impl TopicSchemaFactors {
+    pub fn of_topic(topic: &Arc<ArcTopic>) -> StdR<Self> {
+        let mut context = TopicSchemaFactorsContext::new(topic);
+        TopicSchemaFactorsBuilder::collect_factors(&mut context)?;
+        TopicSchemaFactorsBuilder::create_factors(&mut context)
+    }
+}
 
-    fn remove_first_name(&self) -> F {
-        let inner = self.get_inner();
-        let mut names = inner.names.as_ref().clone();
-        names.remove(0);
-        self.replace_names(Arc::new(names))
+#[cfg(test)]
+mod tests {
+    use crate::{ArcTopic, TopicSchemaFactors};
+    use watchmen_model::{Factor, FactorType, Topic, TopicKind, TopicType};
+
+    #[test]
+    fn test_split() {
+        let parts: Vec<String> = "".split('.').map(String::from).collect();
+        assert_eq!(parts.len(), 1);
+
+        assert_eq!(vec!["abc"][0..1].join("."), "abc");
+    }
+
+    fn create_topic() -> Topic {
+        Topic::new()
+            .topic_id("1".to_string())
+            .name("test-topic".to_string())
+            .r#type(TopicType::Distinct)
+            .kind(TopicKind::Business)
+            .factors(vec![
+                Factor::new()
+                    .factor_id("101".to_string())
+                    .name("name".to_string())
+                    .r#type(FactorType::Text),
+                Factor::new()
+                    .factor_id("102".to_string())
+                    .name("age".to_string())
+                    .r#type(FactorType::Number),
+                Factor::new()
+                    .factor_id("103".to_string())
+                    .name("addresses".to_string())
+                    .r#type(FactorType::Array),
+                Factor::new()
+                    .factor_id("104".to_string())
+                    .name("addresses.city".to_string())
+                    .r#type(FactorType::Text),
+                Factor::new()
+                    .factor_id("105".to_string())
+                    .name("work".to_string())
+                    .r#type(FactorType::Object),
+                Factor::new()
+                    .factor_id("106".to_string())
+                    .name("work.addresses".to_string())
+                    .r#type(FactorType::Array),
+                Factor::new()
+                    .factor_id("107".to_string())
+                    .name("work.addresses.city".to_string())
+                    .r#type(FactorType::Text),
+            ])
+            .tenant_id("1".to_string())
+            .build()
+    }
+
+    #[test]
+    fn test_topic() {
+        let topic = ArcTopic::new(create_topic()).expect("Failed to create topic.");
+        let schema_factors =
+            TopicSchemaFactors::of_topic(&topic).expect("Failed to create schema factors.");
+        println!("{}", schema_factors)
     }
 }

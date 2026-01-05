@@ -46,6 +46,8 @@ pub enum RuntimeModelKernelErrorCode {
     ParameterRightMissed,
     ComputedParametersMissed,
     CaseThenRouteParameterMissed,
+
+    TopicSchemaGenerate,
 }
 
 impl ErrorCode for RuntimeModelKernelErrorCode {
@@ -94,6 +96,8 @@ impl ErrorCode for RuntimeModelKernelErrorCode {
             RuntimeModelKernelErrorCode::ParameterRightMissed => "RTMK-00505",
             RuntimeModelKernelErrorCode::ComputedParametersMissed => "RTMK-00506",
             RuntimeModelKernelErrorCode::CaseThenRouteParameterMissed => "RTMK-00507",
+
+            RuntimeModelKernelErrorCode::TopicSchemaGenerate => "RTMK-00600",
         }
     }
 }

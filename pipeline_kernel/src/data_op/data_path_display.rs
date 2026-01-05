@@ -3,17 +3,7 @@ use crate::{
     PathStr, PlainDataPath,
 };
 use std::fmt::{Display, Formatter, Result};
-
-struct VecLines;
-
-impl VecLines {
-    fn indent(s: String) -> String {
-        s.lines()
-            .map(|l| format!("\t{}", l))
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
-}
+use watchmen_base::DisplayLines;
 
 impl Display for PathStr {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -66,7 +56,7 @@ impl Display for FuncDataPath {
                         FuncDataPathParam::Func(func) => format!("{}", func),
                         FuncDataPathParam::Path(path) => format!("{}", path),
                     })
-                    .map(VecLines::indent)
+                    .map(DisplayLines::indent)
                     .collect::<Vec<String>>()
                     .join(",\n");
                 params_str = format!("[\n{}\n]", params_str);
@@ -98,14 +88,13 @@ impl Display for DataPath {
                 .segments
                 .iter()
                 .map(|s| format!("{}", s))
-                .map(VecLines::indent)
+                .map(DisplayLines::indent)
                 .collect::<Vec<String>>()
                 .join(",\n");
             write!(
                 f,
                 "DataPath[{}, segments=[\n{}\n]]",
-                self.path,
-                segments_str
+                self.path, segments_str
             )
         }
     }
