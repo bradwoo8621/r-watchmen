@@ -25,7 +25,7 @@ pub struct PipelineTrigger {
 
 impl PipelineTrigger {
     fn prepare_trigger_data(&self, data: &mut TopicData) -> VoidR {
-        self.topic_schema.prepare_data(data)
+        self.topic_schema.prepare(data)
     }
 
     fn save_trigger_data(&self, mut data: TopicData) -> StdR<Arc<TopicTrigger>> {
@@ -123,7 +123,7 @@ impl PipelineTrigger {
             Ok((topic_data_id, Some(context)))
         } else {
             println!(
-                "No pipeline needs to be triggered by topic[id={}, name={}].",
+                "No pipeline needs to be triggered by topic[topic_id={}, topic_name={}].",
                 self.topic_schema.topic_id(),
                 self.topic_schema.name()
             );

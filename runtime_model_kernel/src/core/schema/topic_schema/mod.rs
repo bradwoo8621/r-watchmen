@@ -1,11 +1,23 @@
 mod aid_hierarchy;
 mod arc_factor;
 mod arc_topic;
+mod fake_topic_schema_factor;
+mod simple_topic_schema_factor;
+mod topic_data_value_prepper;
 mod topic_schema;
 mod topic_schema_factor;
+mod topic_schema_factor_utils;
+mod topic_schema_factors;
+mod vec_or_map_topic_schema_factor;
 
 pub use aid_hierarchy::*;
 pub use arc_factor::*;
 pub use arc_topic::*;
+pub use fake_topic_schema_factor::*;
+pub use simple_topic_schema_factor::*;
+pub use topic_data_value_prepper::*;
 pub use topic_schema::*;
 pub use topic_schema_factor::*;
+pub use topic_schema_factor_utils::*;
+pub use topic_schema_factors::*;
+pub use vec_or_map_topic_schema_factor::*;

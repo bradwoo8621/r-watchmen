@@ -1,4 +1,4 @@
-use crate::{ArcFactor, ArcTopic, HierarchyAid, TopicSchemaFactors};
+use crate::{ArcFactor, ArcTopic, TopicSchemaFactorValuePrepper, TopicSchemaFactors};
 use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_base::{StdR, VoidR};
@@ -58,86 +58,58 @@ impl TopicSchema {
         self.name().as_ref() != "raw_pipeline_monitor_log"
     }
 
-    /// given data might be changed
-    fn initialize_default_values(&self, data: &mut TopicData) {
-        if self.should_init_default_values() {
-            // self.default_value_factor_groups.as_deref().map(|groups| {
-            //     for group in groups.iter() {
-            //         group.init_default_value(data);
-            //     }
-            // });
-        }
-    }
-
+    /// returns true when topic kind is not system
     fn should_encrypt(&self) -> bool {
         !self.topic().kind.is_system()
     }
 
     /// given data might be changed
-    fn encrypt(&self, data: &mut TopicData) {
-        if self.should_encrypt() {
-            // self.encrypt_factor_groups.as_deref().map(|groups| {
-            //     for group in groups.iter() {
-            //         group.encrypt(data);
-            //     }
-            // });
+    pub fn encrypt(&self, data: &mut TopicData) -> VoidR {
+        if self.should_encrypt()
+            && let Some(factors) = &self.factors
+        {
+            TopicSchemaFactorValuePrepper::with(false, true, false, false, false)
+                .prepare(factors, data)
+        } else {
+            Ok(())
         }
     }
 
     /// given data might be changed
-    pub fn decrypt(&self, data: &mut TopicData) {
-        if self.should_encrypt() {
-            // self.encrypt_factor_groups.as_deref().map(|groups| {
-            //     for group in groups.iter() {
-            //         group.decrypt(data);
-            //     }
-            // });
+    pub fn decrypt(&self, data: &mut TopicData) -> VoidR {
+        if self.should_encrypt()
+            && let Some(factors) = &self.factors
+        {
+            TopicSchemaFactorValuePrepper::with(false, false, true, false, false)
+                .prepare(factors, data)
+        } else {
+            Ok(())
         }
     }
 
-    /// given data might be changed
-    fn try_cast_to_datetime(&self, data: &mut TopicData) {
-        // self.date_or_time_factors.as_deref().map(|groups| {
-        //     for group in groups.iter() {
-        //         group.try_cast_to_datetime(data);
-        //     }
-        // });
+    /// returns true when topic is not raw
+    fn should_flatten(&self) -> bool {
+        !self.topic.is_raw_topic()
     }
 
-    /// given data might be changed
-    fn flatten(&self, data: &mut TopicData) {
-        if self.topic.is_raw_topic() {
-            return;
-        }
-
-        // self.flatten_factors.as_deref().map(|groups| {
-        //     for group in groups.iter() {
-        //         group.flatten(data);
-        //     }
-        // });
-    }
-
+    /// returns true when topic is not raw, and not [raw_pipeline_monitor_log].
     fn should_aid_hierarchy(&self) -> bool {
         let topic = self.topic();
         !topic.is_raw_topic() && topic.name.as_ref() != "raw_pipeline_monitor_log"
     }
 
     /// given data might be changed
-    fn aid_hierarchy(&self, data: &mut TopicData) -> VoidR {
-        if self.should_aid_hierarchy() {
-            HierarchyAid::new().aid(data)?;
+    pub fn prepare(&self, data: &mut TopicData) -> VoidR {
+        if let Some(factors) = &self.factors {
+            TopicSchemaFactorValuePrepper::with(
+                self.should_init_default_values(),
+                self.should_encrypt(),
+                false,
+                self.should_aid_hierarchy(),
+                self.should_flatten(),
+            )
+            .prepare(factors, data)?;
         }
-        Ok(())
-    }
-
-    /// given data might be changed
-    pub fn prepare_data(&self, data: &mut TopicData) -> VoidR {
-        self.initialize_default_values(data);
-        self.try_cast_to_datetime(data);
-        self.encrypt(data);
-        self.aid_hierarchy(data)?;
-        // flatten must be the last step
-        self.flatten(data);
         Ok(())
     }
 }

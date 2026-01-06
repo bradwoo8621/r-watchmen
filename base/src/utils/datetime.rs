@@ -130,17 +130,17 @@ impl DateTimeUtilsBaseForNumber {
 }
 
 impl DateTimeUtils for i64 {
-    /// return local date, not utc
+    /// return utc date
     fn to_date(&self) -> StdR<NaiveDate> {
         DateTimeUtilsBaseForNumber::parse_i64(
             self,
-            |d| d.date_naive(),
+            |d| d.naive_utc().date(),
             StdErrCode::DateParse,
             "date",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_date_loose(&self) -> StdR<NaiveDate> {
         self.to_date()
     }
@@ -149,31 +149,31 @@ impl DateTimeUtils for i64 {
         DateTimeUtilsBaseForNumber::parse_i64(self, |d| d.time(), StdErrCode::TimeParse, "time")
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_i64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_full_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_i64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::FullDateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime_loose(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_i64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )
@@ -182,17 +182,17 @@ impl DateTimeUtils for i64 {
 
 /// as i64, and transform
 impl DateTimeUtils for u64 {
-    /// return local date, not utc
+    /// return utc date
     fn to_date(&self) -> StdR<NaiveDate> {
         DateTimeUtilsBaseForNumber::parse_u64(
             self,
-            |d| d.date_naive(),
+            |d| d.naive_utc().date(),
             StdErrCode::DateParse,
             "date",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_date_loose(&self) -> StdR<NaiveDate> {
         self.to_date()
     }
@@ -201,31 +201,31 @@ impl DateTimeUtils for u64 {
         DateTimeUtilsBaseForNumber::parse_u64(self, |d| d.time(), StdErrCode::TimeParse, "time")
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_u64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_full_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_u64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::FullDateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime_loose(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_u64(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )
@@ -234,17 +234,17 @@ impl DateTimeUtils for u64 {
 
 /// as i64, and transform
 impl DateTimeUtils for BigDecimal {
-    /// return local date, not utc
+    /// return utc date
     fn to_date(&self) -> StdR<NaiveDate> {
         DateTimeUtilsBaseForNumber::parse_decimal(
             self,
-            |d| d.date_naive(),
+            |d| d.naive_utc().date(),
             StdErrCode::DateParse,
             "date",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_date_loose(&self) -> StdR<NaiveDate> {
         self.to_date()
     }
@@ -253,31 +253,31 @@ impl DateTimeUtils for BigDecimal {
         DateTimeUtilsBaseForNumber::parse_decimal(self, |d| d.time(), StdErrCode::TimeParse, "time")
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_decimal(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_full_datetime(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_decimal(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::FullDateTimeParse,
             "datetime",
         )
     }
 
-    /// return local date, not utc
+    /// return utc date
     fn to_datetime_loose(&self) -> StdR<NaiveDateTime> {
         DateTimeUtilsBaseForNumber::parse_decimal(
             self,
-            |d| d.naive_local(),
+            |d| d.naive_utc(),
             StdErrCode::DateTimeParse,
             "datetime",
         )

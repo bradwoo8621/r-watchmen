@@ -48,6 +48,8 @@ pub enum RuntimeModelKernelErrorCode {
     CaseThenRouteParameterMissed,
 
     TopicSchemaGenerate,
+
+    TopicDataComplete,
 }
 
 impl ErrorCode for RuntimeModelKernelErrorCode {
@@ -98,6 +100,8 @@ impl ErrorCode for RuntimeModelKernelErrorCode {
             Self::CaseThenRouteParameterMissed => "RTMK-00507",
 
             Self::TopicSchemaGenerate => "RTMK-00600",
+
+            Self::TopicDataComplete => "RTMK-00700",
         }
     }
 }
