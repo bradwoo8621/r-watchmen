@@ -1,33 +1,46 @@
 use crate::{StdErr, StdErrDetail, StdR};
+use std::panic::Location;
 
 pub trait ErrorCode {
     fn code(&self) -> &'static str;
 
+    #[track_caller]
     fn msg<R, M>(&self, msg: M) -> StdR<R>
     where
         M: Into<String>,
     {
-        StdErr::of(self.code(), msg.into())
+        StdErr::of_with_location(self.code(), msg.into(), Location::caller())
     }
 
+    #[track_caller]
     fn err<R>(&self) -> StdR<R> {
-        StdErr::code_only(self.code())
+        StdErr::code_only_with_location(self.code(), Location::caller())
     }
 
-    fn e_msg<M>(&self, msg: M) -> StdErr
+    #[track_caller]
+    fn err_with_msg<M>(&self, msg: M) -> StdErr
     where
         M: Into<String>,
     {
+        let caller = Location::caller();
         StdErr {
             code: self.code(),
             details: Some(StdErrDetail::Str(msg.into())),
+            filename: caller.file().to_string(),
+            line: caller.line(),
+            column: caller.column(),
         }
     }
 
+    #[track_caller]
     fn e(&self) -> StdErr {
+        let caller = Location::caller();
         StdErr {
             code: self.code(),
             details: None,
+            filename: caller.file().to_string(),
+            line: caller.line(),
+            column: caller.column(),
         }
     }
 }
@@ -64,6 +77,19 @@ impl ErrorCode for StdErrCode {
 
             Self::Multiple => "STDE-99998",
             Self::Unknown => "STDE-99999",
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{ErrorCode, StdErrCode};
+
+    #[test]
+    fn test() {
+        let r: Result<String, _> = StdErrCode::Unknown.msg("Unknown error.");
+        if r.is_err() {
+            println!("{}", r.err().unwrap())
         }
     }
 }
