@@ -2,7 +2,15 @@ use crate::{Encryptor, EncryptorUtils, RuntimeModelKernelErrorCode, StrEncryptor
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 
-/// use [*] to mask trailing chars
+/// use [*] to mask center chars
+/// replace chars count (n) should follow given encrypt method.
+/// - if given string chars count is less than n, then replace all to [*],
+/// - if ascii digits chars count is less than n, then replace center n chars to [*],
+///   center chars means:
+///   - for chars count is even, they are [len / 2 - 2] (3rd), [len / 2 - 1] (1st), [len / 2] (2nd),
+///   - for chars count is odd, they are [(len - 1) / 2 - 1] (3rd), [(len - 1) / 2] (1st), [(len - 1) / 2 + 1] (2nd),
+/// - replace the center ascii digits chars to [*],
+///   center chars counting is same as above, but only ascii digits chars are counted in.
 pub struct CenterCharsMask {
     method: FactorEncryptMethod,
 }

@@ -3,6 +3,9 @@ use chrono::Datelike;
 use watchmen_base::{ErrorCode, LooseDateFormatter, StdR};
 use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 
+/// - mask month to 1,
+/// - mask date of month to 1.
+/// - for string value, try to parse them to date/datetime, and mask, and format to string.
 pub struct DateMask {
     method: FactorEncryptMethod,
 }

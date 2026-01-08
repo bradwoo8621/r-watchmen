@@ -2,7 +2,11 @@ use crate::{Encryptor, EncryptorUtils, RuntimeModelKernelErrorCode, StrEncryptor
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 
-/// use [*] to mask trailing chars
+/// use [*] to mask trailing chars.
+/// replace chars count (n) should follow given encrypt method.
+/// - if given string chars count is less than n, then replace all to [*],
+/// - if ascii digits chars count is less than n, then replace trailing n chars to [*],
+/// - replace the trailing ascii digits chars to [*].
 pub struct LastCharsMask {
     method: FactorEncryptMethod,
 }

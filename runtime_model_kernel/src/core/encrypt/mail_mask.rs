@@ -2,7 +2,7 @@ use crate::{Encryptor, RuntimeModelKernelErrorCode};
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 
-/// use [*] to mask trailing chars
+/// use [*****] to mask chars before [@].
 pub struct MailMask {
     method: FactorEncryptMethod,
 }
