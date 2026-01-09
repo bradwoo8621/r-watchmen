@@ -873,6 +873,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "watchmen_elf"
+version = "0.1.0"
+dependencies = [
+ "watchmen_base",
+]
+
+[[package]]
 name = "watchmen_model"
 version = "0.1.0"
 dependencies = [

@@ -1,3 +1,8 @@
 [workspace]
 resolver = "3"
-members = ["base", "auth", "runtime_model_kernel", "model", "model_marco", "pipeline_kernel"]
+members = [
+    "base", "model", "model_marco",
+    "auth",
+    "runtime_model_kernel", "pipeline_kernel",
+    "elf"
+]

@@ -1,0 +1,7 @@
+[package]
+name = "watchmen_elf"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+watchmen_base = { path = "../base" }
