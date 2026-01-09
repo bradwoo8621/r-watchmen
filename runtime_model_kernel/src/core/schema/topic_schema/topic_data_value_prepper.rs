@@ -1,9 +1,10 @@
 use crate::{
-	ArcFactor, FakeTopicSchemaFactor, HierarchyAid, RuntimeModelKernelErrorCode,
-	SimpleTopicSchemaFactor, TopicSchemaFactor, TopicSchemaFactors, VecOrMapTopicSchemaFactor,
+	ArcFactor, ArcTopic, FakeTopicSchemaFactor, HierarchyAid, RuntimeModelKernelErrorCode,
+	SimpleTopicSchemaFactor, TopicSchemaFactor, TopicSchemaFactors, TriedTDV, TriedTopicDataValue,
+	VecOrMapTopicSchemaFactor,
 };
 use bigdecimal::BigDecimal;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::NaiveTime;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::ops::Deref;
@@ -12,6 +13,7 @@ use watchmen_base::{DateTimeUtils, ErrorCode, StdR, VoidR};
 use watchmen_model::{FactorType, TopicData, TopicDataValue};
 
 pub struct TopicSchemaFactorValuePrepper {
+    pub topic: Arc<ArcTopic>,
     pub use_default_value: bool,
     pub encrypt_value: bool,
     pub decrypt_value: bool,
@@ -21,6 +23,7 @@ pub struct TopicSchemaFactorValuePrepper {
 
 impl TopicSchemaFactorValuePrepper {
     pub fn with(
+        topic: Arc<ArcTopic>,
         use_default_value: bool,
         encrypt_value: bool,
         decrypt_value: bool,
@@ -28,6 +31,7 @@ impl TopicSchemaFactorValuePrepper {
         flatten: bool,
     ) -> Self {
         Self {
+            topic,
             use_default_value,
             encrypt_value,
             decrypt_value,
@@ -55,52 +59,60 @@ impl TopicSchemaFactorValuePrepper {
 
 /// for default value, date/time cast, encrypt/decrypt
 impl TopicSchemaFactorValuePrepper {
+    /// - Ok(Some()) -> encrypted,
+    /// - Ok(None) -> encryption is not needed,
     fn do_encrypt(
         &self,
         factor: &SimpleTopicSchemaFactor,
-        value: TopicDataValue,
-    ) -> StdR<TopicDataValue> {
+        value: &TopicDataValue,
+    ) -> TriedTopicDataValue {
         if self.encrypt_value {
-            factor.encrypt(value)
+            factor.encrypt(value, &self.topic.tenant_id)
         } else {
-            Ok(value)
+            Ok(None)
         }
     }
 
+    /// - Ok(Some()) -> encrypted or decrypted,
+    /// - Ok(None) -> encryption and/or decryption is not needed,
     fn do_encrypt_or_decrypt(
         &self,
         factor: &SimpleTopicSchemaFactor,
-        value: TopicDataValue,
-    ) -> StdR<TopicDataValue> {
+        value: &TopicDataValue,
+    ) -> TriedTopicDataValue {
         if self.encrypt_value {
-            factor.encrypt(value)
+            factor.encrypt(value, &self.topic.tenant_id)
         } else if self.decrypt_value {
-            factor.decrypt(value)
+            factor.decrypt(value, &self.topic.tenant_id)
         } else {
-            Ok(value)
+            Ok(None)
         }
     }
 
-    fn prepare_none_value(&self, factor: &SimpleTopicSchemaFactor) -> StdR<Option<TopicDataValue>> {
+    fn prepare_none_value(&self, factor: &SimpleTopicSchemaFactor) -> TriedTopicDataValue {
         if !self.use_default_value || !factor.has_default_value() {
             // no need to init with default value, or no default value
             return Ok(None);
         }
         let default_value = factor.get_default_value();
-        Ok(Some(self.do_encrypt_or_decrypt(factor, default_value)?))
+        self.do_encrypt_or_decrypt(factor, &default_value)
+            .treated_or_default(default_value)
     }
 
     fn prepare_str_value(
         &self,
         factor: &SimpleTopicSchemaFactor,
-        value: &String,
-    ) -> StdR<Option<TopicDataValue>> {
+        value: &TopicDataValue, // must be str
+    ) -> TriedTopicDataValue {
         if factor.is_date_or_time {
+            let TopicDataValue::Str(str) = value else {
+                return Ok(None);
+            };
             let value = match factor.factor.r#type.deref() {
-				FactorType::Date | FactorType::DateOfBirth => TopicDataValue::Date(value.to_date_loose()?),
-				FactorType::Datetime => TopicDataValue::DateTime(value.to_datetime_loose()?),
-				FactorType::FullDatetime => TopicDataValue::DateTime(value.to_datetime_loose()?),
-				FactorType::Time => TopicDataValue::Time(value.to_time()?),
+				FactorType::Date | FactorType::DateOfBirth => TopicDataValue::Date(str.to_date_loose()?),
+				FactorType::Datetime => TopicDataValue::DateTime(str.to_datetime_loose()?),
+				FactorType::FullDatetime => TopicDataValue::DateTime(str.to_datetime_loose()?),
+				FactorType::Time => TopicDataValue::Time(str.to_time()?),
 				_ => return RuntimeModelKernelErrorCode::TopicDataComplete.msg(
 					format!(
 						"Value[{}] of factor[factor_id={}, factor_name={}] cannot be cast to date/time because factor type is not.",
@@ -109,10 +121,9 @@ impl TopicSchemaFactorValuePrepper {
 				)
 			};
             // value just convert to date/time, no need to decrypt
-            Ok(Some(self.do_encrypt(factor, value)?))
+            self.do_encrypt(factor, &value).treated_or_default(value)
         } else {
-            let value = TopicDataValue::Str(value.clone());
-            Ok(Some(self.do_encrypt_or_decrypt(factor, value)?))
+            self.do_encrypt_or_decrypt(factor, &value)
         }
     }
 
@@ -184,23 +195,17 @@ impl TopicSchemaFactorValuePrepper {
     fn prepare_date_value(
         &self,
         factor: &SimpleTopicSchemaFactor,
-        value: &NaiveDate,
+        value: &TopicDataValue,
     ) -> StdR<Option<TopicDataValue>> {
-        Ok(Some(self.do_encrypt_or_decrypt(
-            factor,
-            TopicDataValue::Date(value.clone()),
-        )?))
+        self.do_encrypt_or_decrypt(factor, value)
     }
 
     fn prepare_datetime_value(
         &self,
         factor: &SimpleTopicSchemaFactor,
-        value: &NaiveDateTime,
+        value: &TopicDataValue,
     ) -> StdR<Option<TopicDataValue>> {
-        Ok(Some(self.do_encrypt_or_decrypt(
-            factor,
-            TopicDataValue::DateTime(value.clone()),
-        )?))
+        self.do_encrypt_or_decrypt(factor, value)
     }
 
     fn prepare_time_value(&self, factor: &SimpleTopicSchemaFactor, value: &NaiveTime) -> VoidR {
@@ -218,27 +223,34 @@ impl TopicSchemaFactorValuePrepper {
     ) -> VoidR {
         let value = data.get(&factor.name);
         match value {
-            Some(TopicDataValue::Str(s)) => {
-                if let Some(value) = self.prepare_str_value(factor, s)? {
-                    data.insert(factor.name.clone(), value);
+            Some(value) => match value {
+                TopicDataValue::Str(_) => {
+                    if let Some(value) = self.prepare_str_value(factor, value)? {
+                        data.insert(factor.name.clone(), value);
+                    }
                 }
-            }
-            Some(TopicDataValue::Num(n)) => self.prepare_num_value(factor, n)?,
-            Some(TopicDataValue::Bool(b)) => self.prepare_bool_value(factor, b)?,
-            Some(TopicDataValue::Map(map)) => self.prepare_map_value(factor, map)?,
-            Some(TopicDataValue::Vec(vec)) => self.prepare_vec_value(factor, vec)?,
-            Some(TopicDataValue::Date(d)) => {
-                if let Some(value) = self.prepare_date_value(factor, d)? {
-                    data.insert(factor.name.clone(), value);
+                TopicDataValue::Num(n) => self.prepare_num_value(factor, n)?,
+                TopicDataValue::Bool(b) => self.prepare_bool_value(factor, b)?,
+                TopicDataValue::Map(map) => self.prepare_map_value(factor, map)?,
+                TopicDataValue::Vec(vec) => self.prepare_vec_value(factor, vec)?,
+                TopicDataValue::Date(_) => {
+                    if let Some(value) = self.prepare_date_value(factor, value)? {
+                        data.insert(factor.name.clone(), value);
+                    }
                 }
-            }
-            Some(TopicDataValue::DateTime(dt)) => {
-                if let Some(value) = self.prepare_datetime_value(factor, dt)? {
-                    data.insert(factor.name.clone(), value);
+                TopicDataValue::DateTime(_) => {
+                    if let Some(value) = self.prepare_datetime_value(factor, value)? {
+                        data.insert(factor.name.clone(), value);
+                    }
                 }
-            }
-            Some(TopicDataValue::Time(t)) => self.prepare_time_value(factor, t)?,
-            Some(TopicDataValue::None) | None => {
+                TopicDataValue::Time(t) => self.prepare_time_value(factor, t)?,
+                TopicDataValue::None => {
+                    if let Some(value) = self.prepare_none_value(factor)? {
+                        data.insert(factor.name.clone(), value);
+                    }
+                }
+            },
+            None => {
                 if let Some(value) = self.prepare_none_value(factor)? {
                     data.insert(factor.name.clone(), value);
                 }

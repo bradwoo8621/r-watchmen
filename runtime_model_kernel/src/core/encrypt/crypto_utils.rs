@@ -2,9 +2,9 @@ use crate::RuntimeModelKernelErrorCode;
 use watchmen_base::{ErrorCode, StdR};
 use watchmen_model::TopicDataValue;
 
-pub struct EncryptorUtils;
+pub struct CryptoUtils;
 
-impl EncryptorUtils {
+impl CryptoUtils {
     /// map, vec -> raise error,
     /// none, empty string -> [Ok(None)],
     /// not empty string -> [Ok(Some(str))],

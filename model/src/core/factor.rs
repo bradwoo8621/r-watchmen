@@ -167,11 +167,9 @@ impl FactorType {
 
     pub fn is_date_or_time(&self) -> bool {
         match self {
-            Self::Date
-            | Self::Time
-            | Self::Datetime
-            | Self::FullDatetime
-            | Self::DateOfBirth => true,
+            Self::Date | Self::Time | Self::Datetime | Self::FullDatetime | Self::DateOfBirth => {
+                true
+            }
             _ => false,
         }
     }
@@ -223,7 +221,7 @@ pub enum FactorIndexGroup {
     UniqueIndex10,
 }
 
-#[derive(Display, Serde, Debug, StrEnum)]
+#[derive(Display, Serde, Eq, PartialEq, Debug, StrEnum)]
 #[pattern = "kebab-upper"]
 pub enum FactorEncryptMethod {
     #[display = "none"]

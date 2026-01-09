@@ -6,18 +6,15 @@ use watchmen_model::{KeyStoreParams, TenantId};
 ///  the tenant meta datasource is a new feature, which is defined on tenant
 ///
 /// Some key might be time-related, it is new feature
-pub struct KeyStoreMetaService;
+pub struct KeyStoreService;
 
-impl KeyStoreMetaService {
-    pub fn find(_key_type: &String, _tenant_id: &TenantId) -> StdR<Option<KeyStoreParams>> {
-        todo!("implement find for KeyStoreMetaService")
-    }
-
-    pub fn find_by_key(
+impl KeyStoreService {
+    // TODO get from envs when not found from datasource
+    pub fn find(
         _key_type: &String,
-        _key_key: &String,
+        _key_key: Option<String>,
         _tenant_id: &TenantId,
-    ) -> StdR<Option<KeyStoreParams>> {
-        todo!("implement find_by_key for KeyStoreMetaService")
+    ) -> StdR<KeyStoreParams> {
+        todo!("implement find for KeyStoreMetaService")
     }
 }

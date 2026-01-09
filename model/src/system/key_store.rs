@@ -3,7 +3,9 @@ use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use watchmen_base::serde::option_naive_datetime;
+use watchmen_base::DisplayLines;
 use watchmen_model_marco::{adapt_model, VariousValueTypes};
 
 /// various value types
@@ -15,6 +17,62 @@ pub enum KeyStoreValue {
     Bool(bool),
     Map(HashMap<String, KeyStoreValue>),
     Vec(Vec<KeyStoreValue>),
+}
+
+impl KeyStoreValue {
+    // noinspection DuplicatedCode
+    pub fn map_to_display(map: &HashMap<String, KeyStoreValue>) -> String {
+        if map.is_empty() {
+            return "Map[]".to_string();
+        }
+
+        let values_str = map
+            .iter()
+            .map(|(key, value)| format!("{}={}", key, value))
+            .map(DisplayLines::indent)
+            .collect::<Vec<String>>()
+            .join(",\n");
+        if values_str.is_empty() {
+            "Map[]".to_string()
+        } else {
+            format!("Map[\n{}\n]", values_str)
+        }
+    }
+
+    // noinspection DuplicatedCode
+    pub fn vec_to_display(vec: &Vec<KeyStoreValue>) -> String {
+        if vec.is_empty() {
+            return "Vec[]".to_string();
+        }
+
+        let values_str = vec
+            .iter()
+            .map(|value| format!("{}", value))
+            .map(DisplayLines::indent)
+            .collect::<Vec<String>>()
+            .join(",\n");
+        if values_str.is_empty() {
+            "Vec[]".to_string()
+        } else {
+            format!("Vec[\n{}\n]", values_str)
+        }
+    }
+}
+
+impl Display for KeyStoreValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Str(s) => write!(f, "Str[{}]", s),
+            Self::Num(n) => write!(f, "Num[{}]", n),
+            Self::Bool(b) => write!(f, "Bool[{}]", b),
+            Self::Map(m) => {
+                write!(f, "{}", Self::map_to_display(m))
+            }
+            Self::Vec(v) => {
+                write!(f, "{}", Self::vec_to_display(v))
+            }
+        }
+    }
 }
 
 pub type KeyStoreParams = HashMap<String, KeyStoreValue>;

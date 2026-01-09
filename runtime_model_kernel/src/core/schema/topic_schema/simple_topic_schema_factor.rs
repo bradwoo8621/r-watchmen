@@ -1,9 +1,9 @@
-use crate::{ArcFactor, TopicSchemaFactor};
+use crate::{ArcFactor, FactorCrypto, TopicSchemaFactor, TriedTopicDataValue};
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 use std::sync::Arc;
 use watchmen_base::{BooleanUtils, DateTimeUtils, NumericUtils, StdR};
-use watchmen_model::{FactorEncryptMethod, FactorTypeCategory, TopicDataValue};
+use watchmen_model::{FactorEncryptMethod, FactorTypeCategory, TenantId, TopicDataValue};
 
 pub struct SimpleTopicSchemaFactor {
     pub factor: Arc<ArcFactor>,
@@ -151,13 +151,47 @@ impl SimpleTopicSchemaFactor {
         }
     }
 
-    /// TODO currently returns given value
-    pub fn encrypt(&self, value: TopicDataValue) -> StdR<TopicDataValue> {
-        Ok(value)
+    fn get_crypto(&self, tenant_id: &Arc<TenantId>) -> StdR<Option<FactorCrypto>> {
+        if let Some(encrypt) = &self.factor.encrypt {
+            FactorCrypto::get(encrypt.as_ref(), tenant_id)
+        } else {
+            Ok(None)
+        }
     }
 
-    /// TODO currently returns given value
-    pub fn decrypt(&self, value: TopicDataValue) -> StdR<TopicDataValue> {
-        Ok(value)
+    /// - Ok(Some()) -> encrypted,
+    /// - Ok(None) -> encryption is not needed,
+    pub fn encrypt(
+        &self,
+        value: &TopicDataValue,
+        tenant_id: &Arc<TenantId>,
+    ) -> TriedTopicDataValue {
+        if let Some(crypto) = self.get_crypto(tenant_id)? {
+            if let Some(encrypted) = crypto.encrypt(value)? {
+                Ok(Some(encrypted))
+            } else {
+                Ok(None)
+            }
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// - Ok(Some()) -> decrypted,
+    /// - Ok(None) -> decryption is not needed,
+    pub fn decrypt(
+        &self,
+        value: &TopicDataValue,
+        tenant_id: &Arc<TenantId>,
+    ) -> TriedTopicDataValue {
+        if let Some(crypto) = self.get_crypto(tenant_id)? {
+            if let Some(decrypted) = crypto.decrypt(value)? {
+                Ok(Some(decrypted))
+            } else {
+                Ok(None)
+            }
+        } else {
+            Ok(None)
+        }
     }
 }

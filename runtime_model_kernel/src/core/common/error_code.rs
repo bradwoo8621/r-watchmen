@@ -52,6 +52,7 @@ pub enum RuntimeModelKernelErrorCode {
     TopicDataComplete,
 
     EncryptNotSupport,
+    AesCrypto,
 }
 
 impl ErrorCode for RuntimeModelKernelErrorCode {
@@ -106,6 +107,7 @@ impl ErrorCode for RuntimeModelKernelErrorCode {
             Self::TopicDataComplete => "RTMK-00700",
 
             Self::EncryptNotSupport => "RTMK-00800",
+            Self::AesCrypto => "RTMK-00801",
         }
     }
 }

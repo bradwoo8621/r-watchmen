@@ -30,6 +30,7 @@ pub enum TopicDataValue {
 }
 
 impl TopicDataValue {
+    // noinspection DuplicatedCode
     pub fn map_to_display(map: &HashMap<String, TopicDataValue>) -> String {
         if map.is_empty() {
             return "Map[]".to_string();
@@ -48,6 +49,7 @@ impl TopicDataValue {
         }
     }
 
+    // noinspection DuplicatedCode
     pub fn vec_to_display(vec: &Vec<TopicDataValue>) -> String {
         if vec.is_empty() {
             return "Vec[]".to_string();

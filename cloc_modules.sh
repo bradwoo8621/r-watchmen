@@ -5,7 +5,7 @@ cargo_toml_path="Cargo.toml"
 
 # check Cargo.toml exists or not
 if [ ! -f "$cargo_toml_path" ]; then
-    echo "文件 $cargo_toml_path 不存在。"
+    echo "Directory $cargo_toml_path not exists。"
     exit 1
 fi
 
@@ -22,3 +22,5 @@ while IFS= read -r dir; do
         echo "Directory $dir not exists."
     fi
 done <<< "$members"
+
+cloc ./**/src/**/*.*

@@ -1,38 +1,17 @@
-use crate::{Encryptor, StrEncryptor};
+use crate::{Crypto, CryptoUtils};
 use md5::compute;
 use watchmen_base::StdR;
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
-pub struct Md5Encrypt {
-    method: FactorEncryptMethod,
-}
+pub struct Md5Crypto;
 
-impl Md5Encrypt {
+impl Md5Crypto {
     pub fn new() -> Self {
-        Self {
-            method: FactorEncryptMethod::Md5,
-        }
+        Self
     }
 }
 
-impl StrEncryptor for Md5Encrypt {
-    fn do_encrypt(&self, value: String) -> String {
-        format!("{{MD5}}{:x}", &compute(value.as_bytes()))
-    }
-}
-
-impl Encryptor for Md5Encrypt {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::Md5 => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for Md5Crypto {
     fn is_encrypted(&self, value: &TopicDataValue) -> bool {
         match value {
             TopicDataValue::Str(s) => s.starts_with("{MD5}"),
@@ -41,7 +20,12 @@ impl Encryptor for Md5Encrypt {
     }
 
     fn encrypt(&self, value: &TopicDataValue) -> StdR<Option<TopicDataValue>> {
-        StrEncryptor::encrypt(self, value)
+        if let Some(str_value) = CryptoUtils::value_to_str(value)? {
+            let encrypted = format!("{{MD5}}{:x}", &compute(str_value.as_bytes()));
+            Ok(Some(TopicDataValue::Str(encrypted)))
+        } else {
+            Ok(None)
+        }
     }
 
     ///  md5 cannot be decrypted, remove prefix only
@@ -61,14 +45,14 @@ impl Encryptor for Md5Encrypt {
 
 #[cfg(test)]
 mod tests {
-    use crate::{EncryptorUtils, Md5Encrypt, StrEncryptor};
+    use crate::{Crypto, CryptoUtils, Md5Crypto};
     use watchmen_model::TopicDataValue;
 
     #[test]
     fn test() {
-        let encryptor = Md5Encrypt::new();
+        let encryptor = Md5Crypto::new();
         assert_eq!(
-            EncryptorUtils::get_str(encryptor.encrypt(&TopicDataValue::Str("abc".to_string()))),
+            CryptoUtils::get_str(encryptor.encrypt(&TopicDataValue::Str("abc".to_string()))),
             "{MD5}900150983cd24fb0d6963f7d28e17f72"
         )
     }

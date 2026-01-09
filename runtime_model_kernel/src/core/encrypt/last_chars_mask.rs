@@ -1,6 +1,6 @@
-use crate::{Encryptor, EncryptorUtils, RuntimeModelKernelErrorCode, StrEncryptor};
+use crate::{Crypto, CryptoUtils, RuntimeModelKernelErrorCode};
 use watchmen_base::{ErrorCode, StdR};
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
 /// use [*] to mask trailing chars.
 /// replace chars count (n) should follow given encrypt method.
@@ -8,7 +8,7 @@ use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 /// - if ascii digits chars count is less than n, then replace trailing n chars to [*],
 /// - replace the trailing ascii digits chars to [*].
 pub struct LastCharsMask {
-    method: FactorEncryptMethod,
+    digits: usize,
 }
 
 impl LastCharsMask {
@@ -21,28 +21,19 @@ impl LastCharsMask {
     }
 
     pub fn last_3() -> Self {
-        Self {
-            method: FactorEncryptMethod::MaskLast3,
-        }
+        Self { digits: 3 }
     }
 
     pub fn last_6() -> Self {
-        Self {
-            method: FactorEncryptMethod::MaskLast6,
-        }
+        Self { digits: 6 }
     }
 
     fn replace_decimal_count(&self) -> usize {
-        match self.method {
-            FactorEncryptMethod::MaskLast3 => 3,
-            FactorEncryptMethod::MaskLast6 => 6,
-            // default 3
-            _ => 3,
-        }
+        self.digits
     }
 }
 
-impl StrEncryptor for LastCharsMask {
+impl LastCharsMask {
     /// when given str
     /// - length is less than digits, all chars replaced with [*],
     /// - if there is no enough ascii digit char([0-9]) in given str, replace the trailing digits to [*],
@@ -57,10 +48,10 @@ impl StrEncryptor for LastCharsMask {
         let replace_decimal_count = self.replace_decimal_count();
         let chars_count = value.chars().count();
         if chars_count <= replace_decimal_count {
-            return EncryptorUtils::n_asterisks(chars_count);
+            return CryptoUtils::n_asterisks(chars_count);
         }
 
-        let decimal_count = EncryptorUtils::get_ascii_digit_count(&value);
+        let decimal_count = CryptoUtils::get_ascii_digit_count(&value);
 
         if decimal_count < replace_decimal_count {
             let replace_start = value
@@ -92,18 +83,7 @@ impl StrEncryptor for LastCharsMask {
     }
 }
 
-impl Encryptor for LastCharsMask {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::MaskLast3 | FactorEncryptMethod::MaskLast6 => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for LastCharsMask {
     /// always returns false.
     /// since even the last chars are [*], still do not know it is the original string or masked,
     /// thus treats anything as unencrypted.
@@ -111,8 +91,13 @@ impl Encryptor for LastCharsMask {
         false
     }
 
+    // noinspection DuplicatedCode
     fn encrypt(&self, value: &TopicDataValue) -> StdR<Option<TopicDataValue>> {
-        StrEncryptor::encrypt(self, value)
+        if let Some(str_value) = CryptoUtils::value_to_str(value)? {
+            Ok(Some(TopicDataValue::Str(self.do_encrypt(str_value))))
+        } else {
+            Ok(None)
+        }
     }
 
     /// always returns none, last chars mask cannot be decrypted.
@@ -123,7 +108,7 @@ impl Encryptor for LastCharsMask {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Encryptor, EncryptorUtils, LastCharsMask};
+    use crate::{Crypto, CryptoUtils, LastCharsMask};
     use watchmen_model::TopicDataValue;
 
     /// - [ab] -> [**],
@@ -135,19 +120,19 @@ mod tests {
         let masker = LastCharsMask::last_3();
         assert_eq!(
             "**",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab".to_string())))
         );
         assert_eq!(
             "***",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("abc".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("abc".to_string())))
         );
         assert_eq!(
             "a***",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab1c".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab1c".to_string())))
         );
         assert_eq!(
             "**a*",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a3".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a3".to_string())))
         );
     }
 }

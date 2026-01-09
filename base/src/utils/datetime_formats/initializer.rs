@@ -7,6 +7,7 @@ pub struct DateTimeFormatterInitializer;
 
 impl DateTimeFormatterInitializer {
     /// initialize all date/time formatter by given environment
+    /// TIP call it at system startup
     pub fn init(envs: &EnvConfig) -> VoidR {
         DateFormatter::init(envs)?;
         DateTimeFormatter::init(envs)?;

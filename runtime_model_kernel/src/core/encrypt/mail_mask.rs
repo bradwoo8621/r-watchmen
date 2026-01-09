@@ -1,32 +1,17 @@
-use crate::{Encryptor, RuntimeModelKernelErrorCode};
+use crate::{Crypto, RuntimeModelKernelErrorCode};
 use watchmen_base::{ErrorCode, StdR};
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
 /// use [*****] to mask chars before [@].
-pub struct MailMask {
-    method: FactorEncryptMethod,
-}
+pub struct MailMask;
 
 impl MailMask {
     pub fn new() -> Self {
-        Self {
-            method: FactorEncryptMethod::MaskMail,
-        }
+        Self
     }
 }
 
-impl Encryptor for MailMask {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::MaskMail => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for MailMask {
     fn is_encrypted(&self, value: &TopicDataValue) -> bool {
         match value {
             TopicDataValue::Str(s) => s.starts_with("*****@"),

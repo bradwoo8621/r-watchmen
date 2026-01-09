@@ -1,13 +1,14 @@
-use crate::{Encryptor, RuntimeModelKernelErrorCode};
+use crate::{Crypto, RuntimeModelKernelErrorCode};
 use chrono::Datelike;
 use watchmen_base::{ErrorCode, LooseDateFormatter, StdR};
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
 /// - mask month to 1,
 /// - mask date of month to 1.
 /// - for string value, try to parse them to date/datetime, and mask, and format to string.
 pub struct DateMask {
-    method: FactorEncryptMethod,
+    month: bool,
+    date: bool,
 }
 
 impl DateMask {
@@ -23,49 +24,37 @@ impl DateMask {
 
     pub fn month_and_day() -> Self {
         Self {
-            method: FactorEncryptMethod::MaskMonthDay,
+            month: true,
+            date: true,
         }
     }
 
     pub fn month() -> Self {
         Self {
-            method: FactorEncryptMethod::MaskMonth,
+            month: true,
+            date: false,
         }
     }
 
     pub fn day_of_month() -> Self {
         Self {
-            method: FactorEncryptMethod::MaskDay,
+            month: false,
+            date: true,
         }
     }
 }
 
 impl DateMask {
     fn mask_date<D: Datelike>(&self, date: &D) -> D {
-        match self.method {
-            FactorEncryptMethod::MaskMonth => date.with_month(1).unwrap(),
-            FactorEncryptMethod::MaskDay => date.with_day(1).unwrap(),
-            FactorEncryptMethod::MaskMonthDay | _ => {
-                date.with_month(1).unwrap().with_day(1).unwrap()
-            }
+        match (self.month, self.date) {
+            (true, false) => date.with_month(1).unwrap(),
+            (false, true) => date.with_day(1).unwrap(),
+            (true, true) | _ => date.with_month(1).unwrap().with_day(1).unwrap(),
         }
     }
 }
 
-impl Encryptor for DateMask {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::MaskDay
-            | FactorEncryptMethod::MaskMonth
-            | FactorEncryptMethod::MaskMonthDay => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for DateMask {
     /// always returns false.
     /// since mask part is changed to another valid random value, still do not know it is the original date or masked,
     /// thus treats anything as unencrypted.
@@ -126,7 +115,7 @@ impl Encryptor for DateMask {
 
 #[cfg(test)]
 mod tests {
-    use crate::{DateMask, Encryptor, EncryptorUtils};
+    use crate::{Crypto, CryptoUtils, DateMask};
     use chrono::{NaiveDate, NaiveTime};
     use watchmen_model::TopicDataValue;
 
@@ -137,17 +126,15 @@ mod tests {
         let time = NaiveTime::default();
         let datetime = date.and_time(time);
         assert_eq!(
-            EncryptorUtils::get_date_str(mask.encrypt(&TopicDataValue::DateTime(datetime.clone()))),
+            CryptoUtils::get_date_str(mask.encrypt(&TopicDataValue::DateTime(datetime.clone()))),
             "2025-01-01"
         );
         assert_eq!(
-            EncryptorUtils::get_date_str(mask.encrypt(&TopicDataValue::Date(date.clone()))),
+            CryptoUtils::get_date_str(mask.encrypt(&TopicDataValue::Date(date.clone()))),
             "2025-01-01"
         );
         assert_eq!(
-            EncryptorUtils::get_str(
-                mask.encrypt(&TopicDataValue::Str("2025-02-08 abc".to_string()))
-            ),
+            CryptoUtils::get_str(mask.encrypt(&TopicDataValue::Str("2025-02-08 abc".to_string()))),
             "2025-01-01 abc"
         );
     }

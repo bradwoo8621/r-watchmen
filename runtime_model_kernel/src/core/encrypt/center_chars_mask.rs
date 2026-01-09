@@ -1,6 +1,6 @@
-use crate::{Encryptor, EncryptorUtils, RuntimeModelKernelErrorCode, StrEncryptor};
+use crate::{Crypto, CryptoUtils, RuntimeModelKernelErrorCode};
 use watchmen_base::{ErrorCode, StdR};
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
 /// use [*] to mask center chars
 /// replace chars count (n) should follow given encrypt method.
@@ -12,7 +12,7 @@ use watchmen_model::{FactorEncryptMethod, TopicDataValue};
 /// - replace the center ascii digits chars to [*],
 ///   center chars counting is same as above, but only ascii digits chars are counted in.
 pub struct CenterCharsMask {
-    method: FactorEncryptMethod,
+    digits: usize,
 }
 
 impl CenterCharsMask {
@@ -25,24 +25,15 @@ impl CenterCharsMask {
     }
 
     pub fn center_3() -> Self {
-        Self {
-            method: FactorEncryptMethod::MaskCenter3,
-        }
+        Self { digits: 3 }
     }
 
     pub fn center_5() -> Self {
-        Self {
-            method: FactorEncryptMethod::MaskCenter5,
-        }
+        Self { digits: 5 }
     }
 
     fn replace_decimal_count(&self) -> usize {
-        match self.method {
-            FactorEncryptMethod::MaskCenter3 => 3,
-            FactorEncryptMethod::MaskCenter5 => 5,
-            // default 3
-            _ => 3,
-        }
+        self.digits
     }
 }
 
@@ -227,13 +218,13 @@ impl CenterCharsMask {
         }
         value.replace_range(
             start_index..start_index + replace_decimal_count,
-            &"*".repeat(replace_decimal_count),
+            &CryptoUtils::n_asterisks(replace_decimal_count),
         );
         value
     }
 }
 
-impl StrEncryptor for CenterCharsMask {
+impl CenterCharsMask {
     /// when given str
     /// - length is less than digits, all chars replaced with [*],
     /// - if there is no enough ascii digit char([0-9]) in given str, replace the center digits to [*],
@@ -251,10 +242,10 @@ impl StrEncryptor for CenterCharsMask {
         let replace_decimal_count = self.replace_decimal_count();
         let chars_count = value.chars().count();
         if chars_count <= replace_decimal_count {
-            return EncryptorUtils::n_asterisks(chars_count);
+            return CryptoUtils::n_asterisks(chars_count);
         }
 
-        let decimal_count = EncryptorUtils::get_ascii_digit_count(&value);
+        let decimal_count = CryptoUtils::get_ascii_digit_count(&value);
         if decimal_count < replace_decimal_count {
             self.replace_with_asterisks(value, chars_count)
         } else {
@@ -263,18 +254,7 @@ impl StrEncryptor for CenterCharsMask {
     }
 }
 
-impl Encryptor for CenterCharsMask {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::MaskCenter3 | FactorEncryptMethod::MaskCenter5 => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for CenterCharsMask {
     /// always returns false.
     /// since even the center chars are [*], still do not know it is the original string or masked,
     /// thus treats anything as unencrypted.
@@ -282,8 +262,13 @@ impl Encryptor for CenterCharsMask {
         false
     }
 
+    // noinspection DuplicatedCode
     fn encrypt(&self, value: &TopicDataValue) -> StdR<Option<TopicDataValue>> {
-        StrEncryptor::encrypt(self, value)
+        if let Some(str_value) = CryptoUtils::value_to_str(value)? {
+            Ok(Some(TopicDataValue::Str(self.do_encrypt(str_value))))
+        } else {
+            Ok(None)
+        }
     }
 
     /// always returns none, center chars mask cannot be decrypted.
@@ -294,7 +279,7 @@ impl Encryptor for CenterCharsMask {
 
 #[cfg(test)]
 mod tests {
-    use crate::{CenterCharsMask, Encryptor, EncryptorUtils};
+    use crate::{CenterCharsMask, Crypto, CryptoUtils};
     use watchmen_model::TopicDataValue;
 
     /// - [ab] -> [**],
@@ -309,27 +294,27 @@ mod tests {
         let masker = CenterCharsMask::center_3();
         assert_eq!(
             "**",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab".to_string())))
         );
         assert_eq!(
             "***",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("abc".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("abc".to_string())))
         );
         assert_eq!(
             "***c",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab1c".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("ab1c".to_string())))
         );
         assert_eq!(
             "**a*",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a3".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a3".to_string())))
         );
         assert_eq!(
             "1*a**",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a34".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("12a34".to_string())))
         );
         assert_eq!(
             "12*a**6",
-            EncryptorUtils::get_str(masker.encrypt(&TopicDataValue::Str("123a456".to_string())))
+            CryptoUtils::get_str(masker.encrypt(&TopicDataValue::Str("123a456".to_string())))
         );
     }
 }

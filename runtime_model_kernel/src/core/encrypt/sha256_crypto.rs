@@ -1,42 +1,18 @@
-use crate::{Encryptor, StrEncryptor};
+use crate::{Crypto, CryptoUtils};
 use hex::encode as hex_encode;
 use sha2::{Digest, Sha256};
 use watchmen_base::StdR;
-use watchmen_model::{FactorEncryptMethod, TopicDataValue};
+use watchmen_model::TopicDataValue;
 
-pub struct Sha256Encrypt {
-    method: FactorEncryptMethod,
-}
+pub struct Sha256Crypto;
 
-impl Sha256Encrypt {
+impl Sha256Crypto {
     pub fn new() -> Self {
-        Self {
-            method: FactorEncryptMethod::Sha256,
-        }
+        Self
     }
 }
 
-impl StrEncryptor for Sha256Encrypt {
-    fn do_encrypt(&self, value: String) -> String {
-        let mut sha256 = Sha256::new();
-        sha256.update(value.as_bytes());
-        let value = sha256.finalize();
-        format!("{{SHA256}}{}", hex_encode(value))
-    }
-}
-
-impl Encryptor for Sha256Encrypt {
-    fn method(&self) -> &FactorEncryptMethod {
-        &self.method
-    }
-
-    fn accept(&self, method: &FactorEncryptMethod) -> bool {
-        match method {
-            FactorEncryptMethod::Sha256 => true,
-            _ => false,
-        }
-    }
-
+impl Crypto for Sha256Crypto {
     fn is_encrypted(&self, value: &TopicDataValue) -> bool {
         match value {
             TopicDataValue::Str(s) => s.starts_with("{SHA256}"),
@@ -45,7 +21,15 @@ impl Encryptor for Sha256Encrypt {
     }
 
     fn encrypt(&self, value: &TopicDataValue) -> StdR<Option<TopicDataValue>> {
-        StrEncryptor::encrypt(self, value)
+        if let Some(str_value) = CryptoUtils::value_to_str(value)? {
+            let mut sha256 = Sha256::new();
+            sha256.update(str_value.as_bytes());
+            let value = sha256.finalize();
+            let encrypted = format!("{{SHA256}}{}", hex_encode(value));
+            Ok(Some(TopicDataValue::Str(encrypted)))
+        } else {
+            Ok(None)
+        }
     }
 
     ///  md5 cannot be decrypted, remove prefix only
@@ -65,14 +49,14 @@ impl Encryptor for Sha256Encrypt {
 
 #[cfg(test)]
 mod tests {
-    use crate::{EncryptorUtils, Sha256Encrypt, StrEncryptor};
+    use crate::{Crypto, CryptoUtils, Sha256Crypto};
     use watchmen_model::TopicDataValue;
 
     #[test]
     fn test() {
-        let encryptor = Sha256Encrypt::new();
+        let encryptor = Sha256Crypto::new();
         assert_eq!(
-            EncryptorUtils::get_str(encryptor.encrypt(&TopicDataValue::Str("abc".to_string()))),
+            CryptoUtils::get_str(encryptor.encrypt(&TopicDataValue::Str("abc".to_string()))),
             "{SHA256}ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         )
     }

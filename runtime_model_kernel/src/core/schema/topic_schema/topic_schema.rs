@@ -68,8 +68,15 @@ impl TopicSchema {
         if self.should_encrypt()
             && let Some(factors) = &self.factors
         {
-            TopicSchemaFactorValuePrepper::with(false, true, false, false, false)
-                .prepare(factors, data)
+            TopicSchemaFactorValuePrepper::with(
+                self.topic.clone(),
+                false,
+                true,
+                false,
+                false,
+                false,
+            )
+            .prepare(factors, data)
         } else {
             Ok(())
         }
@@ -80,8 +87,15 @@ impl TopicSchema {
         if self.should_encrypt()
             && let Some(factors) = &self.factors
         {
-            TopicSchemaFactorValuePrepper::with(false, false, true, false, false)
-                .prepare(factors, data)
+            TopicSchemaFactorValuePrepper::with(
+                self.topic.clone(),
+                false,
+                false,
+                true,
+                false,
+                false,
+            )
+            .prepare(factors, data)
         } else {
             Ok(())
         }
@@ -102,6 +116,7 @@ impl TopicSchema {
     pub fn prepare(&self, data: &mut TopicData) -> VoidR {
         if let Some(factors) = &self.factors {
             TopicSchemaFactorValuePrepper::with(
+                self.topic.clone(),
                 self.should_init_default_values(),
                 self.should_encrypt(),
                 false,
