@@ -278,6 +278,86 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
+name = "elf_auth"
+version = "0.1.0"
+dependencies = [
+ "elf_base",
+ "elf_model",
+ "elf_model_marco",
+ "serde",
+]
+
+[[package]]
+name = "elf_base"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "chrono",
+ "config",
+ "dotenvy",
+ "serde",
+]
+
+[[package]]
+name = "elf_elf"
+version = "0.1.0"
+dependencies = [
+ "elf_base",
+]
+
+[[package]]
+name = "elf_model"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "chrono",
+ "elf_base",
+ "elf_model_marco",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "elf_model_marco"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "elf_pipeline_kernel"
+version = "0.1.0"
+dependencies = [
+ "bigdecimal",
+ "chrono",
+ "elf_auth",
+ "elf_base",
+ "elf_model",
+ "elf_runtime_model_kernel",
+ "tokio",
+]
+
+[[package]]
+name = "elf_runtime_model_kernel"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "base64",
+ "bigdecimal",
+ "cfb-mode",
+ "chrono",
+ "elf_base",
+ "elf_model",
+ "hex",
+ "md5",
+ "serde",
+ "sha2 0.11.0-rc.3",
+ "subtle",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -849,86 +929,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76f218a38c84bcb33c25ec7059b07847d465ce0e0a76b995e134a45adcb6af76"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "watchmen_auth"
-version = "0.1.0"
-dependencies = [
- "serde",
- "watchmen_base",
- "watchmen_model",
- "watchmen_model_marco",
-]
-
-[[package]]
-name = "watchmen_base"
-version = "0.1.0"
-dependencies = [
- "bigdecimal",
- "chrono",
- "config",
- "dotenvy",
- "serde",
-]
-
-[[package]]
-name = "watchmen_elf"
-version = "0.1.0"
-dependencies = [
- "watchmen_base",
-]
-
-[[package]]
-name = "watchmen_model"
-version = "0.1.0"
-dependencies = [
- "bigdecimal",
- "chrono",
- "serde",
- "serde_json",
- "watchmen_base",
- "watchmen_model_marco",
-]
-
-[[package]]
-name = "watchmen_model_marco"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "watchmen_pipeline_kernel"
-version = "0.1.0"
-dependencies = [
- "bigdecimal",
- "chrono",
- "tokio",
- "watchmen_auth",
- "watchmen_base",
- "watchmen_model",
- "watchmen_runtime_model_kernel",
-]
-
-[[package]]
-name = "watchmen_runtime_model_kernel"
-version = "0.1.0"
-dependencies = [
- "aes",
- "base64",
- "bigdecimal",
- "cfb-mode",
- "chrono",
- "hex",
- "md5",
- "serde",
- "sha2 0.11.0-rc.3",
- "subtle",
- "watchmen_base",
- "watchmen_model",
 ]
 
 [[package]]

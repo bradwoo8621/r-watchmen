@@ -1,5 +1,5 @@
 [package]
-name = "watchmen_base"
+name = "elf_base"
 version = "0.1.0"
 edition = "2024"
 

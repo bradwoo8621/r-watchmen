@@ -1,5 +1,5 @@
 [package]
-name = "watchmen_runtime_model_kernel"
+name = "elf_runtime_model_kernel"
 version = "0.1.0"
 edition = "2024"
 
@@ -14,5 +14,5 @@ aes = "0.9.0-rc.2"
 hex = "0.4.3"
 base64 = "0.22.1"
 subtle = "2.6.1"
-watchmen_base = { path = "../base" }
-watchmen_model = { path = "../model" }
+elf_base = { path = "../base" }
+elf_model = { path = "../model" }

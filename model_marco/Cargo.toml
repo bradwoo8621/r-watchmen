@@ -1,10 +1,10 @@
 [package]
-name = "watchmen_model_marco"
+name = "elf_model_marco"
 version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "watchmen_model_marco"
+name = "elf_model_marco"
 path = "src/lib.rs"
 proc-macro = true
 

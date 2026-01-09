@@ -1,10 +1,10 @@
 [package]
-name = "watchmen_auth"
+name = "elf_auth"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
-watchmen_base = { path = "../base" }
-watchmen_model_marco = { path = "../model_marco" }
-watchmen_model = {path = "../model" }
+elf_base = { path = "../base" }
+elf_model_marco = { path = "../model_marco" }
+elf_model = {path = "../model" }

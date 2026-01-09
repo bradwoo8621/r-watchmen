@@ -1,5 +1,5 @@
 [package]
-name = "watchmen_model"
+name = "elf_model"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,5 +8,5 @@ bigdecimal = { version = "0.4.10", features = ["serde"] }
 chrono = "0.4.42"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-watchmen_base = { path = "../base" }
-watchmen_model_marco = { path = "../model_marco" }
+elf_base = { path = "../base" }
+elf_model_marco = { path = "../model_marco" }
