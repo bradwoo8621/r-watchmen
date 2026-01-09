@@ -1,4 +1,4 @@
-use watchmen_base::StdR;
+use watchmen_base::{StdR, VoidR};
 use watchmen_model::TopicDataValue;
 
 pub type TriedTopicDataValue = StdR<Option<TopicDataValue>>;
@@ -11,6 +11,10 @@ pub trait TriedTDV {
     fn is_err(&self) -> bool;
 
     fn treated_or_default(self, default_value: TopicDataValue) -> TriedTopicDataValue;
+
+    fn if_treated<Replace>(self, f: Replace) -> VoidR
+    where
+        Replace: FnOnce(TopicDataValue);
 }
 
 impl TriedTDV for TriedTopicDataValue {
@@ -32,6 +36,20 @@ impl TriedTDV for TriedTopicDataValue {
             Ok(Some(value))
         } else {
             Ok(Some(default_value))
+        }
+    }
+
+    fn if_treated<Replace>(self, f: Replace) -> VoidR
+    where
+        Replace: FnOnce(TopicDataValue),
+    {
+        match self {
+            Ok(Some(value)) => {
+                f(value);
+                Ok(())
+            }
+            Ok(None) => Ok(()),
+            Err(e) => Err(e),
         }
     }
 }

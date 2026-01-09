@@ -225,39 +225,33 @@ impl TopicSchemaFactorValuePrepper {
         match value {
             Some(value) => match value {
                 TopicDataValue::Str(_) => {
-                    if let Some(value) = self.prepare_str_value(factor, value)? {
+                    self.prepare_str_value(factor, value).if_treated(|value| {
                         data.insert(factor.name.clone(), value);
-                    }
+                    })
                 }
-                TopicDataValue::Num(n) => self.prepare_num_value(factor, n)?,
-                TopicDataValue::Bool(b) => self.prepare_bool_value(factor, b)?,
-                TopicDataValue::Map(map) => self.prepare_map_value(factor, map)?,
-                TopicDataValue::Vec(vec) => self.prepare_vec_value(factor, vec)?,
+                TopicDataValue::Num(n) => self.prepare_num_value(factor, n),
+                TopicDataValue::Bool(b) => self.prepare_bool_value(factor, b),
+                TopicDataValue::Map(map) => self.prepare_map_value(factor, map),
+                TopicDataValue::Vec(vec) => self.prepare_vec_value(factor, vec),
                 TopicDataValue::Date(_) => {
-                    if let Some(value) = self.prepare_date_value(factor, value)? {
+                    self.prepare_date_value(factor, value).if_treated(|value| {
                         data.insert(factor.name.clone(), value);
-                    }
+                    })
                 }
-                TopicDataValue::DateTime(_) => {
-                    if let Some(value) = self.prepare_datetime_value(factor, value)? {
+                TopicDataValue::DateTime(_) => self
+                    .prepare_datetime_value(factor, value)
+                    .if_treated(|value| {
                         data.insert(factor.name.clone(), value);
-                    }
-                }
-                TopicDataValue::Time(t) => self.prepare_time_value(factor, t)?,
-                TopicDataValue::None => {
-                    if let Some(value) = self.prepare_none_value(factor)? {
-                        data.insert(factor.name.clone(), value);
-                    }
-                }
-            },
-            None => {
-                if let Some(value) = self.prepare_none_value(factor)? {
+                    }),
+                TopicDataValue::Time(t) => self.prepare_time_value(factor, t),
+                TopicDataValue::None => self.prepare_none_value(factor).if_treated(|value| {
                     data.insert(factor.name.clone(), value);
-                }
-            }
+                }),
+            },
+            None => self.prepare_none_value(factor).if_treated(|value| {
+                data.insert(factor.name.clone(), value);
+            }),
         }
-
-        Ok(())
     }
 
     fn prepare_values_for_vec_or_map(
